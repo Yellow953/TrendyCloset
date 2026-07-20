@@ -2,8 +2,71 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Cormorant Garamond', ui-serif, Georgia, 'Times New Roman', serif;
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    /* Trendy Closet — blush brand palette */
+    --color-ink: #2b2523;
+    --color-ink-2: #2a2926;
+    --color-ink-deep: #221d1b;
+    --color-blush: #a1705f;
+    --color-blush-soft: #8f6f61;
+    --color-tan: #dcc7be;
+    --color-cream: #f6f1ee;
+    --color-cream-2: #f0e7e1;
+    --color-cream-3: #faf5f2;
+    --color-line: #efe9e5;
+    --color-line-2: #ded4cd;
+    --color-line-3: #e4d9d2;
+    --color-muted: #a08a80;
+    --color-muted-2: #6f5c53;
+    --color-muted-3: #5c534d;
+    --color-faint: #b3a69e;
+    --color-gold: #c9a227;
+    --color-jade: #1d8a76;
+}
+
+@layer base {
+    body {
+        background: #fff;
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+    }
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+/* Reusable brand primitives */
+@layer components {
+    .tc-input {
+        @apply w-full border border-line-2 px-4 py-3.5 text-sm font-light text-ink placeholder:text-muted outline-none transition-colors focus:border-blush;
+    }
+    .tc-btn-dark {
+        @apply inline-flex items-center justify-center bg-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush;
+    }
+    .tc-btn-outline {
+        @apply inline-flex items-center justify-center border border-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-ink transition-colors hover:bg-ink hover:text-white;
+    }
+    .tc-link {
+        @apply font-medium text-blush underline underline-offset-2;
+    }
+    /* Hide scrollbar on scroll-snap carousels while keeping them scrollable */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    /* Carousel arrow button */
+    .tc-arrow {
+        @apply flex h-10 w-10 items-center justify-center rounded-full border border-line-2 text-[18px] text-ink transition-colors hover:border-blush hover:text-blush disabled:cursor-default disabled:border-line-2 disabled:text-faint disabled:opacity-40;
+    }
 }
