@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductEventType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -64,6 +65,22 @@ class Product extends Model
     }
 
     /**
+     * @return HasMany<ProductEvent>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(ProductEvent::class);
+    }
+
+    /**
+     * @return HasMany<ProductFavorite>
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(ProductFavorite::class);
+    }
+
+    /**
      * The primary image, falling back to the first image by position.
      */
     public function primaryImage(): ?ProductImage
@@ -109,6 +126,31 @@ class Product extends Model
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /**
+     * Eager-load engagement counts for the CRM dashboard, optionally windowed
+     * to events since a given date. Adds `views_count`, `add_to_cart_count`
+     * and `favorites_count` — favourites are never windowed, since the row
+     * represents current state rather than something that happened.
+     *
+     * @param  Builder<Product>  $query
+     */
+    public function scopeWithEngagement(Builder $query, ?\DateTimeInterface $since = null): void
+    {
+        $window = fn (Builder $q) => $since
+            ? $q->where('product_events.created_at', '>=', $since)
+            : $q;
+
+        $query->withCount([
+            'events as views_count' => fn (Builder $q) => $window(
+                $q->where('type', ProductEventType::View)
+            ),
+            'events as add_to_cart_count' => fn (Builder $q) => $window(
+                $q->where('type', ProductEventType::AddToCart)
+            ),
+            'favorites as favorites_count',
+        ]);
     }
 
     /**

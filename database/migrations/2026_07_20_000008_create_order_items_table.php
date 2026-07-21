@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('order_items', function (Blueprint $table) {
@@ -16,7 +13,6 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_variant_id')->nullable()->constrained()->nullOnDelete();
 
-            // Snapshot of the purchased line so the order stays immutable
             $table->string('product_name');
             $table->string('variant_size')->nullable();
             $table->string('variant_color')->nullable();
@@ -28,9 +24,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('order_items');

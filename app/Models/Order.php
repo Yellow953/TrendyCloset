@@ -13,7 +13,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'customer_id',
         'coupon_id',
         'order_number',
         'status',
@@ -44,11 +44,11 @@ class Order extends Model
     }
 
     /**
-     * @return BelongsTo<User, Order>
+     * @return BelongsTo<Customer, Order>
      */
-    public function user(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Customer::class);
     }
 
     /**

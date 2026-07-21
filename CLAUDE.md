@@ -25,7 +25,9 @@ npm run build      # Production asset build → public/build
 php artisan serve  # Local PHP server (http://localhost:8000)
 ```
 
-There is no test suite wired up for the storefront yet.
+`php artisan test` runs Pest against in-memory SQLite (see `phpunit.xml`) — it never touches the
+dev MySQL database. The storefront pages themselves have no tests yet; `tests/Feature/
+ProductAnalyticsTest.php` covers the analytics layer.
 
 ## Architecture
 
@@ -39,6 +41,36 @@ explicit route groups; **registration and email verification are removed** — t
 `password.email`, `password.reset`, `password.update`, `password.confirm`. Admin accounts are
 created by `DatabaseSeeder` (`ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` in `.env`), never
 self-service. Login redirects to `/`.
+
+**Identity — the key architectural split.** `User` is an **internal back-office user only** and is
+the only authenticatable model. `Customer` is a plain (non-authenticatable) CRM record with no
+password: **customers never sign in**, they check out as guests. Do not add customers to `users`,
+and do not add auth traits to `Customer` without revisiting this decision.
+- `App\Enums\UserRole` (`admin` | `staff`) is cast on `User->role`. `$user->isAdmin()` delegates to
+  `UserRole::managesStore()`. Since only staff can log in, `auth` alone gates the CRM; the `admin`
+  middleware alias (`EnsureUserIsAdmin`, registered in `bootstrap/app.php`) is the narrower gate for
+  user management, coupons, and store settings.
+- `Customer::forEmail($email, $attrs)` matches-or-creates on a normalised (lowercased, trimmed)
+  email — use it at checkout so repeat buyers collapse into one record.
+- `orders.customer_id` is nullable + `nullOnDelete` so deleting a customer never destroys sales
+  history. The `email` / `ship_*` columns on `orders` are a deliberate **snapshot of the order as
+  placed** — never refactor them into a join on `customers`.
+**Analytics** — there is **no `Cart` model or `carts` table**; the bag is not persisted. Product
+engagement is tracked instead, split by shape:
+- `ProductEvent` (`product_events`) is an **append-only** log of things that happened — `view` and
+  `add_to_cart`, typed by `App\Enums\ProductEventType`. No `updated_at`; never mutate a row.
+- `ProductFavorite` (`product_favorites`) is **state**, unique per `(product_id, visitor_id)`.
+  Unfavouriting deletes the row, so the count is just `COUNT(*)`. Favourites are deliberately not
+  events — don't merge these two tables.
+- Identity is `visitor_id`: a forever cookie (`tc_visitor`) set by the `TrackVisitor` middleware and
+  resolved as `App\Support\Visitor`. **Not** the session id — sessions expire in hours, which would
+  fragment one shopper into many visitors and drop their favourites overnight.
+- Write via `App\Services\ProductAnalytics` (`recordView`, `recordAddToCart`, `toggleFavorite`,
+  `hasFavorited`). Views are deduped per visitor/product for 30 min via the cache so refreshes and
+  crawlers don't inflate the numbers; add-to-cart is intentionally not deduped.
+- Read via `Product::withEngagement($since = null)` → `views_count`, `add_to_cart_count`,
+  `favorites_count`. The window applies to events only, never to favourites.
+- Events are kept forever for now — add a prune command if the table outgrows a `GROUP BY`.
 
 **Controller** — `app/Http/Controllers/StoreController.php` holds all page data as PHP arrays
 (translated from the design doc's JS). Key helpers:

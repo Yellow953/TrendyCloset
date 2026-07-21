@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -10,18 +11,14 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // Registration is disabled — the admin account is created here.
-        // Override with ADMIN_EMAIL / ADMIN_PASSWORD in .env.
         User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@trendycloset.com')],
+            ['email' => env('ADMIN_EMAIL', 'test@admin.com')],
             [
-                'name' => env('ADMIN_NAME', 'Leila Konsol'),
-                'password' => env('ADMIN_PASSWORD', 'password'),
+                'name' => env('ADMIN_NAME', 'Admin'),
+                'password' => env('ADMIN_PASSWORD', 'qwe123'),
+                'role' => UserRole::Admin,
             ],
         );
 
