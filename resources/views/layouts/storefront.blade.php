@@ -15,9 +15,11 @@
 </head>
 <body class="min-h-screen bg-white text-ink antialiased">
     @include('partials.header')
+    @include('partials.flash')
     <main>
         @yield('content')
     </main>
     @include('partials.footer')
+    @include('partials.whatsapp')
 </body>
 </html>

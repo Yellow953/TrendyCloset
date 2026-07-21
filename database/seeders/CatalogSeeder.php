@@ -49,6 +49,9 @@ class CatalogSeeder extends Seeder
         $cats = $this->seedCategories();
         $this->seedProducts($cats);
         $this->seedCoupons();
+
+        // Fills out each product's gallery; safe to re-run on its own.
+        $this->call(ProductGallerySeeder::class);
     }
 
     /**

@@ -90,6 +90,60 @@ class Product extends Model
     }
 
     /**
+     * The URL of the primary image — what every product card renders.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->primaryImage()?->url;
+    }
+
+    /**
+     * Display price, e.g. "$54.00".
+     */
+    public function getPriceLabelAttribute(): string
+    {
+        return self::money($this->price);
+    }
+
+    /**
+     * Strike-through "was" price, or null when the product is not discounted.
+     */
+    public function getCompareLabelAttribute(): ?string
+    {
+        return $this->on_sale ? self::money($this->compare_at_price) : null;
+    }
+
+    /**
+     * The corner badge: whatever merchandising set, else a derived "-20%".
+     */
+    public function getBadgeLabelAttribute(): ?string
+    {
+        return $this->badge ?: ($this->on_sale ? '-'.$this->discount_percent.'%' : null);
+    }
+
+    /**
+     * The variant a quick "add to bag" from a product card should use: the
+     * first active size with stock. Null when the piece is sold out.
+     */
+    public function getDefaultVariantAttribute(): ?ProductVariant
+    {
+        return $this->variants->first(fn (ProductVariant $v) => $v->is_active && $v->stock > 0);
+    }
+
+    /**
+     * Whether any active variant has stock left.
+     */
+    public function getInStockAttribute(): bool
+    {
+        return $this->variants->where('is_active', true)->sum('stock') > 0;
+    }
+
+    public static function money(int|float|string|null $amount): string
+    {
+        return '$'.number_format((float) $amount, 2);
+    }
+
+    /**
      * Whether the product is discounted (has a strike-through "was" price).
      */
     public function getOnSaleAttribute(): bool
@@ -159,5 +213,36 @@ class Product extends Model
     public function scopeOnDeal(Builder $query): void
     {
         $query->whereNotNull('sale_ends_at')->where('sale_ends_at', '>', now());
+    }
+
+    /**
+     * Discounted products — the "Sale" edit.
+     *
+     * @param  Builder<Product>  $query
+     */
+    public function scopeOnSale(Builder $query): void
+    {
+        $query->whereNotNull('compare_at_price')->whereColumn('compare_at_price', '>', 'price');
+    }
+
+    /**
+     * The "New in" edit: anything merchandised as NEW, newest first.
+     *
+     * @param  Builder<Product>  $query
+     */
+    public function scopeNewArrivals(Builder $query): void
+    {
+        $query->where('badge', 'NEW');
+    }
+
+    /**
+     * Constrain to a category *and everything beneath it*, so browsing a parent
+     * like "Winter Section" returns the products filed under its subcategories.
+     *
+     * @param  Builder<Product>  $query
+     */
+    public function scopeInCategory(Builder $query, Category $category): void
+    {
+        $query->whereIn('category_id', $category->selfAndDescendantIds());
     }
 }

@@ -62,6 +62,41 @@ class Category extends Model
     }
 
     /**
+     * This category's id plus every id beneath it. Products are filed against
+     * leaves, so browsing a parent has to widen to its children to find any.
+     *
+     * @return array<int, int>
+     */
+    public function selfAndDescendantIds(): array
+    {
+        $ids = [$this->id];
+
+        foreach ($this->children as $child) {
+            $ids = array_merge($ids, $child->selfAndDescendantIds());
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @param  Builder<Category>  $query
+     */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
+    }
+
+    /**
+     * Ordered as merchandised.
+     *
+     * @param  Builder<Category>  $query
+     */
+    public function scopeOrdered(Builder $query): void
+    {
+        $query->orderBy('position')->orderBy('name');
+    }
+
+    /**
      * Top-level categories only (no parent).
      *
      * @param  Builder<Category>  $query

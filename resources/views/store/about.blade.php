@@ -6,9 +6,11 @@
     {{-- Hero --}}
     <div class="relative h-[340px] overflow-hidden bg-tan">
         <img src="{{ $hero['img'] }}" alt="Trendy Closet studio" class="absolute inset-0 h-full w-full object-cover">
+        {{-- Scrim keeps the copy readable whatever the photo does --}}
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-cream-2/85 via-cream-2/45 to-transparent"></div>
         <div class="pointer-events-none absolute inset-0 flex flex-col justify-center px-8 md:px-16">
-            <div class="text-[12px] font-medium tracking-[0.28em] text-ink">OUR STORY</div>
-            <div class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Curated by Leila,<br>for the whole family</div>
+            <div class="text-[12px] font-medium tracking-[0.28em] text-blush-soft">OUR STORY</div>
+            <div class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Curated by Leila,<br><span class="font-serif font-medium italic text-blush">for the whole family</span></div>
         </div>
     </div>
 
@@ -22,7 +24,12 @@
             <div class="mt-2.5 flex gap-10">
                 <div><div class="text-[24px] font-semibold text-blush">2021</div><div class="text-[12.5px] font-light text-muted">founded</div></div>
                 <div><div class="text-[24px] font-semibold text-blush">24k</div><div class="text-[12.5px] font-light text-muted">followers</div></div>
-                <div><div class="text-[24px] font-semibold text-blush">120+</div><div class="text-[12.5px] font-light text-muted">curated pieces</div></div>
+                <div><div class="text-[24px] font-semibold text-blush">{{ $catalogSize }}</div><div class="text-[12.5px] font-light text-muted">curated pieces</div></div>
+                <div><div class="text-[24px] font-semibold text-blush">{{ number_format($storeRating, 1) }}★</div><div class="text-[12.5px] font-light text-muted">store rating</div></div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-3.5">
+                <a href="{{ route('listing', ['edit' => 'featured']) }}" class="tc-btn-dark">Shop Leila's picks</a>
+                <a href="{{ route('contact') }}" class="tc-btn-outline">Get in touch</a>
             </div>
         </div>
     </div>
@@ -44,7 +51,8 @@
                 123 Rue de la Mode<br>75003 Paris, France<br><br>
                 Tue–Sat, 11am–7pm<br>Sun–Mon, closed
             </div>
-            <div class="mt-1.5 text-[13.5px] font-medium text-blush underline underline-offset-2">Get directions</div>
+            <a href="https://maps.google.com/?q=123+Rue+de+la+Mode,+75003+Paris,+France" target="_blank" rel="noopener"
+               class="tc-link mt-1.5 w-fit text-[13.5px]">Get directions</a>
         </div>
         <div class="relative min-h-[360px] flex-1">
             <iframe src="https://maps.google.com/maps?q=123%20Rue%20de%20la%20Mode%2C%2075003%20Paris%2C%20France&t=&z=15&ie=UTF8&iwloc=&output=embed" class="absolute inset-0 h-full w-full [filter:saturate(.75)_contrast(1.02)]" style="border:0" loading="lazy" title="Trendy Closet flagship store"></iframe>
@@ -55,5 +63,6 @@
     <div class="bg-ink px-8 py-11 text-center text-white md:px-16">
         <div class="text-[26px] font-normal">Follow the journey on Instagram</div>
         <div class="mt-2 text-[14px] font-light text-cream">@trendycloset.byleilakonsol</div>
+        <a href="{{ route('listing') }}" class="mt-6 inline-flex items-center justify-center border border-cream px-8 py-3.5 text-[14px] font-medium tracking-[0.06em] text-cream transition-colors hover:bg-cream hover:text-ink">Shop the closet</a>
     </div>
 @endsection

@@ -65,8 +65,118 @@
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
-    /* Carousel arrow button */
+    /* Carousel arrow button — floats over the track, so it carries its own
+       surface rather than sitting on the page background. */
     .tc-arrow {
-        @apply flex h-10 w-10 items-center justify-center rounded-full border border-line-2 text-[18px] text-ink transition-colors hover:border-blush hover:text-blush disabled:cursor-default disabled:border-line-2 disabled:text-faint disabled:opacity-40;
+        @apply flex h-11 w-11 items-center justify-center rounded-full border border-line-2 bg-white text-[18px] text-ink shadow-[0_6px_18px_rgba(43,37,35,.12)] transition-all hover:border-blush hover:text-blush disabled:cursor-default disabled:opacity-0;
+    }
+
+    /* Section heading — centred, with a short rule underneath */
+    .tc-heading {
+        @apply text-center text-[28px] font-normal leading-tight md:text-[34px];
+    }
+    .tc-heading-rule {
+        @apply mx-auto mt-3 block h-px w-16 bg-line-2;
+    }
+
+    /* Round icon button used by the product-card hover rail */
+    .tc-card-action {
+        @apply flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink shadow-[0_4px_12px_rgba(43,37,35,.16)] transition-colors hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-ink;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Chrome behaviour: the header sticks to the top, and the announcement bar
+   collapses out of the way once the page scrolls. Driven by `.is-scrolled`,
+   which app.js puts on the <header>.
+--------------------------------------------------------------------------- */
+[data-announcement] {
+    overflow: hidden;
+    max-height: 3rem;
+    transition:
+        max-height 0.3s ease,
+        opacity 0.25s ease;
+}
+.is-scrolled [data-announcement] {
+    max-height: 0;
+    opacity: 0;
+}
+.is-scrolled {
+    box-shadow: 0 10px 30px rgba(43, 37, 35, 0.08);
+}
+
+/* Hero slides cross-fade; the active one is marked by app.js. */
+[data-hero-slide] {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+[data-hero-slide].is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+[data-hero-dot].is-active {
+    background-color: var(--color-ink);
+    width: 1.75rem;
+}
+
+/* Product gallery: hover-zoom on the main image, active thumbnail ring. */
+[data-zoom] img {
+    transition: transform 0.35s ease;
+}
+[data-zoom] img.is-zoomed {
+    transform: scale(1.9);
+}
+[data-gallery-thumb].is-active {
+    outline: 1px solid var(--color-blush);
+    outline-offset: -1px;
+}
+
+/* Floating WhatsApp button — steps up when the sticky buy bar is showing */
+.tc-whatsapp {
+    bottom: 1.25rem;
+    transition:
+        bottom 0.3s ease,
+        transform 0.2s ease;
+}
+body.has-sticky-buy .tc-whatsapp {
+    bottom: 6.5rem;
+}
+
+/* Sticky buy bar — parked off-screen until the main form scrolls away */
+[data-sticky-buy] {
+    transform: translateY(115%);
+    transition: transform 0.3s ease;
+}
+[data-sticky-buy].is-visible {
+    transform: translateY(0);
+}
+
+/* Tab strip on the product page */
+[data-tab].is-active {
+    color: var(--color-blush);
+    border-color: var(--color-blush);
+}
+
+/* Infinite marquee band. The track holds the item list twice, so translating
+   it by half its width loops seamlessly. */
+@keyframes tc-marquee {
+    to {
+        transform: translateX(-50%);
+    }
+}
+.tc-marquee-track {
+    animation: tc-marquee 38s linear infinite;
+}
+.tc-marquee:hover .tc-marquee-track {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-marquee-track {
+        animation: none;
+    }
+    [data-hero-slide] {
+        transition: none;
     }
 }

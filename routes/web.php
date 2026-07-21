@@ -4,17 +4,42 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StoreController::class, 'home'])->name('home');
-Route::get('/women', [StoreController::class, 'listing'])->name('listing');
-Route::get('/product', [StoreController::class, 'product'])->name('product');
-Route::get('/bag', [StoreController::class, 'cart'])->name('cart');
-Route::get('/checkout', [StoreController::class, 'checkout'])->name('checkout');
+
+/*
+| Catalogue. One listing action serves the whole shop, a single category and
+| the New in / Sale edits (`?edit=`), so filters and sorting behave identically
+| whichever door the shopper came through.
+*/
+Route::get('/shop/{category:slug?}', [StoreController::class, 'listing'])->name('listing');
+Route::get('/product/{product:slug}', [StoreController::class, 'product'])->name('product');
+Route::post('/product/{product:slug}/favorite', [StoreController::class, 'favorite'])->name('product.favorite');
+Route::get('/favorites', [StoreController::class, 'favorites'])->name('favorites');
+
+// The storefront used to live at /women, before the nav was driven by the DB.
+Route::redirect('/women', '/shop');
+
+/*
+| Bag — session-backed, no `carts` table. Checkout renders the real bag but
+| does not yet place an order.
+*/
+Route::get('/bag', [CartController::class, 'index'])->name('cart');
+Route::post('/bag', [CartController::class, 'store'])->name('cart.add');
+Route::patch('/bag/{variant}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/bag/{variant}', [CartController::class, 'destroy'])->name('cart.remove');
+Route::post('/bag/coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
+Route::delete('/bag/coupon', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
+Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+
 Route::get('/about', [StoreController::class, 'about'])->name('about');
 Route::get('/contact', [StoreController::class, 'contact'])->name('contact');
-Route::get('/policies', [StoreController::class, 'policies'])->name('policies');
+Route::post('/contact', [StoreController::class, 'sendContact'])->name('contact.send');
+// Five policy documents behind one action; /policies opens the first.
+Route::get('/policies/{topic?}', [StoreController::class, 'policies'])->name('policies');
 
 /*
 | Admin authentication — the storefront is public; these routes gate the

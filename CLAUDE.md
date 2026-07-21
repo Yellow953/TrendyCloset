@@ -5,9 +5,11 @@ Guidance for working in this repository.
 ## Project
 
 **Trendy Closet by Leila Konsol** — a Laravel storefront (marketing/catalog UI) implemented from
-the "Storefront Explorations" Claude Design doc. It is currently a **static, front-end-only
-storefront**: pages render hard-coded demo data from `StoreController`. There is no database-backed
-catalog, cart persistence, or checkout processing yet — forms and "add to bag" controls are visual.
+the "Storefront Explorations" Claude Design doc. The storefront is now **database-driven**:
+categories, products, imagery, pricing, stock, favourites and the bag all come from real data.
+What is still hard-coded is the *editorial* furniture with no table behind it (hero collage,
+Instagram strip, About copy). **Checkout does not place an order yet** — the payment/address form
+is presentational and nothing writes to `orders`.
 
 ## Stack
 
@@ -25,15 +27,22 @@ npm run build      # Production asset build → public/build
 php artisan serve  # Local PHP server (http://localhost:8000)
 ```
 
-`php artisan test` runs Pest against in-memory SQLite (see `phpunit.xml`) — it never touches the
-dev MySQL database. The storefront pages themselves have no tests yet; `tests/Feature/
-ProductAnalyticsTest.php` covers the analytics layer.
+**This project does not use automated tests** — `tests/` is intentionally empty (only the Pest
+scaffolding remains). Do not add test files; verify changes by exercising the pages instead.
 
 ## Architecture
 
-**Routing** — All storefront routes live in `routes/web.php` and point at `StoreController`.
-Named routes: `home` `/`, `listing` `/women`, `product` `/product`, `cart` `/bag`,
-`checkout` `/checkout`, `about`, `contact`, `policies`.
+**Routing** — Storefront routes live in `routes/web.php`, split across `StoreController` (pages)
+and `CartController` (the bag). Named routes: `home` `/`, `listing` `/shop/{category:slug?}`,
+`product` `/product/{product:slug}`, `product.favorite`, `favorites`, `cart` `/bag`, `cart.add` /
+`cart.update` / `cart.remove` / `cart.coupon` / `cart.coupon.remove`, `checkout`, `about`,
+`contact` + `contact.send`, `policies`. `/women` 301s to `/shop` for old links.
+- **One listing action serves everything**: all products, a single category (`/shop/jeans`) and the
+  edits (`?edit=new|sale|featured`), so filters and sorting behave identically everywhere. Browsing
+  a *parent* category widens to its children via `Product::inCategory()` — products live on leaves.
+- Filters are query params: `edit`, `size`, `color`, `min`, `max`, `sort`
+  (`popular|newest|price-asc|price-desc|rating`). `popular` sorts by real `views_count` from
+  `withEngagement()`, not a hard-coded order.
 
 **Auth** — admin-only, for the (not-yet-built) back-office CRM. `Auth::routes()` was replaced by
 explicit route groups; **registration and email verification are removed** — there is no
@@ -55,8 +64,18 @@ and do not add auth traits to `Customer` without revisiting this decision.
 - `orders.customer_id` is nullable + `nullOnDelete` so deleting a customer never destroys sales
   history. The `email` / `ship_*` columns on `orders` are a deliberate **snapshot of the order as
   placed** — never refactor them into a join on `customers`.
-**Analytics** — there is **no `Cart` model or `carts` table**; the bag is not persisted. Product
-engagement is tracked instead, split by shape:
+**The bag** — `App\Support\Cart` (scoped binding, session key `tc_cart`). There is still **no `Cart`
+model or `carts` table**: an abandoned bag is not a CRM record, and shoppers check out as guests.
+- The session stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are
+  re-read from the catalogue on every request, so a week-old bag can never charge last week's price.
+- Quantities are clamped to `variant->stock`; setting a quantity of 0 removes the line. Lines whose
+  variant or product went inactive silently drop out of `lines()`.
+- `summary()` returns subtotal / discount / shipping / total / coupon in one call. Shipping is free
+  at or above `Cart::FREE_SHIPPING_THRESHOLD` (or with a `free_shipping` coupon), else
+  `Cart::STANDARD_SHIPPING`. Coupons are re-validated against the live subtotal on every read, so a
+  code that stops qualifying simply stops applying.
+
+**Analytics** — product engagement is tracked separately from the bag, split by shape:
 - `ProductEvent` (`product_events`) is an **append-only** log of things that happened — `view` and
   `add_to_cart`, typed by `App\Enums\ProductEventType`. No `updated_at`; never mutate a row.
 - `ProductFavorite` (`product_favorites`) is **state**, unique per `(product_id, visitor_id)`.
@@ -72,16 +91,40 @@ engagement is tracked instead, split by shape:
   `favorites_count`. The window applies to events only, never to favourites.
 - Events are kept forever for now — add a prune command if the table outgrows a `GROUP BY`.
 
-**Controller** — `app/Http/Controllers/StoreController.php` holds all page data as PHP arrays
-(translated from the design doc's JS). Key helpers:
-- `img($id, $author, $slug, $w)` — builds an Unsplash image descriptor (`img` / `credit` /
-  `credit_href`). Product/category records use `[...] + $this->img(...)` to merge fields.
-- `services()`, `cartItems()` — shared data blocks.
-- Every action passes `active` (nav highlight key), `bagCount`, and `bagTotal` to its view.
+**Controllers** — `StoreController` (pages) and `CartController` (bag mutations).
+- `StoreController::img($id, $author, $slug, $w)` builds an Unsplash descriptor and is now only for
+  **editorial** imagery (hero, Instagram, sale banner). Catalogue imagery comes from
+  `product_images` / `categories.image_*`.
+- Every action passes `active` (nav highlight key: `home` `shop` `new` `sale` `about` …).
+  `bagCount`, `bagTotal`, `navTree`, `catalog` and `favoritesCount` are **not** passed by actions —
+  a view composer in `AppServiceProvider` supplies them to `partials.header` / `partials.footer`.
+  The listing action passes `navTree`/`catalog` explicitly because its sidebar walks the same tree.
+
+**Shared support** (`app/Support/`) — `Cart`, `Visitor`, plus:
+- `Catalog` (scoped) — the navigation tree, flattened list, per-category product counts (a parent's
+  count includes its children) and the mega-menu `spotlight()` product. Resolved once per request so
+  header, sidebar and home carousel share one set of queries.
+- `Swatch` — maps variant colour names to hex for the filter/PDP swatches; unknown colours fall back
+  to a neutral chip rather than vanishing.
+
+**Model helpers used by the views** — `Product::money()` formats every price on the site;
+`image_url`, `price_label`, `compare_label`, `badge_label` (falls back to a derived `-20%`) and
+`in_stock` back the product card and PDP. Scopes: `active`, `featured`, `onDeal`, `onSale`,
+`newArrivals`, `inCategory`, `withEngagement`. `ProductVariant::sortSizes()` orders sizes the way a
+rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M · Oat".
 
 **Views** — `resources/views/`:
 - `layouts/storefront.blade.php` — root layout: `<head>` (fonts + `@vite`), header, `@yield('content')`, footer. **Full-bleed** (no max-width wrapper); each section supplies its own horizontal padding (`px-8 md:px-16`).
-- `partials/` — `header` (announcement bar, nav w/ WOMEN mega-menu + active-state highlighting via `$active`), `footer` (newsletter + columns), `product-card` (reusable card taking `$p` and optional height `$h`).
+- `partials/` — `header`, `footer`, `product-card`, `flash`, `pagination`.
+  - `header` is **sticky** (`position: sticky`), with a centred single-line announcement bar that
+    collapses on scroll: `initStickyHeader()` toggles `.is-scrolled`, the CSS does the rest. Nav is
+    HOME / SHOP (mega-menu from the category tree) / ABOUT / CONTACT; the right side is icon
+    actions (search, account, favourites, bag) with count badges.
+  - `footer` is light, five columns (About / Shop / Your Account / Services / Contact) with the
+    newsletter as its opening band and a bottom bar of socials, copyright and payment marks.
+  - `product-card` takes a `Product` (`$p`) and optional height `$h`. On hover it reveals a rail of
+    three actions — favourite, quick-add (posts `default_variant`, so eager-load `variants` or the
+    button renders disabled), and view.
 - `layouts/auth.blade.php` — standalone admin-auth layout (no storefront header/footer): editorial
   image panel on the left (`lg:` only) + form panel on the right. Auth pages fill the
   `eyebrow` / `heading` / `subheading` / `form` sections rather than `content`; `session('status')`
@@ -89,7 +132,34 @@ engagement is tracked instead, split by shape:
 - `partials/auth-field.blade.php` — label + `.tc-input` + inline `@error` message. Takes `name`,
   `label`, and optional `type` / `value` / `autocomplete` / `autofocus` / `placeholder`.
 - `auth/` — `login`, `passwords/{email,reset,confirm}`, each `@extends('layouts.auth')`.
-- `store/` — one Blade file per page (`home`, `listing`, `product`, `cart`, `checkout`, `about`, `contact`, `policies`), each `@extends('layouts.storefront')`.
+- `store/` — one Blade file per page (`home`, `listing`, `product`, `cart`, `checkout`, `favorites`,
+  `about`, `contact`, `policies`), each `@extends('layouts.storefront')`.
+- **Home sections** — a rotating hero (cross-fading slides + dots, `initHero()`; slide one is
+  rendered `.is-active` so it works without JS), centred section headings (`.tc-heading` +
+  `.tc-heading-rule`), category circles, product carousels, an infinite promise marquee
+  (`.tc-marquee`, item list rendered twice so the loop has no seam), promo banners, deal countdown,
+  testimonials and the Instagram strip. Hero slides / marquee / testimonials are editorial arrays on
+  `StoreController`; everything else is catalogue data.
+- **Product page** — thumbnail rail + main image with cursor-tracking hover zoom (`[data-zoom]`,
+  `[data-gallery]`), a purchase panel (size radios + `data-clear-target`, `[data-qty]` stepper,
+  Add To Bag and Buy Now as two submits on one form — `action=buy` adds then redirects to checkout),
+  then a **full-width centred** tab section (`[data-tabs]`; the first panel renders visible so it
+  still works with JS off) and a related grid. The "selling fast" line is the real 7-day
+  `add_to_cart` count, not an invented number.
+- **Sticky buy bar** — `[data-sticky-buy]` slides up once `[data-buy-form]` scrolls past; its size
+  select stays in sync with the radios above. It also sets `.has-sticky-buy` on `<body>` so the
+  floating WhatsApp button lifts clear of it.
+- **WhatsApp** — `partials/whatsapp.blade.php` renders a floating button on every storefront page
+  from `config/store.php` (`WHATSAPP_NUMBER` / `WHATSAPP_MESSAGE`); an empty number hides it.
+- **Blade gotcha:** the inline `@php(...)` form has miscompiled here (emitting `<?php(...)` with no
+  closing tag, which swallows the rest of the file). Prefer a `@php ... @endphp` block, and keep it
+  **inside** `@section`.
+- **Galleries** — `ProductGallerySeeder` tops every product up to three images, drawing extras from
+  a pool belonging to its root category. It is idempotent (skips products that already have three),
+  so it can be re-run over an existing database: `php artisan db:seed --class=ProductGallerySeeder`.
+- **Policies** — one action, five documents at `/policies/{topic}` (`shipping`, `returns`,
+  `size-guide`, `privacy`, `terms`) from `policyTopics()`; link them as `route('policies', 'terms')`.
+  The size guide tabulates the size runs actually stocked.
 
 **Styling** — `resources/css/app.css` is the source of truth for design tokens:
 - Brand palette as `--color-*` tokens (e.g. `ink`, `blush`, `tan`, `cream`, `muted`, `jade`) →
