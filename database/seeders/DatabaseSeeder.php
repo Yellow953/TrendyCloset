@@ -15,12 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Registration is disabled — the admin account is created here.
+        // Override with ADMIN_EMAIL / ADMIN_PASSWORD in .env.
+        User::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'admin@trendycloset.com')],
+            [
+                'name' => env('ADMIN_NAME', 'Leila Konsol'),
+                'password' => env('ADMIN_PASSWORD', 'password'),
+            ],
+        );
 
         $this->call(CatalogSeeder::class);
     }

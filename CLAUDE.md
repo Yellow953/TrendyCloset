@@ -30,8 +30,15 @@ There is no test suite wired up for the storefront yet.
 ## Architecture
 
 **Routing** — All storefront routes live in `routes/web.php` and point at `StoreController`.
-`Auth::routes()` provides the auth scaffolding. Named routes: `home` `/`, `listing` `/women`,
-`product` `/product`, `cart` `/bag`, `checkout` `/checkout`, `about`, `contact`, `policies`.
+Named routes: `home` `/`, `listing` `/women`, `product` `/product`, `cart` `/bag`,
+`checkout` `/checkout`, `about`, `contact`, `policies`.
+
+**Auth** — admin-only, for the (not-yet-built) back-office CRM. `Auth::routes()` was replaced by
+explicit route groups; **registration and email verification are removed** — there is no
+`register` route and no `RegisterController`. Remaining: `login` / `logout`, `password.request`,
+`password.email`, `password.reset`, `password.update`, `password.confirm`. Admin accounts are
+created by `DatabaseSeeder` (`ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` in `.env`), never
+self-service. Login redirects to `/`.
 
 **Controller** — `app/Http/Controllers/StoreController.php` holds all page data as PHP arrays
 (translated from the design doc's JS). Key helpers:
@@ -43,6 +50,13 @@ There is no test suite wired up for the storefront yet.
 **Views** — `resources/views/`:
 - `layouts/storefront.blade.php` — root layout: `<head>` (fonts + `@vite`), header, `@yield('content')`, footer. **Full-bleed** (no max-width wrapper); each section supplies its own horizontal padding (`px-8 md:px-16`).
 - `partials/` — `header` (announcement bar, nav w/ WOMEN mega-menu + active-state highlighting via `$active`), `footer` (newsletter + columns), `product-card` (reusable card taking `$p` and optional height `$h`).
+- `layouts/auth.blade.php` — standalone admin-auth layout (no storefront header/footer): editorial
+  image panel on the left (`lg:` only) + form panel on the right. Auth pages fill the
+  `eyebrow` / `heading` / `subheading` / `form` sections rather than `content`; `session('status')`
+  is rendered by the layout.
+- `partials/auth-field.blade.php` — label + `.tc-input` + inline `@error` message. Takes `name`,
+  `label`, and optional `type` / `value` / `autocomplete` / `autofocus` / `placeholder`.
+- `auth/` — `login`, `passwords/{email,reset,confirm}`, each `@extends('layouts.auth')`.
 - `store/` — one Blade file per page (`home`, `listing`, `product`, `cart`, `checkout`, `about`, `contact`, `policies`), each `@extends('layouts.storefront')`.
 
 **Styling** — `resources/css/app.css` is the source of truth for design tokens:
@@ -72,5 +86,5 @@ There is no test suite wired up for the storefront yet.
 
 - Auth controllers redirect to `/` after login (the default `/home` route was removed in favor of
   the storefront home).
-- Legacy `welcome.blade.php` / `home.blade.php` and `HomeController` remain in the repo but are
-  no longer routed.
+- The legacy Bootstrap scaffolding (`welcome.blade.php`, `home.blade.php`, `layouts/app.blade.php`,
+  `HomeController`) has been deleted — it was unrouted and referenced the removed `register` route.

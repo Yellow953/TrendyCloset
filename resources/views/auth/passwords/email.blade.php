@@ -1,47 +1,28 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
+@section('title', 'Reset password — Trendy Closet Admin')
+@section('eyebrow', 'Account recovery')
+@section('heading', 'Reset your password')
+@section('subheading', 'We will email you a secure link to choose a new password.')
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+@section('form')
+    <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-[18px]">
+        @csrf
 
-                    <form method="POST" action="{{ route('password.email') }}">
-                        @csrf
+        @include('partials.auth-field', [
+            'name' => 'email',
+            'label' => 'Email address',
+            'type' => 'email',
+            'value' => old('email'),
+            'autocomplete' => 'email',
+            'autofocus' => true,
+            'placeholder' => 'you@trendycloset.com',
+        ])
 
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+        <button type="submit" class="tc-btn-dark mt-2 w-full">Send reset link</button>
+    </form>
 
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Send Password Reset Link') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <p class="mt-8 border-t border-line pt-6 text-[12.5px] font-light text-faint">
+        Remembered it? <a href="{{ route('login') }}" class="tc-link">Back to sign in</a>
+    </p>
 @endsection
