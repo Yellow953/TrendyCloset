@@ -32,9 +32,10 @@
         </label>
 
         <a href="{{ route('home') }}" class="flex items-center gap-2.5 md:gap-3.5">
-            <span class="flex h-[42px] w-[42px] items-center justify-center rounded-full border-2 border-ink bg-tan text-center text-[8px] font-normal leading-[1.15] tracking-[0.06em] text-ink outline-2 outline-tan md:h-[52px] md:w-[52px] md:text-[9px]">TRENDY<br>CLOSET</span>
+            <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet"
+                 class="h-[42px] w-[42px] shrink-0 object-contain md:h-[52px] md:w-[52px]">
             <span>
-                <span class="block text-[16px] font-semibold tracking-[0.14em] text-ink sm:text-[20px] md:text-[24px] md:tracking-[0.16em]">TRENDY CLOSET</span>
+                <span class="tc-wordmark block text-[16px] text-ink sm:text-[20px] md:text-[23px]">Trendy Closet</span>
                 <span class="hidden font-serif text-[12px] italic tracking-[0.18em] text-muted sm:block">by Leila Konsol</span>
             </span>
         </a>

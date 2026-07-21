@@ -10,13 +10,17 @@
     --font-serif: 'Cormorant Garamond', ui-serif, Georgia, 'Times New Roman', serif;
     --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 
-    /* Trendy Closet — blush brand palette */
+    /* Trendy Closet — blush brand palette.
+       `brand` is the exact blush sampled from the logo blob (public/images/logo.png);
+       every warm tone below is a lighter/darker step of that same hue. */
+    --color-brand: #e9d6cf;
+    --color-brand-deep: #d9bfb5;
     --color-ink: #2b2523;
     --color-ink-2: #2a2926;
     --color-ink-deep: #221d1b;
     --color-blush: #a1705f;
     --color-blush-soft: #8f6f61;
-    --color-tan: #dcc7be;
+    --color-tan: #e9d6cf;
     --color-cream: #f6f1ee;
     --color-cream-2: #f0e7e1;
     --color-cream-3: #faf5f2;
@@ -56,6 +60,11 @@
     }
     .tc-link {
         @apply font-medium text-blush underline underline-offset-2;
+    }
+    /* Wordmark — set the way the logo is drawn: hairline geometric Jost,
+       all-caps, generously letterspaced. Never bold this. */
+    .tc-wordmark {
+        @apply font-sans font-extralight tracking-[0.2em] uppercase;
     }
     /* Hide scrollbar on scroll-snap carousels while keeping them scrollable */
     .no-scrollbar {

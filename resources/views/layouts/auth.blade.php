@@ -10,7 +10,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,200;0,300;0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="{{ asset('images/logo-64.png') }}" sizes="any">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -25,8 +27,9 @@
         <div class="absolute inset-0 bg-gradient-to-b from-ink-deep/70 via-ink-deep/40 to-ink-deep/85"></div>
 
         <div class="relative flex h-full flex-col justify-between px-14 py-12 text-white">
-            <a href="{{ route('home') }}" class="inline-flex items-baseline gap-2">
-                <span class="font-serif text-[26px] leading-none">Trendy Closet</span>
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
+                <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-11 w-11 shrink-0 object-contain">
+                <span class="tc-wordmark text-[20px] leading-none">Trendy Closet</span>
                 <span class="text-[10px] font-medium tracking-[0.22em] text-tan uppercase">Admin</span>
             </a>
 
@@ -49,8 +52,9 @@
 
     {{-- Form panel --}}
     <main class="flex flex-1 flex-col px-8 py-10 md:px-16">
-        <a href="{{ route('home') }}" class="inline-flex items-baseline gap-2 lg:hidden">
-            <span class="font-serif text-[24px] leading-none">Trendy Closet</span>
+        <a href="{{ route('home') }}" class="inline-flex items-center gap-3 lg:hidden">
+            <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-10 w-10 shrink-0 object-contain">
+            <span class="tc-wordmark text-[19px] leading-none">Trendy Closet</span>
             <span class="text-[10px] font-medium tracking-[0.22em] text-blush uppercase">Admin</span>
         </a>
 

@@ -18,6 +18,10 @@
     {{-- Columns --}}
     <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-5 py-14 md:px-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_.9fr_.9fr_1fr_1.1fr]">
         <div>
+            <a href="{{ route('home') }}" class="mb-6 flex items-center gap-3">
+                <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-12 w-12 shrink-0 object-contain">
+                <span class="tc-wordmark text-[19px] text-ink">Trendy Closet</span>
+            </a>
             <div class="text-[17px] font-medium">About Our Store</div>
             <p class="mt-4 max-w-[330px] text-[14.5px] font-light leading-[1.8] text-muted-2">
                 Trendy Closet started as a small Instagram page sharing outfits Leila loved. Every piece is
