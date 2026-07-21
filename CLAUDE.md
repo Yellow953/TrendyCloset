@@ -161,6 +161,38 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `size-guide`, `privacy`, `terms`) from `policyTopics()`; link them as `route('policies', 'terms')`.
   The size guide tabulates the size runs actually stocked.
 
+**SEO & GEO** — page metadata is controller-owned, never written in a view.
+- `App\Support\Seo` (scoped) carries one page's title / description / image / canonical /
+  indexability / JSON-LD. Controllers configure it (`$this->seo->page(...)->image(...)->schema(...)`)
+  and `partials/seo.blade.php` — included by `layouts/storefront` and fed by a view composer in
+  `AppServiceProvider` — renders the lot. **There is no `@section('title')` on storefront pages**;
+  adding one back does nothing. `layouts/auth` is separate and is `noindex, nofollow` wholesale.
+- `App\Support\Schema` builds the JSON-LD nodes. Every page emits one `@graph` containing
+  `OnlineStore` + `WebSite` (cross-referenced by `@id`) plus whatever the page is about:
+  `Product`+`Offer`, `BreadcrumbList`, `CollectionPage`, `ItemList`, `FAQPage`, `WebPage`.
+  **Do not add `aggregateRating` or `review`** — there is no reviews table, and fabricated rating
+  counts are what earns a structured-data manual action. `Product->rating` is editorial, not reviews.
+- **Canonicals.** Facet params (`size` `color` `min` `max` `sort`) canonicalise back to the clean
+  category/edit URL *and* send `noindex, follow` — they are permutations of one product set.
+  Pagination is the opposite: `?page=2` holds different products, so it self-canonicalises and stays
+  indexable. The facets are deliberately **not** blocked in robots.txt: a blocked URL can never be
+  fetched, so its `noindex` would never be read.
+- `SeoController` serves `/robots.txt`, `/sitemap.xml` and `/llms.txt` as **routes**, all built from
+  live data. `public/robots.txt` was deleted — a file in `public/` shadows the route, and a static
+  file cannot name the sitemap at the current domain.
+- **Every absolute URL derives from `APP_URL`.** No domain is hard-coded anywhere; setting
+  `APP_URL=https://…` in production .env is all that canonicals, OG tags and the sitemap need.
+- `config/seo.php` holds brand strings, the default description/image, currency and the `social`
+  handles that become the Organization `sameAs`. Empty values render nothing.
+- **GEO** — what generative engines quote is answer-shaped prose, so: `/llms.txt` describes the shop,
+  its terms and its categories in plain language from live data; product pages carry a visible
+  "Frequently asked" block (`StoreController::productFaqs()`, built from the piece's real sizes,
+  colours and stock) and the policy pages expose their sections as `FAQPage`. **The schema is only
+  legitimate because the answers render on the page** — never emit `FAQPage` for invisible content.
+- Prices quoted in copy must come from `Cart::FREE_SHIPPING_THRESHOLD` / `Cart::STANDARD_SHIPPING`,
+  not be retyped. (The policies page's "express $9.00" already collides with standard shipping's
+  $9.00; that prose is stale, so the FAQ and llms.txt deliberately do not repeat the express figure.)
+
 **Styling** — `resources/css/app.css` is the source of truth for design tokens:
 - Brand palette as `--color-*` tokens (e.g. `ink`, `blush`, `tan`, `cream`, `muted`, `jade`) →
   use as Tailwind utilities like `bg-cream`, `text-blush`, `border-line-2`.

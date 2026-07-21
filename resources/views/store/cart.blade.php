@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Your Bag — Trendy Closet')
-
 @section('content')
     <div class="px-5 md:px-10 pb-3 pt-9">
         <h1 class="text-[32px] font-normal">Your Bag <span class="text-[18px] font-light text-muted">({{ $lines->sum('qty') }} {{ Str::plural('item', $lines->sum('qty')) }})</span></h1>

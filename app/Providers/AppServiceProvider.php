@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductFavorite;
 use App\Support\Cart;
 use App\Support\Catalog;
+use App\Support\Seo;
 use App\Support\Visitor;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\View;
@@ -18,9 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Both are per-request state: one bag, one set of catalogue queries.
+        // All three are per-request state: one bag, one set of catalogue
+        // queries, one page's metadata.
         $this->app->scoped(Cart::class, fn ($app) => new Cart($app->make(Session::class)));
         $this->app->scoped(Catalog::class, fn () => new Catalog);
+        $this->app->scoped(Seo::class, fn () => new Seo);
     }
 
     /**
@@ -29,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->composeChrome();
+
+        // partials/seo renders whatever the controller put on the scoped Seo
+        // instance; resolving it here keeps every action from passing it along.
+        View::composer('partials.seo', fn ($view) => $view->with('seo', $this->app->make(Seo::class)));
     }
 
     /**

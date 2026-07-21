@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Trendy Closet — Curated fashion for the whole family')
-
 @section('content')
     {{-- Hero — cross-fading slides, driven by initHero() in app.js. Slide one
          carries .is-active so the hero renders fully without JavaScript. --}}

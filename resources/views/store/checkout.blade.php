@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Checkout — Trendy Closet')
-
 @section('content')
     {{-- Checkout progress sub-header --}}
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 md:px-10 py-4">

@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Our Story — Trendy Closet')
-
 @section('content')
     {{-- Hero --}}
     <div class="relative h-[340px] overflow-hidden bg-tan">

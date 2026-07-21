@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', $page['title'].' — Trendy Closet')
-
 @section('content')
     <div class="bg-cream px-8 py-12 text-center md:px-16">
         <h1 class="text-[34px] font-normal">{{ $page['title'] }}</h1>

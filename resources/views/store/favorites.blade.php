@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Your Favourites — Trendy Closet')
-
 @section('content')
     <div class="bg-cream px-5 md:px-10 py-7">
         <h1 class="text-[32px] font-normal">Your Favourites</h1>

@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', 'Contact — Trendy Closet')
-
 @section('content')
     @php($whatsapp = config('store.whatsapp'))
 

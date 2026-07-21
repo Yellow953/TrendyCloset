@@ -10,9 +10,12 @@ use App\Models\ProductVariant;
 use App\Services\ProductAnalytics;
 use App\Support\Cart;
 use App\Support\Catalog;
+use App\Support\Schema;
+use App\Support\Seo;
 use App\Support\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Trendy Closet storefront. Catalogue content (categories, products, imagery,
@@ -25,7 +28,13 @@ class StoreController extends Controller
     /** How many products a listing page shows. */
     private const PER_PAGE = 12;
 
-    public function __construct(private readonly Catalog $catalog) {}
+    /** Display names for the `?edit=` cuts, used by the heading and the meta. */
+    private const EDIT_LABELS = ['new' => 'New In', 'sale' => 'Sale', 'featured' => "Leila's Picks"];
+
+    public function __construct(
+        private readonly Catalog $catalog,
+        private readonly Seo $seo,
+    ) {}
 
     /**
      * Build an Unsplash image descriptor (url + credit) for editorial imagery.
@@ -152,6 +161,18 @@ class StoreController extends Controller
 
         $promos = $this->promos();
 
+        $this->seo
+            ->page(
+                config('seo.brand_full').config('seo.separator').config('seo.tagline'),
+                config('seo.description')
+            )
+            // The hero photo is editorial; the first featured piece is the
+            // truer preview of what the shop actually sells.
+            ->image($featured->first()?->image_url)
+            ->schema(
+                Schema::itemList($featured, 'Featured at '.config('seo.brand')),
+            );
+
         return view('store.home', [
             'categories' => $categories,
             'counts' => $counts,
@@ -262,12 +283,17 @@ class StoreController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
+        $heading = $category?->name ?? (self::EDIT_LABELS[$edit] ?? 'Shop All');
+
+        $this->listingSeo($category, $edit, $heading, $products, $request);
+
         return view('store.listing', [
             // The sidebar walks the same tree the header does.
             'navTree' => $this->catalog->tree(),
             'catalog' => $this->catalog,
             'category' => $category,
             'edit' => $edit,
+            'heading' => $heading,
             'products' => $products,
             'sizes' => $facets['sizes'],
             'colors' => $facets['colors'],
@@ -283,6 +309,102 @@ class StoreController extends Controller
             'sideBanner' => $this->img('photo-1470309864661-68328b2cd0a5', 'Artificial Photography', 'artificialphotography', 600),
             'active' => $category ? 'shop' : ($edit ?? 'shop'),
         ]);
+    }
+
+    /**
+     * Metadata for a listing page.
+     *
+     * The rule that matters here is canonicalisation: `size`, `color`, `min`,
+     * `max` and `sort` produce combinatorially many URLs over the same
+     * products. Those are canonicalised back to the clean category/edit URL and
+     * marked noindex — otherwise one category floods the index with near
+     * duplicates and none of them ranks. Pagination is different: each page
+     * holds *different* products, so page 2 canonicalises to itself.
+     *
+     * @param  \Illuminate\Pagination\LengthAwarePaginator<Product>  $products
+     */
+    private function listingSeo(?Category $category, ?string $edit, string $heading, $products, Request $request): void
+    {
+        $page = $products->currentPage();
+
+        $canonical = route('listing', array_filter([
+            'category' => $category,
+            'edit' => $edit,
+            'page' => $page > 1 ? $page : null,
+        ]));
+
+        $faceted = $request->hasAny(['size', 'color', 'min', 'max'])
+            || $request->query('sort', 'popular') !== 'popular';
+
+        $title = $page > 1 ? $heading.' — Page '.$page : $heading;
+
+        $this->seo
+            ->page($title, $this->listingDescription($category, $edit, $heading, $products->total()))
+            ->canonical($canonical)
+            ->image($products->first()?->image_url)
+            ->schema(
+                Schema::collectionPage($heading, $canonical, $category?->description),
+                Schema::breadcrumbs($this->listingTrail($category, $edit, $heading)),
+                Schema::itemList($products->getCollection(), $heading),
+            );
+
+        if ($faceted) {
+            $this->seo->noindex();
+        }
+    }
+
+    /**
+     * A sentence describing what is on the page, written from live catalogue
+     * data (count and price floor) so it never claims stock that is not there.
+     * A curated category description always wins.
+     */
+    private function listingDescription(?Category $category, ?string $edit, string $heading, int $total): string
+    {
+        if ($category?->description) {
+            return $category->description;
+        }
+
+        $brand = config('seo.brand');
+
+        if ($total === 0) {
+            return "Browse {$heading} at {$brand} — curated by Leila Konsol, with free shipping over "
+                .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+        }
+
+        $from = Product::query()
+            ->active()
+            ->when($category, fn ($q) => $q->inCategory($category))
+            ->min('price');
+
+        $price = $from !== null ? ' from '.Product::money($from) : '';
+
+        return "Shop {$total} ".Str::plural('piece', $total)." in {$heading} at {$brand}{$price}. "
+            .'Hand-picked by Leila Konsol, with free shipping over '
+            .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+    }
+
+    /**
+     * Breadcrumb trail for a listing, without Home (Schema adds it) and without
+     * the current page's own URL.
+     *
+     * @return array<int, array{name: string, url: ?string}>
+     */
+    private function listingTrail(?Category $category, ?string $edit, string $heading): array
+    {
+        // On /shop itself, "Shop" is the current page and carries no link.
+        if (! $category && ! $edit) {
+            return [['name' => 'Shop', 'url' => null]];
+        }
+
+        $trail = [['name' => 'Shop', 'url' => route('listing')]];
+
+        if ($category?->parent) {
+            $trail[] = ['name' => $category->parent->name, 'url' => route('listing', $category->parent)];
+        }
+
+        $trail[] = ['name' => $heading, 'url' => null];
+
+        return $trail;
     }
 
     /**
@@ -357,13 +479,30 @@ class StoreController extends Controller
         }
 
         $variants = $product->variants->where('is_active', true);
+        $sizes = ProductVariant::sortSizes($variants->pluck('size')->filter()->unique()->values());
+        $colors = $variants->pluck('color')->filter()->unique()->values();
+        $breadcrumb = array_filter([$product->category?->parent, $product->category]);
+
+        $faqs = $this->productFaqs($product, $sizes, $colors);
+
+        $this->seo
+            ->page($product->name, $this->productDescription($product))
+            ->image($product->image_url)
+            ->type('product')
+            ->schema(
+                Schema::product($product),
+                Schema::breadcrumbs($this->productTrail($product, $breadcrumb)),
+                // Only claimable because the same Q&As render on the page.
+                Schema::faq($faqs),
+            );
 
         return view('store.product', [
             'product' => $product,
+            'faqs' => $faqs,
             'gallery' => $product->images->sortBy('position')->values(),
-            'sizes' => ProductVariant::sortSizes($variants->pluck('size')->filter()->unique()->values()),
+            'sizes' => $sizes,
             'variants' => $variants->values(),
-            'colors' => $variants->pluck('color')->filter()->unique()->values(),
+            'colors' => $colors,
             'related' => $related,
             'favorited' => $analytics->hasFavorited($product),
             'favoritesCountForProduct' => $product->favorites()->count(),
@@ -372,9 +511,118 @@ class StoreController extends Controller
                 ->where('type', \App\Enums\ProductEventType::AddToCart)
                 ->where('created_at', '>=', now()->subDays(7))
                 ->count(),
-            'breadcrumb' => array_filter([$product->category?->parent, $product->category]),
+            'breadcrumb' => $breadcrumb,
             'active' => 'shop',
         ]);
+    }
+
+    /**
+     * The product's own copy, falling back to a sentence built from the facts
+     * we do have — a blank meta description is worse than a derived one.
+     */
+    private function productDescription(Product $product): string
+    {
+        if ($product->description) {
+            return $product->description;
+        }
+
+        $category = $product->category?->name;
+        $where = $category ? " in {$category}" : '';
+
+        return "{$product->name}{$where} at ".config('seo.brand').", {$product->price_label}. "
+            .'Hand-picked by Leila Konsol, with free shipping over '
+            .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+    }
+
+    /**
+     * Answer-shaped facts about one piece: sizing, colours, stock, delivery and
+     * returns. This is the GEO surface — the questions a shopper actually types
+     * into an assistant, answered in the page's own words from live data rather
+     * than left implicit in the product panel.
+     *
+     * @param  Collection<int, string>  $sizes
+     * @param  Collection<int, string>  $colors
+     * @return array<int, array{question: string, answer: string}>
+     */
+    private function productFaqs(Product $product, Collection $sizes, Collection $colors): array
+    {
+        $name = $product->name;
+        $free = Product::money(Cart::FREE_SHIPPING_THRESHOLD);
+        $flat = Product::money(Cart::STANDARD_SHIPPING);
+
+        $faqs = [];
+
+        if ($sizes->isNotEmpty()) {
+            $faqs[] = [
+                'question' => "What sizes does the {$name} come in?",
+                'answer' => "The {$name} is stocked in ".$this->sentenceList($sizes)
+                    .'. Our pieces run true to size — size up for knitwear and outerwear. '
+                    .'Full measurements are in the size guide.',
+            ];
+        }
+
+        if ($colors->isNotEmpty()) {
+            $faqs[] = [
+                'question' => "What colours is the {$name} available in?",
+                'answer' => "It is available in ".$this->sentenceList($colors)
+                    .'. Screens vary, so the shade in daylight can read slightly differently to the photograph.',
+            ];
+        }
+
+        $faqs[] = [
+            'question' => "Is the {$name} in stock?",
+            'answer' => $product->in_stock
+                ? "Yes — the {$name} is in stock at {$product->price_label} and ships within one working day."
+                : "The {$name} is currently sold out. Message us and we will tell you when it is back.",
+        ];
+
+        // Express pricing is deliberately not quoted here: the policies page
+        // states $9.00, which is what STANDARD_SHIPPING already costs. Quote
+        // only the figure the code is the source of truth for.
+        $faqs[] = [
+            'question' => "How much is delivery on the {$name}?",
+            'answer' => "Standard delivery is {$flat}, and free on orders over {$free}. "
+                .'Orders placed before 2pm on a working day are packed the same day and arrive in 3–5 business days.',
+        ];
+
+        $faqs[] = [
+            'question' => "Can I return the {$name}?",
+            'answer' => 'Yes. You have 30 days from delivery to return it unworn and unwashed with its tags attached, '
+                .'and we cover return postage. Refunds reach your original payment method within 5 working days.',
+        ];
+
+        return $faqs;
+    }
+
+    /**
+     * "XS, S and M" — a list a person would read aloud, for the FAQ prose.
+     *
+     * @param  Collection<int, string>  $values
+     */
+    private function sentenceList(Collection $values): string
+    {
+        if ($values->count() === 1) {
+            return (string) $values->first();
+        }
+
+        return $values->slice(0, -1)->implode(', ').' and '.$values->last();
+    }
+
+    /**
+     * @param  array<int, Category>  $breadcrumb
+     * @return array<int, array{name: string, url: ?string}>
+     */
+    private function productTrail(Product $product, array $breadcrumb): array
+    {
+        $trail = [['name' => 'Shop', 'url' => route('listing')]];
+
+        foreach ($breadcrumb as $crumb) {
+            $trail[] = ['name' => $crumb->name, 'url' => route('listing', $crumb)];
+        }
+
+        $trail[] = ['name' => $product->name, 'url' => null];
+
+        return $trail;
     }
 
     /**
@@ -403,6 +651,12 @@ class StoreController extends Controller
             ->with(['images', 'variants'])
             ->get();
 
+        // Personal to one visitor and different on every request — nothing here
+        // belongs in an index.
+        $this->seo
+            ->page('Your Favourites', 'The pieces you have saved at '.config('seo.brand').'.')
+            ->noindex();
+
         return view('store.favorites', [
             'products' => $products,
             'active' => null,
@@ -411,6 +665,15 @@ class StoreController extends Controller
 
     public function about()
     {
+        $this->seo
+            ->page(
+                'Our Story',
+                'Trendy Closet is the boutique Leila Konsol built out of styling friends — every piece '
+                .'hand-picked, tried on and photographed before it reaches the shop.'
+            )
+            ->type('article')
+            ->schema(Schema::webPage('Our Story', route('about'), 'The story behind Trendy Closet and its founder, Leila Konsol.'));
+
         return view('store.about', [
             'hero' => $this->img('photo-1490481651871-ab68de25d43d', 'Priscilla Du Preez', 'priscilladupreez', 1400),
             'portrait' => $this->img('photo-1544441893-675973e31985', 'Mnz', 'mnzoutfits', 800),
@@ -431,6 +694,14 @@ class StoreController extends Controller
 
     public function contact()
     {
+        $this->seo
+            ->page(
+                'Contact Us',
+                'Questions about sizing, an order or a return? Email '.config('seo.email')
+                .', message us on WhatsApp, or use the form — we reply within 24 hours.'
+            )
+            ->schema(Schema::webPage('Contact Us', route('contact'), 'How to reach Trendy Closet.'));
+
         return view('store.contact', ['active' => 'contact']);
     }
 
@@ -462,10 +733,31 @@ class StoreController extends Controller
 
         abort_unless(isset($topics[$topic]), 404);
 
+        $page = $topics[$topic];
+        $url = route('policies', $topic);
+
+        // Each policy section is already a heading and an answer, and all of it
+        // renders on the page — so it is honestly an FAQPage, and these are the
+        // answers an assistant reaches for when asked about delivery or returns.
+        $faqs = collect($page['sections'])
+            ->map(fn (array $section) => ['question' => $section['heading'], 'answer' => $section['body']])
+            ->all();
+
+        $this->seo
+            ->page($page['title'], $page['intro'])
+            ->canonical($url)
+            ->schema(
+                Schema::webPage($page['title'], $url, $page['intro']),
+                // There is no /policies index page distinct from the first
+                // document, so the trail is simply Home → this document.
+                Schema::breadcrumbs([['name' => $page['title'], 'url' => null]]),
+                Schema::faq($faqs),
+            );
+
         return view('store.policies', [
             'topics' => $topics,
             'current' => $topic,
-            'page' => $topics[$topic],
+            'page' => $page,
             // The size guide tabulates the size runs actually in the catalogue.
             'sizeRuns' => $topic === 'size-guide' ? $this->sizeRuns() : [],
             'active' => 'policies',

@@ -5,10 +5,20 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StoreController::class, 'home'])->name('home');
+
+/*
+| Crawler surfaces. robots.txt is a route rather than a file in public/ so it
+| can name the sitemap at whatever domain APP_URL points at; llms.txt is the
+| plain-language brief for LLM agents.
+*/
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 /*
 | Catalogue. One listing action serves the whole shop, a single category and

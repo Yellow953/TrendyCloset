@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProductVariant;
 use App\Services\ProductAnalytics;
 use App\Support\Cart;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 
 /**
@@ -13,10 +14,16 @@ use Illuminate\Http\Request;
  */
 class CartController extends Controller
 {
-    public function __construct(private readonly Cart $cart) {}
+    public function __construct(
+        private readonly Cart $cart,
+        private readonly Seo $seo,
+    ) {}
 
     public function index()
     {
+        // Session state, unique per shopper: never index the bag or checkout.
+        $this->seo->page('Your Bag')->noindex();
+
         return view('store.cart', [
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
@@ -96,6 +103,8 @@ class CartController extends Controller
         if ($this->cart->isEmpty()) {
             return redirect()->route('cart');
         }
+
+        $this->seo->page('Checkout')->noindex();
 
         return view('store.checkout', [
             'lines' => $this->cart->lines(),

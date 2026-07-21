@@ -1,7 +1,5 @@
 @extends('layouts.storefront')
 
-@section('title', $product->name.' · Trendy Closet')
-
 @php
     $inStock = $product->in_stock;
     $stockLeft = $variants->sum('stock');
@@ -250,6 +248,33 @@
             </div>
         </div>
     </section>
+
+    {{-- Frequently asked. Built in StoreController::productFaqs() from this
+         piece's real sizes, colours and stock, and published as FAQPage
+         structured data — which is only legitimate because the answers render
+         here, on the page, for a shopper to read. --}}
+    @if(!empty($faqs))
+        <section class="px-5 py-14 md:px-10">
+            <h2 class="tc-heading">Frequently asked</h2>
+            <span class="tc-heading-rule"></span>
+            <div class="mx-auto mt-9 max-w-[820px]">
+                @foreach($faqs as $faq)
+                    <details class="group/q border-b border-line">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-[16px] font-medium">
+                            <h3 class="text-[16px] font-medium">{{ $faq['question'] }}</h3>
+                            <span class="text-[20px] leading-none text-muted">
+                                <span class="group-open/q:hidden">+</span><span class="hidden group-open/q:inline">−</span>
+                            </span>
+                        </summary>
+                        <p class="pb-5 pr-10 text-[15px] font-light leading-[1.85] text-muted-3">{{ $faq['answer'] }}</p>
+                    </details>
+                @endforeach
+                <p class="mt-6 text-[14px] font-light text-muted">
+                    Still unsure? <a href="{{ route('contact') }}" class="tc-link">Ask us</a> — we reply within 24 hours.
+                </p>
+            </div>
+        </section>
+    @endif
 
     {{-- Related --}}
     @if($related->isNotEmpty())

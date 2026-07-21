@@ -1,15 +1,13 @@
 @extends('layouts.storefront')
 
 @php
-    $editLabels = ['new' => 'New In', 'sale' => 'Sale', 'featured' => "Leila's Picks"];
-    $heading = $category?->name ?? ($editLabels[$edit] ?? 'Shop All');
+    // $heading comes from the controller, which also builds the page title and
+    // meta description from it — so the <h1> and the search result agree.
     // Every filter link keeps the other filters and resets to page one.
     $filterUrl = fn (array $params) => request()->fullUrlWithQuery($params + ['page' => 1]);
     $clearUrl = fn (array $keys) => request()->fullUrlWithoutQuery([...$keys, 'page']);
     $activeFilters = collect(['size' => $filters['size'], 'color' => $filters['color']])->filter();
 @endphp
-
-@section('title', $heading.' — Trendy Closet')
 
 @section('content')
     <div class="bg-cream px-5 py-9 text-center md:px-10">
