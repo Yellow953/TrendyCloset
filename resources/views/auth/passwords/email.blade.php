@@ -1,7 +1,6 @@
 @extends('layouts.auth')
 
 @section('title', 'Reset password — Trendy Closet Admin')
-@section('eyebrow', 'Account recovery')
 @section('heading', 'Reset your password')
 @section('subheading', 'We will email you a secure link to choose a new password.')
 

@@ -1,7 +1,6 @@
 @extends('layouts.auth')
 
 @section('title', 'Sign in — Trendy Closet Admin')
-@section('eyebrow', 'Staff access')
 @section('heading', 'Sign in')
 @section('subheading', 'Enter your credentials to open the Trendy Closet back office.')
 

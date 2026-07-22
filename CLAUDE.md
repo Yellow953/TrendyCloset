@@ -115,20 +115,43 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 
 **Views** — `resources/views/`:
 - `layouts/storefront.blade.php` — root layout: `<head>` (fonts + `@vite`), header, `@yield('content')`, footer. **Full-bleed** (no max-width wrapper); each section supplies its own horizontal padding (`px-8 md:px-16`).
-- `partials/` — `header`, `footer`, `product-card`, `flash`, `pagination`.
+- `partials/` — `header`, `footer`, `product-card`, `flash`, `pagination`, `drawer` (+
+  `drawer-bag` / `drawer-favorites`).
   - `header` is **sticky** (`position: sticky`), with a centred single-line announcement bar that
     collapses on scroll: `initStickyHeader()` toggles `.is-scrolled`, the CSS does the rest. Nav is
-    HOME / SHOP (mega-menu from the category tree) / ABOUT / CONTACT; the right side is icon
-    actions (search, account, favourites, bag) with count badges.
+    HOME / SHOP (mega-menu from the category tree) / ABOUT / CONTACT; the right side is three icon
+    actions — search, favourites, bag — with count badges (`[data-fav-count]`, `[data-bag-count]`,
+    updated in place by `app.js`). There is deliberately **no account icon**: only staff log in, and
+    the login page is not shopper-facing.
+  - **Search** is a plain GET form in a collapsible header panel onto `/shop?q=…` — a shareable URL
+    that works with JS off; `initSearch()` only reveals the panel. `Product::search()` matches name,
+    description, category name and variant colour. `q` behaves as a facet for SEO: `noindex, follow`,
+    canonical back to the clean listing.
+  - **The drawer** (`partials/drawer`) is one slide-over shared by bag and favourites. The header
+    icons carry `data-drawer-open="<fragment url>"` (`/bag/drawer`, `/favorites/drawer`) with the
+    real page as the no-JS href. `app.js` fetches the fragment on open and re-fetches after any
+    `[data-drawer-refresh]` form inside it, so quantities, totals and the free-shipping line always
+    come from one server render — the client never computes a price.
+  - **Nothing reloads the page.** Any `form[data-async]` (card quick-add + heart, PDP add-to-bag and
+    favourite, everything in the drawer) posts over fetch; `CartController` / `StoreController::favorite`
+    answer `expectsJson()` with `{status, bagCount|favorited, favoritesCount}` instead of a redirect.
+    **"Buy Now" is the deliberate exception** — it submits normally because it has to land on
+    checkout. Confirmation is a `.tc-toast` (`toast()` in app.js), since a flash banner needs a page
+    load to render on.
   - `footer` is light, five columns (About / Shop / Your Account / Services / Contact) with the
     newsletter as its opening band and a bottom bar of socials, copyright and payment marks.
   - `product-card` takes a `Product` (`$p`) and optional height `$h`. On hover it reveals a rail of
     three actions — favourite, quick-add (posts `default_variant`, so eager-load `variants` or the
     button renders disabled), and view.
-- `layouts/auth.blade.php` — standalone admin-auth layout (no storefront header/footer): editorial
-  image panel on the left (`lg:` only) + form panel on the right. Auth pages fill the
-  `eyebrow` / `heading` / `subheading` / `form` sections rather than `content`; `session('status')`
-  is rendered by the layout.
+- `layouts/auth.blade.php` — standalone admin-auth layout (no storefront header/footer): a centred
+  white card with the wordmark above it and the storefront link below. The old split-screen
+  editorial panel was removed. Auth pages fill the `heading` / `subheading` / `form` sections rather
+  than `content`; `session('status')` is rendered by the layout. Its two visual devices live in
+  `app.css` as `.tc-auth-page` / `.tc-auth-card`: a **woven** backdrop (warp/weft hairlines at 2–4%
+  alpha + blush bloom + white vignette) painted by one `position: fixed` pseudo-element so it covers
+  the viewport at any form height, and an offset hairline **frame** around the card, like a swing
+  tag on a garment card. Load-in uses `.tc-auth-rise` (staggered by `[animation-delay:*]`, disabled
+  under `prefers-reduced-motion`). Keep the weave faint — it is the only decoration on the page.
 - `partials/auth-field.blade.php` — label + `.tc-input` + inline `@error` message. Takes `name`,
   `label`, and optional `type` / `value` / `autocomplete` / `autofocus` / `placeholder`.
 - `auth/` — `login`, `passwords/{email,reset,confirm}`, each `@extends('layouts.auth')`.

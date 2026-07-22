@@ -244,7 +244,36 @@ body.has-sticky-buy .tc-whatsapp {
     animation-play-state: paused;
 }
 
+/* ---------------------------------------------------------------------------
+   Admin sign-in (layouts/auth) — a half/half split: editorial plate on the
+   left, form on plain white at the right. The plate carries the whole design;
+   the form side stays undecorated so the fields read first.
+--------------------------------------------------------------------------- */
+/* The plate: an image matted behind a hairline, the way a lookbook page is
+   mounted. The mat is inset from the panel edge, not drawn on the photograph. */
+.tc-auth-plate::after {
+    content: '';
+    position: absolute;
+    inset: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+}
+
+/* One quiet load sequence: mark, form, then the way back out. */
+@keyframes tc-auth-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+.tc-auth-rise {
+    animation: tc-auth-rise 0.55s cubic-bezier(0.22, 0.7, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .tc-auth-rise {
+        animation: none;
+    }
     .tc-marquee-track {
         animation: none;
     }

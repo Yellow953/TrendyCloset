@@ -19,50 +19,37 @@
 <body class="min-h-screen bg-white text-ink antialiased">
 <div class="flex min-h-screen">
 
-    {{-- Editorial panel — decorative, hidden on small screens --}}
-    <aside class="relative hidden w-[46%] shrink-0 overflow-hidden bg-ink-deep lg:block">
-        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=60&w=1400&auto=format&fit=crop"
+    {{-- Editorial plate — decorative, so it only appears when there is room for it --}}
+    <aside class="tc-auth-plate relative hidden w-1/2 shrink-0 overflow-hidden bg-ink-deep lg:block">
+        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=70&w=1600&auto=format&fit=crop"
              alt=""
-             class="absolute inset-0 h-full w-full object-cover opacity-45">
-        <div class="absolute inset-0 bg-gradient-to-b from-ink-deep/70 via-ink-deep/40 to-ink-deep/85"></div>
+             class="absolute inset-0 h-full w-full object-cover opacity-50">
+        <div class="absolute inset-0 bg-gradient-to-b from-ink-deep/55 via-ink-deep/35 to-ink-deep/90"></div>
 
-        <div class="relative flex h-full flex-col justify-between px-14 py-12 text-white">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-11 w-11 shrink-0 object-contain">
-                <span class="tc-wordmark text-[20px] leading-none">Trendy Closet</span>
-                <span class="text-[10px] font-medium tracking-[0.22em] text-tan uppercase">Admin</span>
-            </a>
-
-            <div>
-                <div class="mb-5 h-px w-14 bg-tan/50"></div>
-                <p class="max-w-[24ch] font-serif text-[38px] leading-[1.15] font-normal">
-                    The back room of the boutique.
-                </p>
-                <p class="mt-4 max-w-[38ch] text-[14.5px] leading-relaxed font-light text-white/65">
-                    Manage the catalogue, orders, and customer enquiries for
-                    Trendy Closet by Leila Konsol.
-                </p>
-            </div>
-
-            <div class="text-[11px] tracking-[0.16em] text-white/40 uppercase">
-                Authorised staff only
-            </div>
+        <div class="relative flex h-full flex-col justify-end px-16 py-16 text-white">
+            <span class="mb-6 block h-px w-12 bg-tan/60"></span>
+            <p class="max-w-[18ch] font-serif text-[42px] leading-[1.12] font-normal">
+                The room behind the shop floor.
+            </p>
+            <p class="mt-5 max-w-[40ch] text-[14px] leading-relaxed font-light text-white/60">
+                Catalogue, orders and customer enquiries for Trendy Closet by Leila Konsol.
+            </p>
         </div>
     </aside>
 
     {{-- Form panel --}}
-    <main class="flex flex-1 flex-col px-8 py-10 md:px-16">
-        <a href="{{ route('home') }}" class="inline-flex items-center gap-3 lg:hidden">
-            <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-10 w-10 shrink-0 object-contain">
-            <span class="tc-wordmark text-[19px] leading-none">Trendy Closet</span>
-            <span class="text-[10px] font-medium tracking-[0.22em] text-blush uppercase">Admin</span>
-        </a>
+    <main class="flex flex-1 flex-col justify-center px-7 py-12 sm:px-14">
+        <div class="mx-auto w-full max-w-[400px]">
 
-        <div class="flex flex-1 items-center justify-center py-12">
-            <div class="w-full max-w-[400px]">
-                <div class="mb-2 text-[11px] font-medium tracking-[0.22em] text-blush uppercase">@yield('eyebrow', 'Staff access')</div>
-                <h1 class="font-serif text-[36px] leading-tight font-normal">@yield('heading')</h1>
-                <p class="mt-2.5 text-[14.5px] leading-relaxed font-light text-muted-2">@yield('subheading')</p>
+            <a href="{{ route('home') }}" class="tc-auth-rise mb-10 block">
+                <span class="tc-wordmark block text-[18px] leading-none">Trendy Closet</span>
+                <span class="mt-2.5 block text-[10px] font-medium tracking-[0.3em] text-blush uppercase">Back office</span>
+            </a>
+
+            <div class="tc-auth-rise [animation-delay:90ms]">
+                <h1 class="font-serif text-[34px] leading-tight font-normal">@yield('heading')</h1>
+                <span class="mt-4 block h-px w-10 bg-brand-deep"></span>
+                <p class="mt-4 max-w-[38ch] text-[14px] leading-relaxed font-light text-muted-2">@yield('subheading')</p>
 
                 @if (session('status'))
                     <div class="mt-7 border-l-2 border-jade bg-cream-3 px-4 py-3 text-[13.5px] leading-relaxed font-light text-muted-3">
@@ -74,10 +61,10 @@
                     @yield('form')
                 </div>
             </div>
-        </div>
 
-        <div class="text-center text-[12.5px] font-light text-faint lg:text-left">
-            <a href="{{ route('home') }}" class="transition-colors hover:text-blush">← Back to the storefront</a>
+            <p class="tc-auth-rise mt-10 text-[12.5px] font-light text-faint [animation-delay:180ms]">
+                <a href="{{ route('home') }}" class="transition-colors hover:text-blush">← Back to the storefront</a>
+            </p>
         </div>
     </main>
 </div>

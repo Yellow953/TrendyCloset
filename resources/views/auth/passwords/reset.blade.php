@@ -1,7 +1,6 @@
 @extends('layouts.auth')
 
 @section('title', 'Choose a new password — Trendy Closet Admin')
-@section('eyebrow', 'Account recovery')
 @section('heading', 'Choose a new password')
 @section('subheading', 'Pick something long and unique — at least eight characters.')
 

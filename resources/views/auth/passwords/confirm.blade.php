@@ -1,7 +1,6 @@
 @extends('layouts.auth')
 
 @section('title', 'Confirm password — Trendy Closet Admin')
-@section('eyebrow', 'Security check')
 @section('heading', 'Confirm your password')
 @section('subheading', "You're about to enter a protected area. Re-enter your password to continue.")
 
