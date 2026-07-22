@@ -88,7 +88,9 @@
             {{-- One form, two submits: add to bag, or buy now (adds, then goes
                  straight to checkout). The radio carries the variant, so size
                  and stock are enforced by the same request. --}}
-            <form method="POST" action="{{ route('cart.add') }}" data-buy-form class="flex flex-col gap-5">
+            {{-- data-async covers "Add To Bag"; "Buy Now" is left to submit
+                 normally, since it has to navigate to checkout. --}}
+            <form method="POST" action="{{ route('cart.add') }}" data-buy-form data-async class="flex flex-col gap-5">
                 @csrf
 
                 @if($variants->isNotEmpty())
@@ -140,12 +142,12 @@
             </form>
 
             <div class="flex flex-wrap items-center gap-4">
-                <form method="POST" action="{{ route('product.favorite', $product) }}">
+                <form method="POST" action="{{ route('product.favorite', $product) }}" data-async data-favorite-form>
                     @csrf
                     <button type="submit" aria-pressed="{{ $favorited ? 'true' : 'false' }}"
-                            class="flex items-center gap-2 text-[14px] font-light transition-colors {{ $favorited ? 'text-blush' : 'text-muted-2 hover:text-blush' }}">
-                        <svg viewBox="0 0 24 24" fill="{{ $favorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.6" class="h-[18px] w-[18px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
-                        {{ $favorited ? 'Saved to favourites' : 'Add to favourites' }}
+                            class="flex items-center gap-2 text-[14px] font-light text-muted-2 transition-colors hover:text-blush aria-pressed:text-blush aria-pressed:[&_svg]:fill-current">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[18px] w-[18px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
+                        <span data-favorite-label>{{ $favorited ? 'Saved to favourites' : 'Add to favourites' }}</span>
                     </button>
                 </form>
                 @if($inStock && $stockLeft <= 10)
@@ -181,7 +183,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('cart.add') }}" class="flex items-center gap-2.5">
+                <form method="POST" action="{{ route('cart.add') }}" data-async class="flex items-center gap-2.5">
                     @csrf
                     @if($variants->isNotEmpty())
                         <select name="variant_id" data-sticky-size aria-label="Size"

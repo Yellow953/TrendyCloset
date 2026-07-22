@@ -6,7 +6,8 @@
     // Every filter link keeps the other filters and resets to page one.
     $filterUrl = fn (array $params) => request()->fullUrlWithQuery($params + ['page' => 1]);
     $clearUrl = fn (array $keys) => request()->fullUrlWithoutQuery([...$keys, 'page']);
-    $activeFilters = collect(['size' => $filters['size'], 'color' => $filters['color']])->filter();
+    $activeFilters = collect(['q' => $filters['q'], 'size' => $filters['size'], 'color' => $filters['color']])->filter();
+    $filterLabels = ['q' => 'Search', 'size' => 'Size', 'color' => 'Colour'];
 @endphp
 
 @section('content')
@@ -168,7 +169,7 @@
                 <div class="mb-6 flex flex-wrap items-center gap-2.5">
                     @foreach($activeFilters as $key => $value)
                         <a href="{{ $clearUrl([$key]) }}" class="flex items-center gap-2 border border-line-2 px-3 py-1.5 text-[13px] font-light transition-colors hover:border-blush hover:text-blush">
-                            {{ ucfirst($key) }}: {{ $value }} <span class="text-[14px] leading-none">×</span>
+                            {{ $filterLabels[$key] ?? ucfirst($key) }}: {{ $value }} <span class="text-[14px] leading-none">×</span>
                         </a>
                     @endforeach
                     <a href="{{ $clearUrl($activeFilters->keys()->all()) }}" class="text-[13px] font-light text-blush underline underline-offset-2">Clear all</a>
@@ -177,8 +178,13 @@
 
             @if($products->isEmpty())
                 <div class="border border-line bg-cream-3 px-6 py-20 text-center">
-                    <div class="text-[20px] font-normal">Nothing matches those filters</div>
-                    <div class="mt-2 text-[14px] font-light text-muted-2">Try a different size or price range.</div>
+                    @if($filters['q'])
+                        <div class="text-[20px] font-normal">Nothing found for “{{ $filters['q'] }}”</div>
+                        <div class="mt-2 text-[14px] font-light text-muted-2">Try a shorter word — a colour, a category or part of the name.</div>
+                    @else
+                        <div class="text-[20px] font-normal">Nothing matches those filters</div>
+                        <div class="mt-2 text-[14px] font-light text-muted-2">Try a different size or price range.</div>
+                    @endif
                     <a href="{{ route('listing') }}" class="tc-link mt-5 inline-block">Browse everything</a>
                 </div>
             @else

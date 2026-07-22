@@ -24,5 +24,6 @@
     </main>
     @include('partials.footer')
     @include('partials.whatsapp')
+    @include('partials.drawer')
 </body>
 </html>

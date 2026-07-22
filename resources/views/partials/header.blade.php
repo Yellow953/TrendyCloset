@@ -1,5 +1,5 @@
-{{-- $navTree, $catalog, $bagCount, $bagTotal and $favoritesCount are supplied
-     by the view composer in AppServiceProvider. --}}
+{{-- $navTree, $catalog, $bagCount and $favoritesCount are supplied by the view
+     composer in AppServiceProvider. --}}
 @php
     $active = $active ?? null;
     $spotlight = $catalog->spotlight();
@@ -84,27 +84,35 @@
 
         {{-- Icon actions. The counters are badges rather than inline text. --}}
         <div class="flex items-center gap-4 md:gap-5">
-            <button type="button" aria-label="Search" class="transition-colors hover:text-blush">
+            <button type="button" data-search-toggle aria-label="Search" aria-expanded="false" aria-controls="tc-search" class="transition-colors hover:text-blush">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
             </button>
 
-            <a href="{{ route('login') }}" aria-label="Account" class="transition-colors hover:text-blush">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg>
-            </a>
-
-            <a href="{{ route('favorites') }}" aria-label="Favourites ({{ $favoritesCount }})" class="relative transition-colors hover:text-blush">
+            {{-- Both icons open the shared slide-over (partials/drawer); the
+                 href is the no-JS fallback. --}}
+            <a href="{{ route('favorites') }}" data-drawer-open="{{ route('favorites.drawer') }}" aria-label="Favourites ({{ $favoritesCount }})" class="relative transition-colors hover:text-blush">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
-                <span class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $favoritesCount }}</span>
+                <span data-fav-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $favoritesCount }}</span>
             </a>
 
-            <a href="{{ route('cart') }}" aria-label="Bag ({{ $bagCount }})" class="flex items-center gap-2 transition-colors hover:text-blush">
-                <span class="relative">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><path d="M6 7.5h12l-1 12.5H7L6 7.5Z"/><path d="M9 7.5a3 3 0 0 1 6 0"/></svg>
-                    <span class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $bagCount }}</span>
-                </span>
-                <span class="hidden text-[14px] font-medium sm:inline">{{ $bagTotal }}</span>
+            <a href="{{ route('cart') }}" data-drawer-open="{{ route('cart.drawer') }}" aria-label="Bag ({{ $bagCount }})" class="relative transition-colors hover:text-blush">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><path d="M6 7.5h12l-1 12.5H7L6 7.5Z"/><path d="M9 7.5a3 3 0 0 1 6 0"/></svg>
+                <span data-bag-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $bagCount }}</span>
             </a>
         </div>
+    </div>
+
+    {{-- Search. A plain GET form onto the listing, so results are a normal,
+         shareable URL (`/shop?q=…`) and it still works with JS off — the
+         toggle button is the only part JS owns. --}}
+    <div id="tc-search" data-search-panel class="border-b border-line bg-white" @if(! request()->filled('q')) hidden @endif>
+        <form method="GET" action="{{ route('listing') }}" class="mx-auto flex max-w-[760px] items-center gap-3 px-5 py-4 md:px-10">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[20px] w-[20px] shrink-0 text-muted-2"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            <input type="search" name="q" value="{{ request('q') }}" data-search-input autocomplete="off"
+                   placeholder="Search for a piece, a colour, a category…"
+                   class="tc-input flex-1" aria-label="Search products">
+            <button type="submit" class="tc-btn-dark whitespace-nowrap px-6 py-3 text-[14px]">Search</button>
+        </form>
     </div>
 
     {{-- Mobile drawer (toggled by the checkbox above) --}}
@@ -120,8 +128,7 @@
             <a href="{{ route('about') }}" class="border-b border-line py-3.5 {{ $active === 'about' ? 'text-blush' : '' }}">ABOUT</a>
             <a href="{{ route('contact') }}" class="border-b border-line py-3.5 {{ $active === 'contact' ? 'text-blush' : '' }}">CONTACT</a>
             <div class="flex gap-6 py-4 text-[13px] font-light text-muted-2">
-                <span>Search</span>
-                <a href="{{ route('login') }}">Account</a>
+                <button type="button" data-search-toggle aria-controls="tc-search">Search</button>
                 <a href="{{ route('favorites') }}">Favourites ({{ $favoritesCount }})</a>
                 <a href="{{ route('about') }}">About</a>
                 <a href="{{ route('contact') }}">Contact</a>

@@ -250,7 +250,200 @@ function initStickyBuy() {
     });
 }
 
+// Header search. The form is a plain GET onto the listing and works on its
+// own; JS only reveals the panel and puts the caret in the field.
+function initSearch() {
+    const panel = document.querySelector('[data-search-panel]');
+    const input = panel?.querySelector('[data-search-input]');
+    const toggles = document.querySelectorAll('[data-search-toggle]');
+    if (!panel || !toggles.length) return;
+
+    const setOpen = (open) => {
+        panel.hidden = !open;
+        toggles.forEach((t) => t.setAttribute('aria-expanded', String(open)));
+        if (open) input?.focus();
+    };
+
+    toggles.forEach((toggle) => {
+        toggle.addEventListener('click', () => setOpen(panel.hidden));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !panel.hidden) setOpen(false);
+    });
+}
+
+// Toast, bottom-centre. Replaces the flash banner for anything posted over
+// fetch — there is no page load to render a banner on.
+function toast(message) {
+    if (!message) return;
+
+    let host = document.querySelector('[data-toasts]');
+    if (!host) {
+        host = document.createElement('div');
+        host.setAttribute('data-toasts', '');
+        host.className = 'tc-toasts';
+        document.body.appendChild(host);
+    }
+
+    const note = document.createElement('div');
+    note.className = 'tc-toast';
+    note.setAttribute('role', 'status');
+    note.textContent = message;
+    host.appendChild(note);
+
+    requestAnimationFrame(() => note.classList.add('is-in'));
+    setTimeout(() => {
+        note.classList.remove('is-in');
+        note.addEventListener('transitionend', () => note.remove(), { once: true });
+    }, 3200);
+}
+
+// The shared slide-over (bag / favourites). The trigger carries the fragment
+// URL in data-drawer-open; the panel fetches it on open and again after any
+// change made inside it, so it is never showing a stale bag.
+const drawer = {
+    url: null,
+
+    open(url) {
+        const panel = document.querySelector('[data-drawer]');
+        const overlay = document.querySelector('[data-drawer-overlay]');
+        if (!panel || !overlay) return;
+
+        this.url = url;
+        panel.classList.add('is-open');
+        overlay.classList.add('is-open');
+        document.body.classList.add('has-drawer');
+        this.load();
+    },
+
+    close() {
+        document.querySelector('[data-drawer]')?.classList.remove('is-open');
+        document.querySelector('[data-drawer-overlay]')?.classList.remove('is-open');
+        document.body.classList.remove('has-drawer');
+    },
+
+    get isOpen() {
+        return document.querySelector('[data-drawer]')?.classList.contains('is-open') ?? false;
+    },
+
+    async load() {
+        const body = document.querySelector('[data-drawer-body]');
+        if (!body || !this.url) return;
+
+        try {
+            const response = await fetch(this.url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            body.innerHTML = await response.text();
+        } catch {
+            body.innerHTML = '<div class="flex h-full items-center justify-center px-6 text-center text-[14px] font-light text-muted-2">Could not load that just now.</div>';
+        }
+    },
+};
+
+function initDrawer() {
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-drawer-open]');
+        if (trigger) {
+            event.preventDefault();
+            drawer.open(trigger.dataset.drawerOpen);
+            return;
+        }
+
+        if (event.target.closest('[data-drawer-close], [data-drawer-overlay]')) {
+            drawer.close();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && drawer.isOpen) drawer.close();
+    });
+}
+
+function setCount(selector, value) {
+    document.querySelectorAll(selector).forEach((el) => { el.textContent = value; });
+}
+
+// Add-to-bag and favourite, without losing the page.
+//
+// Any [data-async] form posts over fetch; the controllers answer those with
+// JSON (bag count, favourite state) instead of a redirect. "Buy now" is the
+// deliberate exception — it submits normally, because it has to land on
+// checkout.
+function initAsyncForms() {
+    document.addEventListener('submit', async (event) => {
+        const form = event.target.closest('form[data-async]');
+        if (!form) return;
+
+        const submitter = event.submitter;
+        if (submitter?.value === 'buy') return;
+
+        event.preventDefault();
+
+        const body = new FormData(form);
+        if (submitter?.name) body.append(submitter.name, submitter.value);
+
+        const buttons = form.querySelectorAll('button[type="submit"]');
+        buttons.forEach((b) => { b.disabled = true; });
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                toast(data.message || 'Sorry — that did not work. Please try again.');
+                return;
+            }
+
+            if (data.bagCount !== undefined) setCount('[data-bag-count]', data.bagCount);
+            if (data.favoritesCount !== undefined) setCount('[data-fav-count]', data.favoritesCount);
+            if (data.favorited !== undefined) applyFavorite(form, data.favorited);
+
+            // Forms living inside the drawer redraw it, so quantities, totals
+            // and the free-shipping line all come back from the same render.
+            if (form.hasAttribute('data-drawer-refresh')) await drawer.load();
+
+            toast(data.status);
+        } catch {
+            toast('Sorry — that did not work. Please try again.');
+        } finally {
+            buttons.forEach((b) => { b.disabled = false; });
+        }
+    });
+}
+
+// Reflect the new favourite state on the button that was pressed — and, on the
+// favourites page, drop the card entirely once it is no longer saved.
+function applyFavorite(form, favorited) {
+    const button = form.querySelector('button[type="submit"]');
+    button?.setAttribute('aria-pressed', String(favorited));
+
+    const label = form.querySelector('[data-favorite-label]');
+    if (label) label.textContent = favorited ? 'Saved to favourites' : 'Add to favourites';
+
+    const grid = form.closest('[data-favorites-grid]');
+    const card = form.closest('[data-favorites-grid] > *');
+    if (!favorited && grid && card) {
+        card.style.transition = 'opacity .25s';
+        card.style.opacity = '0';
+        setTimeout(() => {
+            card.remove();
+            if (!grid.children.length) window.location.reload();
+        }, 250);
+    }
+}
+
 function init() {
+    initSearch();
+    initDrawer();
+    initAsyncForms();
     initCarousels();
     initTabs();
     initStickyBuy();

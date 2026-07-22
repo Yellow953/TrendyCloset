@@ -16,7 +16,7 @@
     </div>
 
     {{-- Columns --}}
-    <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-5 py-14 md:px-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_.9fr_.9fr_1fr_1.1fr]">
+    <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-5 py-14 md:px-10 sm:grid-cols-2 lg:grid-cols-[2fr_.9fr_.9fr_1fr]">
         <div>
             <a href="{{ route('home') }}" class="mb-6 flex items-center gap-3">
                 <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-12 w-12 shrink-0 object-contain">
@@ -42,17 +42,7 @@
         </div>
 
         <div>
-            <div class="text-[17px] font-medium">Your Account</div>
-            <div class="mt-4 flex flex-col gap-2.5 text-[14.5px] font-light text-muted-2">
-                <a href="{{ route('cart') }}" class="transition-colors hover:text-blush">Your Bag</a>
-                <a href="{{ route('checkout') }}" class="transition-colors hover:text-blush">Checkout</a>
-                <a href="{{ route('favorites') }}" class="transition-colors hover:text-blush">Favourites</a>
-                <a href="{{ route('contact') }}" class="transition-colors hover:text-blush">Contact Us</a>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-[17px] font-medium">Services</div>
+            <div class="text-[17px] font-medium">Policies</div>
             <div class="mt-4 flex flex-col gap-2.5 text-[14.5px] font-light text-muted-2">
                 <a href="{{ route('policies', 'shipping') }}" class="transition-colors hover:text-blush">Shipping &amp; Delivery</a>
                 <a href="{{ route('policies', 'returns') }}" class="transition-colors hover:text-blush">Returns &amp; Refunds</a>
@@ -84,23 +74,8 @@
 
     {{-- Bottom bar --}}
     <div class="border-t border-line px-5 py-6 md:px-10">
-        <div class="mx-auto flex max-w-[1200px] flex-col items-center gap-5 md:flex-row md:justify-between">
-            <div class="flex gap-2.5">
-                @foreach(['Instagram' => 'IG', 'Facebook' => 'FB', 'Pinterest' => 'PT', 'TikTok' => 'TT'] as $network => $label)
-                    <a href="{{ route('about') }}" aria-label="{{ $network }}"
-                       class="flex h-9 w-9 items-center justify-center rounded-full bg-cream text-[11px] font-medium tracking-[0.04em] text-ink transition-colors hover:bg-ink hover:text-white">{{ $label }}</a>
-                @endforeach
-            </div>
-
-            <div class="order-last text-center text-[13px] font-light text-muted md:order-none">
+            <div class="w-[100%] text-center text-[13px] font-light text-muted md:order-none">
                 © {{ date('Y') }} Trendy Closet by Leila Konsol
             </div>
-
-            <div class="flex flex-wrap items-center justify-center gap-2">
-                @foreach(['VISA', 'MASTERCARD', 'AMEX', 'PAYPAL', 'APPLE PAY'] as $method)
-                    <span class="border border-line-2 px-2.5 py-1.5 text-[10px] font-medium tracking-[0.08em] text-muted-2">{{ $method }}</span>
-                @endforeach
-            </div>
-        </div>
     </div>
 </footer>

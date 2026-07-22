@@ -110,11 +110,11 @@
     {{-- Promo banners — real categories, priced from live stock --}}
     <div class="flex flex-col gap-6 px-5 md:px-10 py-14 md:flex-row">
         @foreach($promos as $promo)
-            <a href="{{ route('listing', $promo['category']) }}" class="group relative h-[260px] flex-1 overflow-hidden bg-[#e9ddd6]">
-                @if($promo['category']->image_url)
-                    <img src="{{ $promo['category']->image_url }}" alt="{{ $promo['category']->name }}" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+            <a href="{{ route('listing', $promo['category']) }}" class="group relative h-[280px] flex-1 overflow-hidden rounded-2xl bg-[#e9ddd6] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] transition-shadow duration-500 hover:shadow-[0_18px_44px_-20px_rgba(0,0,0,0.45)]">
+                @if($promo['image'])
+                    <img src="{{ $promo['image'] }}" alt="{{ $promo['category']->name }}" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
                 @endif
-                <div class="pointer-events-none absolute inset-0 flex flex-col justify-center gap-2 bg-gradient-to-r from-white/75 via-white/40 to-transparent px-5 md:px-10">
+                <div class="pointer-events-none absolute inset-0 flex flex-col justify-center gap-2 bg-gradient-to-r from-white/92 via-white/55 to-transparent px-7 md:px-11">
                     <div class="text-[12px] font-medium tracking-[0.24em]">{{ $promo['eyebrow'] }}</div>
                     @if($promo['from'])
                         <div class="text-[15px] font-light">Starting at <span class="text-[22px] font-semibold text-blush">{{ $promo['from'] }}</span></div>

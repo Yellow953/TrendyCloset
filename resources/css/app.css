@@ -114,6 +114,69 @@
     box-shadow: 0 10px 30px rgba(43, 37, 35, 0.08);
 }
 
+/* The shared slide-over (bag / favourites), opened by app.js. Closed state is
+   off-canvas rather than display:none so it animates both ways. */
+[data-drawer] {
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.32s;
+}
+[data-drawer].is-open {
+    transform: translateX(0);
+    visibility: visible;
+}
+[data-drawer-overlay] {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.32s ease;
+}
+[data-drawer-overlay].is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.has-drawer {
+    overflow: hidden;
+}
+
+/* Toasts. Confirmation for the actions that no longer reload the page (adding
+   to the bag, hearting a piece) — the flash banner has no load to render on. */
+.tc-toasts {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 1.5rem;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+.tc-toast {
+    max-width: min(90vw, 26rem);
+    padding: 0.75rem 1.25rem;
+    border-radius: 999px;
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+    font-size: 13.5px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(43, 37, 35, 0.22);
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+.tc-toast.is-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* The sticky buy bar owns the bottom of the screen on a PDP. */
+.has-sticky-buy .tc-toasts {
+    bottom: 6rem;
+}
+
 /* Hero slides cross-fade; the active one is marked by app.js. */
 [data-hero-slide] {
     opacity: 0;

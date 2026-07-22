@@ -33,6 +33,21 @@ class CartController extends Controller
     }
 
     /**
+     * The slide-over bag's contents, as an HTML fragment. Fetched by app.js
+     * when the drawer opens and re-fetched after every change — rendering the
+     * bag server-side keeps one source of truth for prices and stock.
+     */
+    public function drawer()
+    {
+        return view('partials.drawer-bag', [
+            'lines' => $this->cart->lines(),
+            'summary' => $this->cart->summary(),
+            'count' => $this->cart->count(),
+            'freeShippingRemainder' => $this->cart->freeShippingRemainder(),
+        ]);
+    }
+
+    /**
      * Add to bag. The chosen variant carries the size/colour, so this is also
      * where the add_to_cart analytics event is recorded.
      */
@@ -46,18 +61,33 @@ class CartController extends Controller
         $variant = ProductVariant::with('product')->findOrFail($data['variant_id']);
 
         if (! $variant->is_active || ! $variant->in_stock || ! $variant->product?->is_active) {
-            return back()->withErrors(['variant_id' => 'That size just sold out.']);
+            $message = 'That size just sold out.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->withErrors(['variant_id' => $message]);
         }
 
         $this->cart->add($variant, (int) ($data['quantity'] ?? 1));
         $analytics->recordAddToCart($variant->product);
+
+        $status = $variant->product->name.' added to your bag.';
+
+        // The card and PDP buttons post this over fetch (see initAsyncForms in
+        // app.js) so adding never costs the shopper their scroll position.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => $status,
+                'bagCount' => $this->cart->count(),
+            ]);
+        }
 
         // "Buy now" is the same add, but it takes you straight to checkout.
         if ($request->input('action') === 'buy') {
             return redirect()->route('checkout');
         }
 
-        return back()->with('status', $variant->product->name.' added to your bag.');
+        return back()->with('status', $status);
     }
 
     public function update(Request $request, ProductVariant $variant)
@@ -68,14 +98,20 @@ class CartController extends Controller
 
         $this->cart->setQuantity($variant, (int) $data['quantity']);
 
-        return back();
+        return $request->expectsJson()
+            ? response()->json(['bagCount' => $this->cart->count()])
+            : back();
     }
 
-    public function destroy(ProductVariant $variant)
+    public function destroy(Request $request, ProductVariant $variant)
     {
         $this->cart->remove($variant);
 
-        return back()->with('status', 'Item removed from your bag.');
+        $status = 'Item removed from your bag.';
+
+        return $request->expectsJson()
+            ? response()->json(['status' => $status, 'bagCount' => $this->cart->count()])
+            : back()->with('status', $status);
     }
 
     public function applyCoupon(Request $request)

@@ -28,6 +28,7 @@ Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 Route::get('/shop/{category:slug?}', [StoreController::class, 'listing'])->name('listing');
 Route::get('/product/{product:slug}', [StoreController::class, 'product'])->name('product');
 Route::post('/product/{product:slug}/favorite', [StoreController::class, 'favorite'])->name('product.favorite');
+Route::get('/favorites/drawer', [StoreController::class, 'favoritesDrawer'])->name('favorites.drawer');
 Route::get('/favorites', [StoreController::class, 'favorites'])->name('favorites');
 
 // The storefront used to live at /women, before the nav was driven by the DB.
@@ -38,6 +39,7 @@ Route::redirect('/women', '/shop');
 | does not yet place an order.
 */
 Route::get('/bag', [CartController::class, 'index'])->name('cart');
+Route::get('/bag/drawer', [CartController::class, 'drawer'])->name('cart.drawer');
 Route::post('/bag', [CartController::class, 'store'])->name('cart.add');
 Route::patch('/bag/{variant}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/bag/{variant}', [CartController::class, 'destroy'])->name('cart.remove');

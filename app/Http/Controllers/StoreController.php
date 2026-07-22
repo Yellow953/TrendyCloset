@@ -217,11 +217,20 @@ class StoreController extends Controller
      * The two banner tiles under Featured Products. Each is a real category —
      * its own image, its own live "starting at" price.
      *
-     * @return array<int, array{category: Category, from: ?string, eyebrow: string}>
+     * @return array<int, array{category: Category, from: ?string, eyebrow: string, image: ?string}>
      */
     private function promos(): array
     {
         $preferred = ['summer-section', 'winter-section'];
+
+        // Editorial banner art: overhead flat-lays of the season's pieces, shot
+        // on a light ground so the copy still reads over them. Deliberately not
+        // the category's own tile — that is a portrait crop and squeezing it
+        // into this band leaves a meaningless close-up of fabric.
+        $art = [
+            'summer-section' => $this->img('photo-1502301197179-65228ab57f78', w: 1600, h: 480)['img'],
+            'winter-section' => $this->img('photo-1516762689617-e1cffcef479d', w: 1600, h: 480)['img'],
+        ];
 
         $tree = $this->catalog->tree();
         $chosen = collect($preferred)
@@ -233,13 +242,14 @@ class StoreController extends Controller
             $chosen = $tree->take(2);
         }
 
-        return $chosen->map(function (Category $category) {
+        return $chosen->map(function (Category $category) use ($art) {
             $from = Product::query()->active()->inCategory($category)->min('price');
 
             return [
                 'category' => $category,
                 'from' => $from !== null ? Product::money($from) : null,
                 'eyebrow' => 'BEST COLLECTION',
+                'image' => $art[$category->slug] ?? $category->image_url,
             ];
         })->values()->all();
     }
@@ -256,15 +266,19 @@ class StoreController extends Controller
             ? $request->query('edit')
             : null;
 
-        // The facet lists describe the products in *scope* (category + edit),
-        // before the shopper's own size/colour/price choices narrow them —
-        // otherwise picking "M" would hide every other size from the sidebar.
+        $term = trim((string) $request->query('q', ''));
+
+        // The facet lists describe the products in *scope* (category + edit +
+        // search term), before the shopper's own size/colour/price choices
+        // narrow them — otherwise picking "M" would hide every other size from
+        // the sidebar.
         $scope = fn () => Product::query()
             ->active()
             ->when($category, fn ($q) => $q->inCategory($category))
             ->when($edit === 'new', fn ($q) => $q->newArrivals())
             ->when($edit === 'sale', fn ($q) => $q->onSale())
-            ->when($edit === 'featured', fn ($q) => $q->featured());
+            ->when($edit === 'featured', fn ($q) => $q->featured())
+            ->when($term !== '', fn ($q) => $q->search($term));
 
         $scopeIds = $scope()->pluck('id');
         $facets = $this->facets($scopeIds);
@@ -283,7 +297,9 @@ class StoreController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
-        $heading = $category?->name ?? (self::EDIT_LABELS[$edit] ?? 'Shop All');
+        $heading = $term !== ''
+            ? 'Search: “'.$term.'”'
+            : ($category?->name ?? (self::EDIT_LABELS[$edit] ?? 'Shop All'));
 
         $this->listingSeo($category, $edit, $heading, $products, $request);
 
@@ -300,6 +316,7 @@ class StoreController extends Controller
             'priceFloor' => $facets['min'],
             'priceCeiling' => $facets['max'],
             'filters' => [
+                'q' => $term,
                 'size' => $size,
                 'color' => $color,
                 'min' => $request->query('min'),
@@ -333,7 +350,9 @@ class StoreController extends Controller
             'page' => $page > 1 ? $page : null,
         ]));
 
-        $faceted = $request->hasAny(['size', 'color', 'min', 'max'])
+        // A search term is a facet too: `?q=` is one shopper's slice of the same
+        // catalogue, and an indexed search page is a thin duplicate.
+        $faceted = $request->hasAny(['size', 'color', 'min', 'max', 'q'])
             || $request->query('sort', 'popular') !== 'popular';
 
         $title = $page > 1 ? $heading.' — Page '.$page : $heading;
@@ -629,15 +648,39 @@ class StoreController extends Controller
      * Toggle the heart. Favourites are per-visitor state, not an event — see
      * the analytics notes in CLAUDE.md.
      */
-    public function favorite(Product $product, ProductAnalytics $analytics)
+    public function favorite(Request $request, Product $product, ProductAnalytics $analytics, Visitor $visitor)
     {
         abort_unless($product->is_active, 404);
 
         $favorited = $analytics->toggleFavorite($product);
 
-        return back()->with('status', $favorited
+        $status = $favorited
             ? 'Saved to your favourites.'
-            : 'Removed from your favourites.');
+            : 'Removed from your favourites.';
+
+        // Hearting is posted over fetch from the card and the PDP, so the page
+        // never reloads under the shopper (see initAsyncForms in app.js).
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => $status,
+                'favorited' => $favorited,
+                'favoritesCount' => ProductFavorite::where('visitor_id', $visitor->id)->count(),
+            ]);
+        }
+
+        return back()->with('status', $status);
+    }
+
+    /**
+     * The favourites drawer's contents, as an HTML fragment — the counterpart
+     * to CartController::drawer. Fetched by app.js when the drawer opens and
+     * re-fetched after every change.
+     */
+    public function favoritesDrawer(Visitor $visitor)
+    {
+        return view('partials.drawer-favorites', [
+            'products' => $this->favoritedProducts($visitor),
+        ]);
     }
 
     /**
@@ -645,11 +688,7 @@ class StoreController extends Controller
      */
     public function favorites(Visitor $visitor)
     {
-        $products = Product::query()
-            ->active()
-            ->whereIn('id', ProductFavorite::where('visitor_id', $visitor->id)->select('product_id'))
-            ->with(['images', 'variants'])
-            ->get();
+        $products = $this->favoritedProducts($visitor);
 
         // Personal to one visitor and different on every request — nothing here
         // belongs in an index.
@@ -661,6 +700,21 @@ class StoreController extends Controller
             'products' => $products,
             'active' => null,
         ]);
+    }
+
+    /**
+     * The pieces this visitor has hearted, shared by the page and the drawer.
+     * Variants come along because both offer a quick add to bag.
+     *
+     * @return Collection<int, Product>
+     */
+    private function favoritedProducts(Visitor $visitor): Collection
+    {
+        return Product::query()
+            ->active()
+            ->whereIn('id', ProductFavorite::where('visitor_id', $visitor->id)->select('product_id'))
+            ->with(['images', 'variants'])
+            ->get();
     }
 
     public function about()

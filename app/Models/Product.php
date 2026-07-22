@@ -245,4 +245,23 @@ class Product extends Model
     {
         $query->whereIn('category_id', $category->selfAndDescendantIds());
     }
+
+    /**
+     * Header search. Matches the piece itself, its category name and its
+     * variants, so "oat", "jeans" and "linen dress" all find something — a
+     * shopper types the colour as readily as the name.
+     *
+     * @param  Builder<Product>  $query
+     */
+    public function scopeSearch(Builder $query, string $term): void
+    {
+        $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
+
+        $query->where(function (Builder $q) use ($like) {
+            $q->where('name', 'like', $like)
+                ->orWhere('description', 'like', $like)
+                ->orWhereHas('category', fn ($c) => $c->where('name', 'like', $like))
+                ->orWhereHas('variants', fn ($v) => $v->where('is_active', true)->where('color', 'like', $like));
+        });
+    }
 }

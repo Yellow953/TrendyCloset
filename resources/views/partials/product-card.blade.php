@@ -1,12 +1,14 @@
 {{-- Product card. $p is an App\Models\Product — eager-load `images` and
      `variants` (the hover rail quick-adds the first in-stock variant).
-     $h overrides the image height. --}}
+     $h overrides the image height. $fav pre-fills the heart where the caller
+     already knows the piece is saved (the favourites page). --}}
 @php
     $h = $h ?? 'h-[300px]';
+    $fav = $fav ?? false;
     $variant = $p->relationLoaded('variants') ? $p->default_variant : null;
 @endphp
 <div class="group relative">
-    <div class="relative {{ $h }} overflow-hidden bg-cream">
+    <div class="relative {{ $h }} overflow-hidden rounded-xl bg-cream">
         <a href="{{ route('product', $p) }}" class="block h-full w-full" aria-label="{{ $p->name }}">
             @if($p->image_url)
                 <img src="{{ $p->image_url }}" alt="{{ $p->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -24,14 +26,14 @@
         {{-- Hover rail: save, quick-add, view. Slides in from the right on
              hover, and stays reachable by keyboard via focus-within. --}}
         <div class="absolute right-3 top-3 flex translate-x-3 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
-            <form method="POST" action="{{ route('product.favorite', $p) }}">
+            <form method="POST" action="{{ route('product.favorite', $p) }}" data-async data-favorite-form>
                 @csrf
-                <button type="submit" class="tc-card-action" title="Save to favourites" aria-label="Save {{ $p->name }} to favourites">
+                <button type="submit" aria-pressed="{{ $fav ? 'true' : 'false' }}" class="tc-card-action aria-pressed:text-blush aria-pressed:[&_svg]:fill-current" title="Save to favourites" aria-label="Save {{ $p->name }} to favourites">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[18px] w-[18px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
                 </button>
             </form>
 
-            <form method="POST" action="{{ route('cart.add') }}">
+            <form method="POST" action="{{ route('cart.add') }}" data-async>
                 @csrf
                 <input type="hidden" name="variant_id" value="{{ $variant?->id }}">
                 <button type="submit" class="tc-card-action" @disabled(! $variant)

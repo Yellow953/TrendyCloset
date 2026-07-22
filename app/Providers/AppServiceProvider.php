@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Product;
 use App\Models\ProductFavorite;
 use App\Support\Cart;
 use App\Support\Catalog;
@@ -54,7 +53,6 @@ class AppServiceProvider extends ServiceProvider
                 'catalog' => $catalog,
                 'navTree' => $catalog->tree(),
                 'bagCount' => $cart->count(),
-                'bagTotal' => Product::money($cart->subtotal()),
                 'favoritesCount' => $this->favoritesCount(),
             ]);
         });
