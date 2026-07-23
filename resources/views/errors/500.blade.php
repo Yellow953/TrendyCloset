@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('title', 'Something went wrong')
+@section('code', '500')
+@section('heading', 'Something came apart at the seams')
+@section('message', 'An unexpected error occurred on our end. We have been notified and will stitch it back together. Please try again shortly.')

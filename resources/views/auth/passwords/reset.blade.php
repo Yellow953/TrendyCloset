@@ -34,6 +34,6 @@
             'placeholder' => '••••••••',
         ])
 
-        <button type="submit" class="tc-btn-dark mt-2 w-full">Reset password</button>
+        <button type="submit" class="ad-btn-primary mt-2 w-full py-3">Reset password</button>
     </form>
 @endsection

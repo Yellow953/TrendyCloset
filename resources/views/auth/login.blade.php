@@ -27,21 +27,21 @@
         ])
 
         <div class="flex items-center justify-between pt-1">
-            <label for="remember" class="flex cursor-pointer items-center gap-2.5 text-[13.5px] font-light text-muted-2">
+            <label for="remember" class="flex cursor-pointer items-center gap-2.5 text-[13.5px] font-normal text-slate-500">
                 <input id="remember" name="remember" type="checkbox" {{ old('remember') ? 'checked' : '' }}
-                       class="h-4 w-4 accent-blush">
+                       class="h-4 w-4 accent-slate-900">
                 Keep me signed in
             </label>
 
-            <a href="{{ route('password.request') }}" class="text-[13px] font-light text-muted-2 underline underline-offset-4 transition-colors hover:text-blush">
+            <a href="{{ route('password.request') }}" class="text-[13px] font-normal text-slate-500 underline underline-offset-4 transition-colors hover:text-slate-700">
                 Forgot password?
             </a>
         </div>
 
-        <button type="submit" class="tc-btn-dark mt-2 w-full">Sign in</button>
+        <button type="submit" class="ad-btn-primary mt-2 w-full py-3">Sign in</button>
     </form>
 
-    <p class="mt-8 border-t border-line pt-6 text-[12.5px] leading-relaxed font-light text-faint">
+    <p class="mt-8 border-t border-slate-200 pt-6 text-[12.5px] leading-relaxed font-normal text-slate-400">
         Accounts are issued by the site administrator — there is no public sign-up.
     </p>
 @endsection

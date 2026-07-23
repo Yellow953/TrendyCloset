@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\ContactMessage;
+use App\Models\Order;
 use App\Models\ProductFavorite;
 use App\Support\Cart;
 use App\Support\Catalog;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->composeChrome();
+        $this->composeAdminChrome();
 
         // partials/seo renders whatever the controller put on the scoped Seo
         // instance; resolving it here keeps every action from passing it along.
@@ -54,6 +57,21 @@ class AppServiceProvider extends ServiceProvider
                 'navTree' => $catalog->tree(),
                 'bagCount' => $cart->count(),
                 'favoritesCount' => $this->favoritesCount(),
+            ]);
+        });
+    }
+
+    /**
+     * The back-office sidebar and top bar both want to know how much work is
+     * waiting: orders nobody has fulfilled and enquiries nobody has opened.
+     * Composed here so no admin action has to remember to pass them.
+     */
+    private function composeAdminChrome(): void
+    {
+        View::composer(['partials.admin.sidebar', 'partials.admin.topbar'], function ($view) {
+            $view->with([
+                'openOrders' => Order::open()->count(),
+                'unreadMessageCount' => ContactMessage::whereNull('read_at')->count(),
             ]);
         });
     }

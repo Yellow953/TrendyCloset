@@ -10,6 +10,10 @@
     --font-serif: 'Cormorant Garamond', ui-serif, Georgia, 'Times New Roman', serif;
     --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 
+    /* The back office is a working tool, not the shop — it drops the brand
+       serif for Inter, the neutral workhorse behind dashboards like Metronic. */
+    --font-admin: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
     /* Trendy Closet — blush brand palette.
        `brand` is the exact blush sampled from the logo blob (public/images/logo.png);
        every warm tone below is a lighter/darker step of that same hue. */
@@ -33,6 +37,12 @@
     --color-faint: #b3a69e;
     --color-gold: #c9a227;
     --color-jade: #1d8a76;
+
+    /* Back-office only: a darker gold that passes on a pale chip, a red for
+       refunds and destructive actions, and the canvas the admin sits on. */
+    --color-gold-deep: #8a6d10;
+    --color-rose: #b4443c;
+    --color-canvas: #f7f4f2;
 }
 
 @layer base {
@@ -245,20 +255,9 @@ body.has-sticky-buy .tc-whatsapp {
 }
 
 /* ---------------------------------------------------------------------------
-   Admin sign-in (layouts/auth) — a half/half split: editorial plate on the
-   left, form on plain white at the right. The plate carries the whole design;
-   the form side stays undecorated so the fields read first.
+   Admin sign-in (layouts/auth) — a half/half split: a pure-black brand plate on
+   the left matching the back-office rail, form on plain white at the right.
 --------------------------------------------------------------------------- */
-/* The plate: an image matted behind a hairline, the way a lookbook page is
-   mounted. The mat is inset from the panel edge, not drawn on the photograph. */
-.tc-auth-plate::after {
-    content: '';
-    position: absolute;
-    inset: 26px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    pointer-events: none;
-}
-
 /* One quiet load sequence: mark, form, then the way back out. */
 @keyframes tc-auth-rise {
     from {
@@ -279,5 +278,250 @@ body.has-sticky-buy .tc-whatsapp {
     }
     [data-hero-slide] {
         transition: none;
+    }
+}
+
+
+/* ===========================================================================
+   BACK OFFICE
+   ---------------------------------------------------------------------------
+   Neutral, professional, unbranded — the register-room, not the shop floor.
+   Inter throughout, a slate palette, a single indigo accent. Prefixed `.ad-`
+   so it never collides with the storefront's `.tc-` primitives. Uses Tailwind's
+   built-in slate / gray / indigo scales rather than the blush brand tokens.
+=========================================================================== */
+.ad-root {
+    font-family: var(--font-admin);
+    -webkit-font-smoothing: antialiased;
+}
+.ad-root :is(h1, h2, h3) {
+    font-family: var(--font-admin);
+    letter-spacing: -0.01em;
+}
+
+@layer components {
+    /* --- Surfaces ------------------------------------------------------- */
+    .ad-card {
+        @apply rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,.04)];
+    }
+    .ad-card-head {
+        @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4;
+    }
+    .ad-card-title {
+        @apply text-[14px] font-semibold tracking-[-0.01em] text-slate-800;
+    }
+    .ad-eyebrow {
+        @apply text-[11px] font-semibold tracking-[0.06em] text-slate-400 uppercase;
+    }
+    /* Figures stay in Inter but tabular, so columns of numbers line up */
+    .ad-figure {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* --- Navigation ----------------------------------------------------- */
+    .ad-nav-link {
+        @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white;
+    }
+    .ad-nav-link.is-active {
+        @apply bg-white/[0.10] text-white;
+    }
+    .ad-nav-icon {
+        @apply relative flex h-[18px] w-[18px] shrink-0 items-center justify-center;
+    }
+    .ad-nav-icon svg {
+        @apply h-[18px] w-[18px];
+    }
+
+    /* --- Controls ------------------------------------------------------- */
+    .ad-label {
+        @apply mb-1.5 block text-[12.5px] font-medium text-slate-600;
+    }
+    .ad-input {
+        @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[13.5px] font-normal text-slate-800 placeholder:text-slate-400 outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-200/70;
+    }
+    .ad-input-sm {
+        @apply w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[13px] font-normal text-slate-800 placeholder:text-slate-400 outline-none transition-colors focus:border-slate-400;
+    }
+    .ad-hint {
+        @apply mt-1.5 text-[12px] leading-relaxed font-normal text-slate-400;
+    }
+    .ad-error {
+        @apply mt-1.5 text-[12px] font-medium text-rose-600;
+    }
+
+    /* --- Buttons -------------------------------------------------------- */
+    .ad-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-45;
+    }
+    .ad-btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-45;
+    }
+    .ad-btn-danger {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-600 hover:text-white;
+    }
+    .ad-btn-sm {
+        @apply px-2.5 py-1.5 text-[12px];
+    }
+
+    /* --- Tables --------------------------------------------------------- */
+    .ad-table {
+        @apply w-full border-collapse text-left text-[13.5px];
+    }
+    .ad-table thead th {
+        @apply border-b border-slate-100 bg-slate-50/70 px-5 py-3 text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap text-slate-400 uppercase;
+    }
+    .ad-table tbody td {
+        @apply border-b border-slate-100 px-5 py-3.5 align-middle font-normal text-slate-700;
+    }
+    .ad-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    .ad-table tbody tr {
+        @apply transition-colors hover:bg-slate-50/70;
+    }
+
+    /* --- Pills ---------------------------------------------------------- */
+    .ad-badge {
+        @apply inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap;
+    }
+    .ad-badge-neutral {
+        @apply border-slate-200 bg-slate-50 text-slate-500;
+    }
+    .ad-badge-good {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-600;
+    }
+    .ad-badge-warn {
+        @apply border-amber-200 bg-amber-50 text-amber-600;
+    }
+    .ad-badge-bad {
+        @apply border-rose-200 bg-rose-50 text-rose-600;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   The sidebar is a fixed rail on desktop and a slide-in panel below `lg`. On
+   desktop it also collapses to an icon-only rail: the width and the content's
+   left padding both key off `.ad-collapsed` on <html>, and app.js persists the
+   choice. `.ad-hide-collapsed` / `.ad-show-collapsed` swap what is visible.
+--------------------------------------------------------------------------- */
+.ad-sidebar {
+    width: 260px;
+    transition:
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        width 0.2s ease;
+}
+@media (min-width: 1024px) {
+    .ad-main {
+        padding-left: 260px;
+        transition: padding-left 0.2s ease;
+    }
+    .ad-collapsed .ad-sidebar {
+        width: 74px;
+    }
+    .ad-collapsed .ad-main {
+        padding-left: 74px;
+    }
+    /* Collapsed rail: hide labels, centre every icon, reveal the expand handle */
+    .ad-collapsed .ad-hide-collapsed {
+        display: none;
+    }
+    .ad-collapsed .ad-show-collapsed {
+        display: flex;
+    }
+    .ad-collapsed .ad-sidebar-head {
+        justify-content: center;
+        padding-inline: 0;
+    }
+    .ad-collapsed .ad-nav-link {
+        justify-content: center;
+        padding-inline: 0;
+    }
+}
+/* The dot marker and expand handle only exist in the collapsed state */
+.ad-show-collapsed {
+    display: none;
+}
+
+[data-admin-nav] {
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (max-width: 1023px) {
+    [data-admin-nav] {
+        transform: translateX(-100%);
+    }
+    [data-admin-nav].is-open {
+        transform: translateX(0);
+    }
+}
+[data-admin-scrim] {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+[data-admin-scrim].is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal entrance — a SweetAlert-style pop for the card, a fade for the
+   backdrop. They replay every time the dialog goes from display:none to shown,
+   so opening always animates. */
+.ad-modal-backdrop {
+    animation: ad-fade 0.2s ease both;
+}
+.ad-modal-card {
+    animation: ad-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes ad-fade {
+    from {
+        opacity: 0;
+    }
+}
+@keyframes ad-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(8px);
+    }
+}
+
+/* The warning glyph on a delete prompt gives a small nudge as it lands. */
+.ad-confirm > span:first-child {
+    animation: ad-pulse 0.4s ease-out 0.12s both;
+}
+@keyframes ad-pulse {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Dashboard bar chart — bars grow from the baseline on load. */
+.ad-bar {
+    transform-origin: bottom;
+    animation: ad-bar-rise 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+}
+@keyframes ad-bar-rise {
+    from {
+        transform: scaleY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-admin-nav],
+    [data-admin-scrim] {
+        transition: none;
+    }
+    .ad-bar,
+    .ad-modal-card,
+    .ad-modal-backdrop,
+    .ad-confirm > span:first-child {
+        animation: none;
     }
 }

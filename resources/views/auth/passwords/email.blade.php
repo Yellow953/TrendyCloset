@@ -18,10 +18,10 @@
             'placeholder' => 'you@trendycloset.com',
         ])
 
-        <button type="submit" class="tc-btn-dark mt-2 w-full">Send reset link</button>
+        <button type="submit" class="ad-btn-primary mt-2 w-full py-3">Send reset link</button>
     </form>
 
-    <p class="mt-8 border-t border-line pt-6 text-[12.5px] font-light text-faint">
-        Remembered it? <a href="{{ route('login') }}" class="tc-link">Back to sign in</a>
+    <p class="mt-8 border-t border-slate-200 pt-6 text-[12.5px] font-normal text-slate-400">
+        Remembered it? <a href="{{ route('login') }}" class="font-medium text-slate-900 underline underline-offset-4 transition-colors hover:text-slate-600">Back to sign in</a>
     </p>
 @endsection

@@ -1,5 +1,6 @@
 {{--
-    Auth form field — label + input + inline validation message.
+    Auth form field — label + input + inline validation message. Styled with the
+    back-office `.ad-*` primitives so sign-in matches the admin it opens.
     $name, $label; optional $type, $value, $autocomplete, $autofocus, $placeholder.
 --}}
 @php
@@ -11,9 +12,7 @@
 @endphp
 
 <div>
-    <label for="{{ $name }}" class="mb-2 block text-[11px] font-medium tracking-[0.16em] text-muted-2 uppercase">
-        {{ $label }}
-    </label>
+    <label for="{{ $name }}" class="ad-label">{{ $label }}</label>
 
     <input id="{{ $name }}"
            name="{{ $name }}"
@@ -23,9 +22,9 @@
            @if ($autocomplete) autocomplete="{{ $autocomplete }}" @endif
            @if ($autofocus) autofocus @endif
            required
-           class="tc-input @error($name) border-blush @enderror">
+           class="ad-input @error($name) border-rose-400 focus:border-rose-400 focus:ring-rose-100 @enderror">
 
     @error($name)
-        <p class="mt-2 text-[12.5px] font-light text-blush">{{ $message }}</p>
+        <p class="ad-error">{{ $message }}</p>
     @enderror
 </div>

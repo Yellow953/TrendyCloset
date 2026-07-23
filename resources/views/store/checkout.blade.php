@@ -10,24 +10,41 @@
     </div>
 
     <div class="flex flex-col gap-12 px-5 md:px-10 pb-12 pt-9 lg:flex-row">
-        {{-- Form. Presentational for now: no order is written yet. --}}
-        <div class="flex flex-col gap-[26px] lg:flex-[1.5]">
+        {{-- The real thing: this writes an order. There is no payment gateway,
+             so no card details are collected — the order lands as `pending` and
+             the back office arranges payment. --}}
+        <form method="POST" action="{{ route('checkout.place') }}" class="flex flex-col gap-[26px] lg:flex-[1.5]">
+            @csrf
+
             <div>
-                <div class="flex items-baseline justify-between"><div class="text-[18px] font-medium">Contact</div><div class="text-[13px] font-light text-muted">Have an account? <a href="{{ route('login') }}" class="text-blush underline underline-offset-2">Log in</a></div></div>
-                <input type="email" placeholder="Email address" class="tc-input mt-3">
-                <label class="mt-2.5 flex items-center gap-2 text-[13px] font-light text-muted-2"><span class="inline-block h-4 w-4 border border-line-2"></span>Email me new drops and offers</label>
+                <div class="text-[18px] font-medium">Contact</div>
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="Email address" class="tc-input mt-3">
+                @error('email')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                <label class="mt-2.5 flex items-center gap-2 text-[13px] font-light text-muted-2">
+                    <input type="checkbox" name="marketing_opt_in" value="1" @checked(old('marketing_opt_in')) class="h-4 w-4 accent-blush">
+                    Email me new drops and offers
+                </label>
             </div>
 
             <div>
                 <div class="mb-3 text-[18px] font-medium">Shipping address</div>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <input placeholder="First name" class="tc-input">
-                    <input placeholder="Last name" class="tc-input">
-                    <input placeholder="Street address" class="tc-input sm:col-span-2">
-                    <input placeholder="City" class="tc-input">
-                    <input placeholder="Postal code" class="tc-input">
-                    <input placeholder="Country ▾" class="tc-input">
-                    <input placeholder="Phone" class="tc-input">
+                    @foreach([
+                        ['ship_name', 'Full name', true, 'sm:col-span-2'],
+                        ['ship_line1', 'Street address', true, 'sm:col-span-2'],
+                        ['ship_line2', 'Apartment, suite (optional)', false, 'sm:col-span-2'],
+                        ['ship_city', 'City', true, ''],
+                        ['ship_postcode', 'Postal code', false, ''],
+                        ['ship_region', 'Region / state (optional)', false, ''],
+                        ['ship_country', 'Country', true, ''],
+                        ['ship_phone', 'Phone (optional)', false, 'sm:col-span-2'],
+                    ] as [$field, $placeholder, $required, $span])
+                        <div class="{{ $span }}">
+                            <input name="{{ $field }}" value="{{ old($field) }}" placeholder="{{ $placeholder }}"
+                                   @required($required) class="tc-input">
+                            @error($field)<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -37,23 +54,23 @@
                     <span><b class="font-medium">Standard</b> · 3–5 business days</span>
                     <span class="{{ $summary['shipping'] > 0 ? '' : 'text-jade' }}">{{ $summary['shipping'] > 0 ? \App\Models\Product::money($summary['shipping']) : 'Free' }}</span>
                 </div>
-                <div class="flex justify-between border border-t-0 border-line-2 p-4 text-[14px] font-normal text-muted-2"><span>Express · 1–2 business days</span><span>{{ \App\Models\Product::money(9) }}</span></div>
             </div>
 
             <div>
-                <div class="mb-3 text-[18px] font-medium">Payment</div>
-                <div class="border border-blush bg-cream-3 p-4 text-[14px] font-normal">Credit / debit card</div>
-                <div class="grid grid-cols-1 gap-3 border border-t-0 border-line-2 p-4 sm:grid-cols-[2fr_1fr_1fr]">
-                    <input placeholder="Card number" class="border border-line-2 px-3.5 py-3 text-[13.5px] font-light text-ink placeholder:text-muted outline-none focus:border-blush">
-                    <input placeholder="MM / YY" class="border border-line-2 px-3.5 py-3 text-[13.5px] font-light text-ink placeholder:text-muted outline-none focus:border-blush">
-                    <input placeholder="CVC" class="border border-line-2 px-3.5 py-3 text-[13.5px] font-light text-ink placeholder:text-muted outline-none focus:border-blush">
-                </div>
-                <div class="border border-t-0 border-line-2 p-4 text-[14px] font-normal text-muted-2">PayPal</div>
-                <div class="border border-t-0 border-line-2 p-4 text-[14px] font-normal text-muted-2">Apple Pay</div>
+                <div class="mb-3 text-[18px] font-medium">Order notes</div>
+                <textarea name="notes" rows="3" placeholder="Anything we should know — delivery instructions, gift wrapping…"
+                          class="tc-input resize-y">{{ old('notes') }}</textarea>
             </div>
 
-            <button class="bg-ink py-4 text-center text-[15px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">Pay {{ \App\Models\Product::money($summary['total']) }}</button>
-        </div>
+            <div class="border border-line-2 bg-cream-3 p-4 text-[13.5px] leading-relaxed font-light text-muted-3">
+                <b class="font-medium text-ink">Payment</b> is arranged after you place your order — we will email you at the
+                address above to confirm your pieces and settle up. No card details are taken here.
+            </div>
+
+            <button type="submit" class="bg-ink py-4 text-center text-[15px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">
+                Place order · {{ \App\Models\Product::money($summary['total']) }}
+            </button>
+        </form>
 
         {{-- Summary --}}
         <div class="w-full lg:max-w-[420px] lg:flex-1">

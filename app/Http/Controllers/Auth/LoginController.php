@@ -21,11 +21,13 @@ class LoginController extends Controller
     use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
+     * Where to redirect users after login — the back office they signed in for.
+     * Only staff can authenticate, so there is nothing on the storefront for
+     * them to land on. Logout still returns to the shop (see logout override).
      *
      * @var string
      */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/admin';
 
     /**
      * Create a new controller instance.

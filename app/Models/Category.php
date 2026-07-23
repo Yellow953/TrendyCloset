@@ -19,6 +19,7 @@ class Category extends Model
         'slug',
         'description',
         'image_url',
+        'image_path',
         'image_credit',
         'image_credit_href',
         'position',

@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\ProductVariant;
+use App\Services\Checkout;
 use App\Services\ProductAnalytics;
 use App\Support\Cart;
 use App\Support\Seo;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 /**
- * The bag. State lives in the session (see {@see Cart}) — nothing here writes
- * an order; checkout is still presentational.
+ * The bag and checkout. Bag state lives in the session (see {@see Cart});
+ * placing an order hands off to {@see Checkout}, which snapshots it into
+ * `orders` / `order_items`.
  */
 class CartController extends Controller
 {
@@ -145,6 +149,60 @@ class CartController extends Controller
         return view('store.checkout', [
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
+            'active' => null,
+        ]);
+    }
+
+    /**
+     * Place the order. There is no payment gateway yet — the order lands as
+     * `pending` and the back office takes it from there.
+     */
+    public function placeOrder(Request $request, Checkout $checkout)
+    {
+        if ($this->cart->isEmpty()) {
+            return redirect()->route('cart');
+        }
+
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+            'ship_name' => ['required', 'string', 'max:255'],
+            'ship_line1' => ['required', 'string', 'max:255'],
+            'ship_line2' => ['nullable', 'string', 'max:255'],
+            'ship_city' => ['required', 'string', 'max:120'],
+            'ship_region' => ['nullable', 'string', 'max:120'],
+            'ship_postcode' => ['nullable', 'string', 'max:32'],
+            'ship_country' => ['required', 'string', 'max:120'],
+            'ship_phone' => ['nullable', 'string', 'max:40'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'marketing_opt_in' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            $order = $checkout->place($data);
+        } catch (RuntimeException $e) {
+            return back()->withInput()->withErrors(['email' => $e->getMessage()]);
+        }
+
+        // The confirmation page is gated on this, not on the order number:
+        // knowing someone's order number must not reveal their address.
+        $request->session()->put('tc_order', $order->id);
+
+        return redirect()->route('order.confirmed', $order->order_number);
+    }
+
+    /**
+     * The thank-you page, readable only by the session that placed the order.
+     */
+    public function confirmed(Request $request, string $number)
+    {
+        $order = Order::with('items')->where('order_number', $number)->firstOrFail();
+
+        abort_unless($request->session()->get('tc_order') === $order->id, 404);
+
+        $this->seo->page('Order '.$order->order_number)->noindex();
+
+        return view('store.order-confirmed', [
+            'order' => $order,
             'active' => null,
         ]);
     }
