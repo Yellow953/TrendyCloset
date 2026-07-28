@@ -16,7 +16,7 @@
         @else
             {{-- data-favorites-grid: un-hearting here removes the card in place
                  rather than leaving a saved-looking piece that no longer is. --}}
-            <div data-favorites-grid class="grid grid-cols-2 gap-[22px] md:grid-cols-4">
+            <div data-favorites-grid data-reveal-children class="grid grid-cols-2 gap-[22px] md:grid-cols-4">
                 @foreach($products as $p)
                     @include('partials.product-card', ['p' => $p, 'h' => 'h-[300px] sm:h-[360px]', 'fav' => true])
                 @endforeach

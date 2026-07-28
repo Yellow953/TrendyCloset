@@ -18,7 +18,7 @@
 
     <div class="flex flex-col gap-12 px-5 pb-14 pt-6 md:px-10 lg:flex-row lg:gap-16">
         {{-- Gallery: thumbnail rail + zoomable main image --}}
-        <div data-gallery class="flex w-full flex-col-reverse gap-4 sm:flex-row lg:w-[54%] lg:flex-none">
+        <div data-gallery data-reveal="left" class="flex w-full flex-col-reverse gap-4 sm:flex-row lg:w-[54%] lg:flex-none">
             @if($gallery->count() > 1)
                 <div class="flex flex-row gap-3 sm:flex-col">
                     @foreach($gallery as $g)
@@ -42,8 +42,9 @@
             </div>
         </div>
 
-        {{-- Purchase panel --}}
-        <div class="flex flex-1 flex-col gap-5">
+        {{-- Purchase panel. data-reveal-children walks the panel top to bottom
+             — category, name, price, then the form — as the page settles. --}}
+        <div data-reveal-children class="flex flex-1 flex-col gap-5">
             @if($product->category)
                 <div class="text-[13.5px] font-light text-muted">
                     Category: <a href="{{ route('listing', $product->category) }}" class="font-medium text-blush hover:underline">{{ $product->category->name }}</a>
@@ -205,7 +206,7 @@
     @endif
 
     {{-- Full-width detail section, centred --}}
-    <section data-tabs class="border-y border-line bg-cream-3 px-5 py-14 md:px-10">
+    <section data-tabs data-reveal="fade" class="border-y border-line bg-cream-3 px-5 py-14 md:px-10">
         <div class="mx-auto max-w-[1000px]">
             <div class="flex flex-wrap justify-center gap-8 border-b border-line-2 text-[13.5px] font-medium tracking-[0.1em]">
                 <button type="button" data-tab="description" class="is-active -mb-px border-b-2 border-transparent pb-3 transition-colors hover:text-blush">DESCRIPTION</button>
@@ -257,9 +258,9 @@
          here, on the page, for a shopper to read. --}}
     @if(!empty($faqs))
         <section class="px-5 py-14 md:px-10">
-            <h2 class="tc-heading">Frequently asked</h2>
-            <span class="tc-heading-rule"></span>
-            <div class="mx-auto mt-9 max-w-[820px]">
+            <h2 data-reveal class="tc-heading">Frequently asked</h2>
+            <span data-reveal class="tc-heading-rule"></span>
+            <div data-reveal-children class="mx-auto mt-9 max-w-[820px]">
                 @foreach($faqs as $faq)
                     <details class="group/q border-b border-line">
                         <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-[16px] font-medium">
@@ -281,9 +282,9 @@
     {{-- Related --}}
     @if($related->isNotEmpty())
         <div class="px-5 py-14 md:px-10">
-            <h2 class="tc-heading">You may also like</h2>
-            <span class="tc-heading-rule"></span>
-            <div class="mt-9 grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-4">
+            <h2 data-reveal class="tc-heading">You may also like</h2>
+            <span data-reveal class="tc-heading-rule"></span>
+            <div data-reveal-children class="mt-9 grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-4">
                 @foreach($related as $p)
                     @include('partials.product-card', ['p' => $p, 'h' => 'h-[280px] sm:h-[360px]'])
                 @endforeach

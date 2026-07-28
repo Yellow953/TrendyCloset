@@ -1,3 +1,43 @@
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// Scroll reveal. Two contracts, both authored in the Blade:
+//   [data-reveal]           the element itself rises in
+//   [data-reveal-children]  its children rise in one after another
+// Either way it is the marked element that is observed and it is unobserved
+// the moment it lands — a reveal happens once per page, never on the way back
+// up. The hidden starting state lives behind `.tc-js` (set in the layout head),
+// so nothing here can leave a page blank if the script never runs.
+function initReveal() {
+    const targets = document.querySelectorAll('[data-reveal], [data-reveal-children]');
+    if (!targets.length) return;
+
+    const showAll = () => targets.forEach((el) => el.classList.add('is-in'));
+
+    if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+        showAll();
+        return;
+    }
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                // Anything already above the viewport — a restored scroll
+                // position, a jump to an anchor — is shown rather than left as
+                // a hole the shopper has to scroll back up to fill.
+                const past = entry.boundingClientRect.bottom <= 0;
+                if (!entry.isIntersecting && !past) return;
+                entry.target.classList.add('is-in');
+                observer.unobserve(entry.target);
+            });
+        },
+        // Start a little before the element is fully in view, so it has
+        // finished arriving by the time it is worth looking at.
+        { threshold: 0.06, rootMargin: '0px 0px -8% 0px' },
+    );
+
+    targets.forEach((el) => observer.observe(el));
+}
+
 // Lightweight scroll-snap carousels.
 // Markup contract:
 //   [data-carousel]            wrapper
@@ -46,13 +86,23 @@ function initCountdowns() {
 
         const pad = (n) => String(Math.max(n, 0)).padStart(2, '0');
 
+        // Only the digits that actually changed animate, so the seconds tick
+        // over on their own while the days sit still.
+        const set = (el, value) => {
+            if (!el || el.textContent === value) return;
+            el.textContent = value;
+            el.classList.remove('tc-tick');
+            void el.offsetWidth; // restart the animation
+            el.classList.add('tc-tick');
+        };
+
         const tick = () => {
             const left = Math.max(target - Date.now(), 0);
             const seconds = Math.floor(left / 1000);
-            if (parts.days) parts.days.textContent = pad(Math.floor(seconds / 86400));
-            if (parts.hours) parts.hours.textContent = pad(Math.floor((seconds % 86400) / 3600));
-            if (parts.minutes) parts.minutes.textContent = pad(Math.floor((seconds % 3600) / 60));
-            if (parts.seconds) parts.seconds.textContent = pad(seconds % 60);
+            set(parts.days, pad(Math.floor(seconds / 86400)));
+            set(parts.hours, pad(Math.floor((seconds % 86400) / 3600)));
+            set(parts.minutes, pad(Math.floor((seconds % 3600) / 60)));
+            set(parts.seconds, pad(seconds % 60));
             if (left === 0) clearInterval(timer);
         };
 
@@ -138,8 +188,27 @@ function initGalleries() {
 
         thumbs.forEach((thumb) => {
             thumb.addEventListener('click', () => {
-                main.src = thumb.dataset.full || thumb.querySelector('img')?.src;
+                const src = thumb.dataset.full || thumb.querySelector('img')?.src;
+                if (!src || main.src === src) return;
+
                 thumbs.forEach((t) => t.classList.toggle('is-active', t === thumb));
+
+                // Cross-fade rather than cut. The swap happens while the frame
+                // is empty, so a slow image never shows half-loaded.
+                const swap = () => {
+                    main.src = src;
+                    main.addEventListener('load', () => main.classList.remove('is-swapping'), { once: true });
+                    // A cached image can be ready before the listener binds.
+                    if (main.complete) main.classList.remove('is-swapping');
+                };
+
+                if (reducedMotion.matches) {
+                    main.src = src;
+                    return;
+                }
+
+                main.classList.add('is-swapping');
+                setTimeout(swap, 180);
             });
         });
     });
@@ -337,6 +406,11 @@ const drawer = {
                 credentials: 'same-origin',
             });
             body.innerHTML = await response.text();
+            // Every re-render (a quantity change, a removed line) fades its new
+            // state in, so the drawer never appears to jump.
+            body.classList.remove('tc-fade-up');
+            void body.offsetWidth;
+            body.classList.add('tc-fade-up');
         } catch {
             body.innerHTML = '<div class="flex h-full items-center justify-center px-6 text-center text-[14px] font-light text-muted-2">Could not load that just now.</div>';
         }
@@ -362,8 +436,16 @@ function initDrawer() {
     });
 }
 
+// Update a header badge, and let it acknowledge a number that actually moved.
 function setCount(selector, value) {
-    document.querySelectorAll(selector).forEach((el) => { el.textContent = value; });
+    document.querySelectorAll(selector).forEach((el) => {
+        const changed = el.textContent !== String(value);
+        el.textContent = value;
+        if (!changed) return;
+        el.classList.remove('tc-bump');
+        void el.offsetWidth; // restart the animation
+        el.classList.add('tc-bump');
+    });
 }
 
 // Add-to-bag and favourite, without losing the page.
@@ -387,6 +469,8 @@ function initAsyncForms() {
 
         const buttons = form.querySelectorAll('button[type="submit"]');
         buttons.forEach((b) => { b.disabled = true; });
+        // Only the button that was pressed breathes — the others just go quiet.
+        submitter?.classList.add('is-busy');
 
         try {
             const response = await fetch(form.action, {
@@ -415,6 +499,7 @@ function initAsyncForms() {
             toast('Sorry — that did not work. Please try again.');
         } finally {
             buttons.forEach((b) => { b.disabled = false; });
+            submitter?.classList.remove('is-busy');
         }
     });
 }
@@ -424,6 +509,14 @@ function initAsyncForms() {
 function applyFavorite(form, favorited) {
     const button = form.querySelector('button[type="submit"]');
     button?.setAttribute('aria-pressed', String(favorited));
+
+    // The heart itself reacts — it is the only confirmation on a card.
+    const heart = button?.querySelector('svg');
+    if (heart && favorited) {
+        heart.classList.remove('tc-pop');
+        void heart.getBoundingClientRect(); // restart the animation
+        heart.classList.add('tc-pop');
+    }
 
     const label = form.querySelector('[data-favorite-label]');
     if (label) label.textContent = favorited ? 'Saved to favourites' : 'Add to favourites';
@@ -587,6 +680,7 @@ function initUploadPreviews() {
 }
 
 function init() {
+    initReveal();
     initSearch();
     initDrawer();
     initAsyncForms();

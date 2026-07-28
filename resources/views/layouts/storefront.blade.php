@@ -15,6 +15,11 @@
     <link rel="apple-touch-icon" href="{{ asset('images/logo-192.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Scroll reveal only hides what it is about to animate in when there is
+         JavaScript to bring it back. Set here, before first paint, so nothing
+         flashes and a JS-off page is simply the page. --}}
+    <script>document.documentElement.classList.add('tc-js');</script>
 </head>
 <body class="min-h-screen bg-white text-ink antialiased">
     @include('partials.header')

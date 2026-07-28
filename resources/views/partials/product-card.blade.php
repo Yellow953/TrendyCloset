@@ -8,7 +8,7 @@
     $variant = $p->relationLoaded('variants') ? $p->default_variant : null;
 @endphp
 <div class="group relative">
-    <div class="relative {{ $h }} overflow-hidden rounded-xl bg-cream">
+    <div class="tc-card-media relative {{ $h }} overflow-hidden rounded-xl bg-cream">
         <a href="{{ route('product', $p) }}" class="block h-full w-full" aria-label="{{ $p->name }}">
             @if($p->image_url)
                 <img src="{{ $p->image_url }}" alt="{{ $p->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -23,9 +23,10 @@
             <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/80 py-2 text-center text-[12px] font-medium tracking-[0.12em] text-white">SOLD OUT</div>
         @endif
 
-        {{-- Hover rail: save, quick-add, view. Slides in from the right on
-             hover, and stays reachable by keyboard via focus-within. --}}
-        <div class="absolute right-3 top-3 flex translate-x-3 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+        {{-- Hover rail: save, quick-add, view. The three actions deal in from
+             the right one after another (see [data-card-rail] in app.css), and
+             stay reachable by keyboard via focus-within. --}}
+        <div data-card-rail class="absolute right-3 top-3 flex flex-col gap-2">
             <form method="POST" action="{{ route('product.favorite', $p) }}" data-async data-favorite-form>
                 @csrf
                 <button type="submit" aria-pressed="{{ $fav ? 'true' : 'false' }}" class="tc-card-action aria-pressed:text-blush aria-pressed:[&_svg]:fill-current" title="Save to favourites" aria-label="Save {{ $p->name }} to favourites">

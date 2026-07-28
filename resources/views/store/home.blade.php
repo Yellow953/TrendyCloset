@@ -20,8 +20,10 @@
                     {{-- Scrim for the overlay layout below lg --}}
                     <div class="absolute inset-0 bg-gradient-to-r from-cream-2 via-cream-2/85 to-cream-2/20 lg:hidden"></div>
 
+                    {{-- data-hero-copy: the four lines rise in turn once this
+                         slide becomes .is-active (see app.css). --}}
                     <div class="relative flex h-full items-center px-8 md:px-16 lg:w-1/2">
-                        <div class="flex max-w-[520px] flex-col gap-5">
+                        <div data-hero-copy class="flex max-w-[520px] flex-col gap-5">
                             <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">{{ $slide['eyebrow'] }}</div>
                             <h1 class="text-[38px] font-light leading-[1.05] tracking-[0.01em] sm:text-[48px] lg:text-[64px]">
                                 {{ $slide['title'] }}<br>
@@ -52,10 +54,10 @@
     {{-- Categories --}}
     @if($categories->isNotEmpty())
         <section class="pb-14 pt-14">
-            <h2 class="tc-heading">Shop by Category</h2>
-            <span class="tc-heading-rule"></span>
+            <h2 data-reveal class="tc-heading">Shop by Category</h2>
+            <span data-reveal class="tc-heading-rule"></span>
             <div data-carousel class="relative mt-9">
-                <div data-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-8 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-8 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($categories as $c)
                         <a href="{{ route('listing', $c) }}" class="group flex w-[170px] shrink-0 snap-start flex-col items-center gap-3.5 sm:w-[200px]">
                             <div class="h-[170px] w-[170px] overflow-hidden rounded-full bg-cream sm:h-[200px] sm:w-[200px]">
@@ -77,10 +79,10 @@
     {{-- Featured products --}}
     @if($featured->isNotEmpty())
         <section class="pb-14">
-            <h2 class="tc-heading">Featured Products</h2>
-            <span class="tc-heading-rule"></span>
+            <h2 data-reveal class="tc-heading">Featured Products</h2>
+            <span data-reveal class="tc-heading-rule"></span>
             <div data-carousel class="relative mt-9">
-                <div data-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($featured as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
                             @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]'])
@@ -94,7 +96,7 @@
     @endif
 
     {{-- Promise band — scrolling marquee --}}
-    <div class="tc-marquee overflow-hidden border-y border-line bg-cream-3 py-4">
+    <div data-reveal="fade" class="tc-marquee overflow-hidden border-y border-line bg-cream-3 py-4">
         <div class="tc-marquee-track flex w-max items-center whitespace-nowrap">
             {{-- The list is rendered twice so the loop has no seam --}}
             @foreach([1, 2] as $pass)
@@ -108,7 +110,7 @@
     </div>
 
     {{-- Promo banners — real categories, priced from live stock --}}
-    <div class="flex flex-col gap-6 px-5 md:px-10 py-14 md:flex-row">
+    <div data-reveal-children class="flex flex-col gap-6 px-5 md:px-10 py-14 md:flex-row">
         @foreach($promos as $promo)
             <a href="{{ route('listing', $promo['category']) }}" class="group relative h-[280px] flex-1 overflow-hidden rounded-2xl bg-[#e9ddd6] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] transition-shadow duration-500 hover:shadow-[0_18px_44px_-20px_rgba(0,0,0,0.45)]">
                 @if($promo['image'])
@@ -129,11 +131,11 @@
     {{-- Deal of the week --}}
     @if($deals->isNotEmpty())
         <section class="pb-14">
-            <h2 class="tc-heading">Deal of the Week</h2>
-            <span class="tc-heading-rule"></span>
+            <h2 data-reveal class="tc-heading">Deal of the Week</h2>
+            <span data-reveal class="tc-heading-rule"></span>
             @if($countdown)
                 {{-- Rendered server-side; the ticker in app.js counts it down. --}}
-                <div class="mt-5 flex justify-center gap-2.5" data-countdown="{{ $dealEndsAt->toIso8601String() }}">
+                <div data-reveal="zoom" class="mt-5 flex justify-center gap-2.5" data-countdown="{{ $dealEndsAt->toIso8601String() }}">
                     @foreach($countdown as $t)
                         <div class="w-16 bg-cream py-2.5 text-center">
                             <div class="text-[20px] font-semibold text-blush" data-countdown-part="{{ $t['k'] }}">{{ str_pad((string) $t['n'], 2, '0', STR_PAD_LEFT) }}</div>
@@ -143,7 +145,7 @@
                 </div>
             @endif
             <div data-carousel class="relative mt-9">
-                <div data-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($deals as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
                             @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]'])
@@ -158,9 +160,9 @@
 
     {{-- Testimonials --}}
     <section class="bg-cream px-5 py-14 md:px-10">
-        <h2 class="tc-heading">What the Closet Says</h2>
-        <span class="tc-heading-rule"></span>
-        <div class="mx-auto mt-9 grid max-w-[1200px] gap-6 md:grid-cols-3">
+        <h2 data-reveal class="tc-heading">What the Closet Says</h2>
+        <span data-reveal class="tc-heading-rule"></span>
+        <div data-reveal-children class="mx-auto mt-9 grid max-w-[1200px] gap-6 md:grid-cols-3">
             @foreach($testimonials as $t)
                 <figure class="flex h-full flex-col gap-4 bg-white p-8">
                     <div class="text-[13px] tracking-[2px] text-gold">{{ str_repeat('★', $t['stars']) . str_repeat('☆', 5 - $t['stars']) }}</div>

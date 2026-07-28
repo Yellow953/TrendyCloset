@@ -223,6 +223,24 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - Reusable component classes: `.tc-input`, `.tc-btn-dark`, `.tc-btn-outline`, `.tc-link`.
 - `@source '../views'` ensures Blade class names are scanned.
 
+**Motion** — one vocabulary, all of it in the `MOTION` section of `app.css`: things *arrive* by
+rising a few pixels and settling, once. Shared easing/step tokens are `--tc-ease` / `--tc-stagger`.
+- **Scroll reveal** is two attributes, written in the Blade, driven by `initReveal()`:
+  `data-reveal` (the element itself; optional value `fade|left|right|zoom`, default up) and
+  `data-reveal-children` (its direct children, staggered — the *container* is what's observed, so a
+  grid of twenty cards costs one observer). Both get `.is-in` once and are then unobserved; an
+  element already scrolled past is revealed rather than left as a hole.
+- **The hidden starting state is gated behind `.tc-js`**, set on `<html>` by an inline script in
+  `layouts/storefront` before first paint. With JS off the selector never matches and the page is
+  simply the page — so never write an `opacity: 0` starting state outside that gate.
+- Everything degrades under `prefers-reduced-motion: reduce`: the effects still *happen*, instantly.
+  Nothing there may leave an element stuck at `opacity: 0`.
+- Also in that section: the hero's Ken Burns drift + per-line copy rise (`data-hero-copy`), the card
+  hover (`.tc-card-media` lift, `[data-card-rail]` dealing its three actions in), the feedback
+  animations `.tc-pop` (heart), `.tc-bump` (header badge), `.tc-tick` (countdown digits), `.is-busy`
+  (a submit mid-flight), the shared `tc-rise-in` used by `<details>` / tabs / the search panel, and
+  `.tc-nav-link`'s underline sweep.
+
 ## Conventions
 
 - **Tailwind v4 spacing:** fractional utilities like `py-5.5` / `gap-6.5` are NOT valid — use

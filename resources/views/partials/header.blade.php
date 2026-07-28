@@ -41,11 +41,11 @@
         </a>
 
         <nav class="hidden items-center gap-[30px] text-[13.5px] font-medium tracking-[0.08em] lg:flex">
-            <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-blush' : 'hover:text-blush' }}">HOME</a>
+            <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">HOME</a>
             <span class="group/mega static">
-                <a href="{{ route('listing') }}" class="inline-flex items-center gap-1.5 py-1 {{ $active === 'shop' ? 'border-b-2 border-blush text-blush' : 'hover:text-blush' }}">SHOP <span class="text-[10px]">▾</span></a>
+                <a href="{{ route('listing') }}" class="inline-flex items-center gap-1.5 py-1 {{ $active === 'shop' ? 'border-b-2 border-blush text-blush' : 'tc-nav-link hover:text-blush' }}">SHOP <span class="text-[10px] transition-transform duration-300 group-hover/mega:rotate-180">▾</span></a>
                 {{-- Mega menu, built from the category tree --}}
-                <div class="invisible absolute inset-x-0 top-full z-30 flex gap-14 border-b border-line-3 bg-white px-16 pb-10 pt-8 opacity-0 shadow-[0_34px_54px_rgba(43,37,35,.14)] transition-all duration-150 group-hover/mega:visible group-hover/mega:opacity-100">
+                <div class="invisible absolute inset-x-0 top-full z-30 flex -translate-y-2 gap-14 border-b border-line-3 bg-white px-16 pb-10 pt-8 opacity-0 shadow-[0_34px_54px_rgba(43,37,35,.14)] transition-all duration-200 ease-out group-hover/mega:visible group-hover/mega:translate-y-0 group-hover/mega:opacity-100">
                     @foreach($columns as $column)
                         <div class="flex-1">
                             <a href="{{ route('listing', $column) }}" class="mb-3.5 block text-[12px] font-medium tracking-[0.18em] text-blush">{{ Str::upper($column->name) }}</a>
@@ -78,8 +78,8 @@
                     @endif
                 </div>
             </span>
-            <a href="{{ route('about') }}" class="{{ $active === 'about' ? 'text-blush' : 'hover:text-blush' }}">ABOUT</a>
-            <a href="{{ route('contact') }}" class="{{ $active === 'contact' ? 'text-blush' : 'hover:text-blush' }}">CONTACT</a>
+            <a href="{{ route('about') }}" class="{{ $active === 'about' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">ABOUT</a>
+            <a href="{{ route('contact') }}" class="{{ $active === 'contact' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">CONTACT</a>
         </nav>
 
         {{-- Icon actions. The counters are badges rather than inline text. --}}

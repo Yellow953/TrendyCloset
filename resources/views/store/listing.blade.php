@@ -12,8 +12,8 @@
 
 @section('content')
     <div class="bg-cream px-5 py-9 text-center md:px-10">
-        <h1 class="text-[32px] font-normal md:text-[38px]">{{ $heading }}</h1>
-        <div class="mt-2 text-[13px] font-light text-muted">
+        <h1 data-reveal class="text-[32px] font-normal md:text-[38px]">{{ $heading }}</h1>
+        <div data-reveal class="mt-2 text-[13px] font-light text-muted">
             <a href="{{ route('home') }}" class="hover:text-blush">Home</a>
             @if($category?->parent)
                 / <a href="{{ route('listing', $category->parent) }}" class="hover:text-blush">{{ $category->parent->name }}</a>
@@ -24,7 +24,7 @@
 
     <div class="flex flex-col gap-9 px-5 py-10 md:px-10 lg:flex-row lg:gap-12">
         {{-- Filter rail — each group is a collapsible bordered panel --}}
-        <aside class="flex w-full flex-col gap-5 lg:w-[310px] lg:flex-none">
+        <aside data-reveal="left" class="flex w-full flex-col gap-5 lg:w-[310px] lg:flex-none">
             <details open class="group/f border border-line">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                     <span class="text-[16px] font-medium">Shop by Category</span>
@@ -128,8 +128,8 @@
                 </div>
             </details>
 
-            <a href="{{ route('listing', ['edit' => 'sale']) }}" class="relative block h-[320px] overflow-hidden bg-tan">
-                <img src="{{ $sideBanner['img'] }}" alt="Shop the sale" loading="lazy" class="absolute inset-0 h-full w-full object-cover">
+            <a href="{{ route('listing', ['edit' => 'sale']) }}" class="group relative block h-[320px] overflow-hidden bg-tan">
+                <img src="{{ $sideBanner['img'] }}" alt="Shop the sale" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-end gap-1.5 bg-gradient-to-t from-white/85 to-transparent p-6">
                     <div class="text-[22px] font-normal leading-[1.2]">Sale is<br>live now</div>
                     <div class="text-[13px] font-medium text-blush underline underline-offset-2">Shop Sale</div>
@@ -140,7 +140,7 @@
         {{-- Results --}}
         <div class="flex-1">
             {{-- Toolbar: result count left, sorting right --}}
-            <div class="mb-7 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+            <div data-reveal="fade" class="mb-7 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
                 <div class="text-[14px] font-light text-muted-2">
                     @if($products->total() > 0)
                         Showing {{ $products->firstItem() }}–{{ $products->lastItem() }} of {{ $products->total() }} results
@@ -177,7 +177,7 @@
             @endif
 
             @if($products->isEmpty())
-                <div class="border border-line bg-cream-3 px-6 py-20 text-center">
+                <div data-reveal class="border border-line bg-cream-3 px-6 py-20 text-center">
                     @if($filters['q'])
                         <div class="text-[20px] font-normal">Nothing found for “{{ $filters['q'] }}”</div>
                         <div class="mt-2 text-[14px] font-light text-muted-2">Try a shorter word — a colour, a category or part of the name.</div>
@@ -188,7 +188,7 @@
                     <a href="{{ route('listing') }}" class="tc-link mt-5 inline-block">Browse everything</a>
                 </div>
             @else
-                <div class="grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-3">
+                <div data-reveal-children class="grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-3">
                     @foreach($products as $p)
                         @include('partials.product-card', ['p' => $p, 'h' => 'h-[300px] sm:h-[380px]'])
                     @endforeach

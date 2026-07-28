@@ -281,6 +281,304 @@ body.has-sticky-buy .tc-whatsapp {
     }
 }
 
+/* ===========================================================================
+   MOTION
+   ---------------------------------------------------------------------------
+   One vocabulary for the whole storefront: things *arrive* — they rise a few
+   pixels and settle — and they only ever do it once. Nothing loops, nothing
+   slides across the page, nothing moves while it is being read.
+
+   The starting (hidden) state is gated behind `.tc-js`, which an inline script
+   in the layout head puts on <html> before first paint. With JavaScript off the
+   selector never matches, so every one of these elements is simply visible.
+=========================================================================== */
+:root {
+    --tc-ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+    --tc-stagger: 70ms;
+}
+
+/* --- Scroll reveal --------------------------------------------------------
+   `[data-reveal]` rises in when it first meets the viewport; initReveal()
+   marks it `.is-in` and then stops watching it, so it never fades back out.
+   The value picks the direction: up (default) / fade / left / right / zoom. */
+[data-reveal] {
+    transition:
+        opacity 0.7s var(--tc-ease),
+        transform 0.7s var(--tc-ease);
+}
+.tc-js [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+}
+.tc-js [data-reveal='fade'] {
+    transform: none;
+}
+.tc-js [data-reveal='left'] {
+    transform: translateX(-26px);
+}
+.tc-js [data-reveal='right'] {
+    transform: translateX(26px);
+}
+.tc-js [data-reveal='zoom'] {
+    transform: scale(0.965);
+}
+.tc-js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+}
+
+/* Reveal a row or grid one item at a time. The *container* is what's observed,
+   so a grid of twenty cards still costs a single IntersectionObserver entry. */
+[data-reveal-children] > * {
+    transition:
+        opacity 0.6s var(--tc-ease),
+        transform 0.6s var(--tc-ease);
+}
+.tc-js [data-reveal-children] > * {
+    opacity: 0;
+    transform: translateY(20px);
+}
+.tc-js [data-reveal-children].is-in > * {
+    opacity: 1;
+    transform: none;
+}
+/* Hand-written because CSS can't do arithmetic on :nth-child(). Past the
+   eighth item the delay stops growing — a long grid should not take four
+   seconds to finish arriving. */
+[data-reveal-children] > *:nth-child(2) {
+    transition-delay: calc(var(--tc-stagger) * 1);
+}
+[data-reveal-children] > *:nth-child(3) {
+    transition-delay: calc(var(--tc-stagger) * 2);
+}
+[data-reveal-children] > *:nth-child(4) {
+    transition-delay: calc(var(--tc-stagger) * 3);
+}
+[data-reveal-children] > *:nth-child(5) {
+    transition-delay: calc(var(--tc-stagger) * 4);
+}
+[data-reveal-children] > *:nth-child(6) {
+    transition-delay: calc(var(--tc-stagger) * 5);
+}
+[data-reveal-children] > *:nth-child(7) {
+    transition-delay: calc(var(--tc-stagger) * 6);
+}
+[data-reveal-children] > *:nth-child(n + 8) {
+    transition-delay: calc(var(--tc-stagger) * 7);
+}
+
+/* --- Hero -----------------------------------------------------------------
+   The active photograph drifts slowly inward (a long, linear Ken Burns, so it
+   reads as stillness rather than movement) and the copy rises line by line as
+   the slide takes over. Slide one is server-rendered `.is-active`, so this
+   plays on load without JavaScript. */
+[data-hero-slide] img {
+    transform: scale(1.07);
+    transition: transform 9s linear;
+}
+[data-hero-slide].is-active img {
+    transform: scale(1);
+}
+[data-hero-copy] > * {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+        opacity 0.75s var(--tc-ease),
+        transform 0.75s var(--tc-ease);
+}
+[data-hero-slide].is-active [data-hero-copy] > * {
+    opacity: 1;
+    transform: none;
+}
+[data-hero-copy] > *:nth-child(1) {
+    transition-delay: 0.12s;
+}
+[data-hero-copy] > *:nth-child(2) {
+    transition-delay: 0.22s;
+}
+[data-hero-copy] > *:nth-child(3) {
+    transition-delay: 0.32s;
+}
+[data-hero-copy] > *:nth-child(4) {
+    transition-delay: 0.42s;
+}
+
+/* --- Product card ---------------------------------------------------------
+   The picture lifts and casts a shadow under the pointer; the type below it
+   stays where it was, so a grid never looks like it is shuffling. The lift
+   lives on the media box rather than the card root, which is what the reveal
+   above already owns the transform of. */
+.tc-card-media {
+    transition:
+        transform 0.45s var(--tc-ease),
+        box-shadow 0.45s var(--tc-ease);
+}
+.group:hover .tc-card-media {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 36px -22px rgba(43, 37, 35, 0.55);
+}
+/* The hover rail deals its three actions out one after another. */
+[data-card-rail] > * {
+    opacity: 0;
+    transform: translateX(12px);
+    transition:
+        opacity 0.32s var(--tc-ease),
+        transform 0.32s var(--tc-ease);
+}
+.group:hover [data-card-rail] > *,
+.group:focus-within [data-card-rail] > * {
+    opacity: 1;
+    transform: none;
+}
+[data-card-rail] > *:nth-child(2) {
+    transition-delay: 55ms;
+}
+[data-card-rail] > *:nth-child(3) {
+    transition-delay: 110ms;
+}
+
+/* --- Micro-interactions ---------------------------------------------------
+   Feedback for the things that no longer reload the page. */
+@keyframes tc-pop {
+    40% {
+        transform: scale(1.32);
+    }
+    70% {
+        transform: scale(0.93);
+    }
+}
+.tc-pop {
+    animation: tc-pop 0.42s var(--tc-ease);
+}
+
+/* The header badge acknowledges its own new number. */
+@keyframes tc-bump {
+    35% {
+        transform: scale(1.42);
+    }
+    70% {
+        transform: scale(0.92);
+    }
+}
+.tc-bump {
+    animation: tc-bump 0.45s var(--tc-ease);
+}
+
+/* A submit button that is mid-flight. */
+@keyframes tc-breathe {
+    50% {
+        opacity: 0.55;
+    }
+}
+.is-busy {
+    animation: tc-breathe 1s ease-in-out infinite;
+    cursor: progress;
+}
+
+/* Countdown digits tick over rather than blink. */
+@keyframes tc-tick {
+    from {
+        opacity: 0;
+        transform: translateY(-45%);
+    }
+}
+.tc-tick {
+    animation: tc-tick 0.3s var(--tc-ease);
+}
+
+/* --- Disclosure and swap --------------------------------------------------
+   Anything that appears in place — a filter panel, an FAQ answer, a tab, the
+   search bar, a freshly fetched drawer — uses the same short rise. */
+@keyframes tc-rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+details[open] > *:not(summary),
+[data-tab-panel]:not(.hidden),
+[data-search-panel]:not([hidden]) {
+    animation: tc-rise-in 0.32s var(--tc-ease);
+}
+@keyframes tc-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+.tc-fade-up {
+    animation: tc-fade-up 0.35s var(--tc-ease);
+}
+
+/* The gallery cross-fades when a thumbnail swaps the main photograph. */
+[data-gallery-main] {
+    transition: opacity 0.25s ease;
+}
+[data-gallery-main].is-swapping {
+    opacity: 0;
+}
+
+/* --- Nav ------------------------------------------------------------------
+   A hairline sweeps out from the left under a nav link, and back out to the
+   right when the pointer leaves. */
+.tc-nav-link {
+    position: relative;
+}
+.tc-nav-link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -5px;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s var(--tc-ease);
+}
+.tc-nav-link:hover::after,
+.tc-nav-link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* --- Reduced motion -------------------------------------------------------
+   Everything above still *happens* — it just happens instantly. Nothing here
+   may leave an element stuck at opacity 0. */
+@media (prefers-reduced-motion: reduce) {
+    .tc-js [data-reveal],
+    .tc-js [data-reveal-children] > *,
+    [data-hero-copy] > * {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    /* The rail still hides and shows on hover — it just does it at once. */
+    [data-card-rail] > * {
+        transform: none;
+        transition: none;
+    }
+    [data-hero-slide] img,
+    .tc-card-media,
+    [data-gallery-main],
+    .tc-nav-link::after {
+        transition: none;
+    }
+    [data-hero-slide] img,
+    .group:hover .tc-card-media {
+        transform: none;
+    }
+    details[open] > *:not(summary),
+    [data-tab-panel]:not(.hidden),
+    [data-search-panel]:not([hidden]),
+    .tc-pop,
+    .tc-bump,
+    .tc-tick,
+    .tc-fade-up,
+    .is-busy {
+        animation: none;
+    }
+}
+
 
 /* ===========================================================================
    BACK OFFICE
