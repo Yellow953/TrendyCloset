@@ -129,7 +129,8 @@
             </details>
 
             <a href="{{ route('listing', ['edit' => 'sale']) }}" class="group relative block h-[320px] overflow-hidden bg-tan">
-                <img src="{{ $sideBanner['img'] }}" alt="Shop the sale" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                <x-img :src="$sideBanner['img']" alt="Shop the sale" sizes="310px"
+                       class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-end gap-1.5 bg-gradient-to-t from-white/85 to-transparent p-6">
                     <div class="text-[22px] font-normal leading-[1.2]">Sale is<br>live now</div>
                     <div class="text-[13px] font-medium text-blush underline underline-offset-2">Shop Sale</div>
@@ -190,7 +191,15 @@
             @else
                 <div data-reveal-children class="grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-3">
                     @foreach($products as $p)
-                        @include('partials.product-card', ['p' => $p, 'h' => 'h-[300px] sm:h-[380px]'])
+                        {{-- Measured, not guessed: three up beside the 310px rail
+                             from lg, three up full-width from md, two below. A
+                             loose vw estimate here costs a whole rung of the
+                             ladder — 27vw asked for 800px to fill 315. --}}
+                        @include('partials.product-card', [
+                            'p' => $p,
+                            'h' => 'h-[300px] sm:h-[380px]',
+                            'imgSizes' => '(min-width: 1024px) calc((100vw - 494px) / 3), (min-width: 768px) calc((100vw - 136px) / 3), calc((100vw - 68px) / 2)',
+                        ])
                     @endforeach
                 </div>
                 @include('partials.pagination', ['paginator' => $products])

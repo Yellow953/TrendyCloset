@@ -8,9 +8,26 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            // Self-hosted at build time, so the storefront's critical path holds
+            // no third-party stylesheet: Vite::fonts() inlines the @font-face
+            // rules and preloads only the faces the first screen actually needs.
+            // Weights mirror what the views use — adding one here costs every
+            // visitor a file, so check the markup before you do.
             fonts: [
-                bunny('Instrument Sans', {
+                bunny('Jost', {
+                    weights: [200, 300, 400, 500, 600],
+                    // Body copy is 300/400; the rest can arrive with the swap.
+                    preload: [{ weight: 300 }, { weight: 400 }],
+                }),
+                bunny('Cormorant Garamond', {
                     weights: [400, 500, 600],
+                    styles: ['normal', 'italic'],
+                    // A handful of accent lines — never the LCP text.
+                    preload: false,
+                }),
+                bunny('Space Grotesk', {
+                    weights: [400, 500],
+                    preload: false,
                 }),
             ],
         }),

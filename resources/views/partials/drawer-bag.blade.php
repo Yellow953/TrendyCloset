@@ -18,9 +18,8 @@
             @foreach($lines as $line)
                 <div class="flex gap-3.5 border-b border-line py-4 last:border-0">
                     <a href="{{ route('product', $line['variant']->product) }}" class="h-[92px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-cream">
-                        @if($line['variant']->product->image_url)
-                            <img src="{{ $line['variant']->product->image_url }}" alt="{{ $line['variant']->product->name }}" class="h-full w-full object-cover">
-                        @endif
+                        <x-img :src="$line['variant']->product->image_url" :alt="$line['variant']->product->name"
+                               sizes="72px" class="h-full w-full object-cover" />
                     </a>
                     <div class="min-w-0 flex-1">
                         <a href="{{ route('product', $line['variant']->product) }}" class="block truncate text-[14.5px] font-normal transition-colors hover:text-blush">{{ $line['variant']->product->name }}</a>

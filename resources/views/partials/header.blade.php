@@ -32,7 +32,11 @@
         </label>
 
         <a href="{{ route('home') }}" class="flex items-center gap-2.5 md:gap-3.5">
+            {{-- Displayed at 42–52px: the 64px file is the right one on a
+                 1x screen, the 192px only on a retina one. --}}
             <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet"
+                 srcset="{{ asset('images/logo-64.png') }} 64w, {{ asset('images/logo-192.png') }} 192w"
+                 sizes="52px" width="52" height="52" decoding="async"
                  class="h-[42px] w-[42px] shrink-0 object-contain md:h-[52px] md:w-[52px]">
             <span>
                 <span class="tc-wordmark block text-[16px] text-ink sm:text-[20px] md:text-[23px]">Trendy Closet</span>
@@ -71,7 +75,14 @@
 
                     @if($spotlight)
                         <div class="flex-[0_0_300px]">
-                            <div class="h-[180px] overflow-hidden rounded"><img src="{{ $spotlight->image_url }}" alt="{{ $spotlight->name }}" class="h-full w-full object-cover"></div>
+                            {{-- The mega-menu sits inside the viewport even while
+                                 hidden, so `lazy` cannot defer this one — keeping
+                                 it to the 300px it renders at is what makes it
+                                 cheap. --}}
+                            <div class="h-[180px] overflow-hidden rounded">
+                                <x-img :src="$spotlight->image_url" :alt="$spotlight->name" sizes="300px"
+                                       class="h-full w-full object-cover" />
+                            </div>
                             <div class="mt-3 text-[15px] font-normal">{{ $spotlight->name }}</div>
                             <a href="{{ route('product', $spotlight) }}" class="mt-1 inline-block text-[13px] font-medium text-blush underline underline-offset-2">Shop the piece</a>
                         </div>

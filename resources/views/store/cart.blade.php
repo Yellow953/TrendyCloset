@@ -26,9 +26,7 @@
                     <div class="flex flex-wrap items-center gap-y-4 border-b border-line py-5">
                         <div class="flex w-full items-center gap-4 sm:w-auto sm:flex-[2.2]">
                             <a href="{{ route('product', $product) }}" class="h-[92px] w-[76px] flex-none overflow-hidden bg-cream">
-                                @if($product->image_url)
-                                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-                                @endif
+                                <x-img :src="$product->image_url" :alt="$product->name" sizes="76px" class="h-full w-full object-cover" />
                             </a>
                             <div>
                                 <a href="{{ route('product', $product) }}" class="text-[15.5px] font-normal hover:text-blush">{{ $product->name }}</a>

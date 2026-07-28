@@ -193,17 +193,24 @@ function initGalleries() {
 
                 thumbs.forEach((t) => t.classList.toggle('is-active', t === thumb));
 
+                // srcset outranks src, so it has to move with it — otherwise the
+                // main frame keeps rendering the previous photograph.
+                const show = () => {
+                    main.srcset = thumb.dataset.srcset || '';
+                    main.src = src;
+                };
+
                 // Cross-fade rather than cut. The swap happens while the frame
                 // is empty, so a slow image never shows half-loaded.
                 const swap = () => {
-                    main.src = src;
+                    show();
                     main.addEventListener('load', () => main.classList.remove('is-swapping'), { once: true });
                     // A cached image can be ready before the listener binds.
                     if (main.complete) main.classList.remove('is-swapping');
                 };
 
                 if (reducedMotion.matches) {
-                    main.src = src;
+                    show();
                     return;
                 }
 

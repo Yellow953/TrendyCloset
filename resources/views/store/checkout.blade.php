@@ -81,9 +81,7 @@
                     <div class="flex items-center gap-3.5 pb-4">
                         <div class="relative">
                             <div class="h-[70px] w-[58px] overflow-hidden rounded-md bg-white">
-                                @if($product->image_url)
-                                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-                                @endif
+                                <x-img :src="$product->image_url" :alt="$product->name" sizes="58px" class="h-full w-full object-cover" />
                             </div>
                             <div class="pointer-events-none absolute -right-[7px] -top-[7px] flex h-5 w-5 items-center justify-center rounded-full bg-blush text-[11px] font-medium text-white">{{ $line['qty'] }}</div>
                         </div>

@@ -1,5 +1,10 @@
 @extends('layouts.storefront')
 
+@push('head')
+    {{-- The hero photograph is the LCP; sizes matches the <x-img> below. --}}
+    <x-img-preload :src="$heroSlides[0]['img'] ?? null" sizes="(min-width: 1024px) 54vw, 100vw" />
+@endpush
+
 @section('content')
     {{-- Hero — cross-fading slides, driven by initHero() in app.js. Slide one
          carries .is-active so the hero renders fully without JavaScript. --}}
@@ -11,9 +16,13 @@
                          right half from lg up, so portrait shots aren't cropped
                          to a sliver. --}}
                     <div class="absolute inset-0 lg:left-[46%]">
-                        <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] }} {{ $slide['accent'] }}"
-                             @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
-                             class="h-full w-full object-cover object-center">
+                        {{-- Slide one is the LCP: eager and high priority. The
+                             rest are lazy — they are behind an opacity fade, so
+                             the browser cannot tell they are offscreen. --}}
+                        <x-img :src="$slide['img']" :alt="$slide['title'].' '.$slide['accent']"
+                               :eager="$loop->first"
+                               sizes="(min-width: 1024px) 54vw, 100vw"
+                               class="h-full w-full object-cover object-center" />
                         {{-- Softens the seam between the cream panel and the photo --}}
                         <div class="absolute inset-y-0 left-0 hidden w-32 bg-gradient-to-r from-cream-2 to-transparent lg:block"></div>
                     </div>
@@ -61,9 +70,8 @@
                     @foreach($categories as $c)
                         <a href="{{ route('listing', $c) }}" class="group flex w-[170px] shrink-0 snap-start flex-col items-center gap-3.5 sm:w-[200px]">
                             <div class="h-[170px] w-[170px] overflow-hidden rounded-full bg-cream sm:h-[200px] sm:w-[200px]">
-                                @if($c->image_url)
-                                    <img src="{{ $c->image_url }}" alt="{{ $c->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                @endif
+                                <x-img :src="$c->image_url" :alt="$c->name" sizes="200px"
+                                       class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                             </div>
                             <div class="text-center text-[16px] font-medium transition-colors group-hover:text-blush">{{ $c->name }}</div>
                             <div class="-mt-2.5 text-[13px] font-light text-muted">{{ $counts[$c->id] ?? 0 }} {{ Str::plural('product', $counts[$c->id] ?? 0) }}</div>
@@ -85,7 +93,7 @@
                 <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($featured as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]'])
+                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]', 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
                         </div>
                     @endforeach
                 </div>
@@ -113,9 +121,9 @@
     <div data-reveal-children class="flex flex-col gap-6 px-5 md:px-10 py-14 md:flex-row">
         @foreach($promos as $promo)
             <a href="{{ route('listing', $promo['category']) }}" class="group relative h-[280px] flex-1 overflow-hidden rounded-2xl bg-[#e9ddd6] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] transition-shadow duration-500 hover:shadow-[0_18px_44px_-20px_rgba(0,0,0,0.45)]">
-                @if($promo['image'])
-                    <img src="{{ $promo['image'] }}" alt="{{ $promo['category']->name }}" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
-                @endif
+                <x-img :src="$promo['image']" :alt="$promo['category']->name"
+                       sizes="(min-width: 768px) 50vw, 100vw"
+                       class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-center gap-2 bg-gradient-to-r from-white/92 via-white/55 to-transparent px-7 md:px-11">
                     <div class="text-[12px] font-medium tracking-[0.24em]">{{ $promo['eyebrow'] }}</div>
                     @if($promo['from'])
@@ -148,7 +156,7 @@
                 <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($deals as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]'])
+                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]', 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
                         </div>
                     @endforeach
                 </div>

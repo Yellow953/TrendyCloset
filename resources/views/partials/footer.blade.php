@@ -19,7 +19,10 @@
     <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-5 py-14 md:px-10 sm:grid-cols-2 lg:grid-cols-[2fr_.9fr_.9fr_1fr]">
         <div>
             <a href="{{ route('home') }}" class="mb-6 flex items-center gap-3">
-                <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet" class="h-12 w-12 shrink-0 object-contain">
+                <img src="{{ asset('images/logo-192.png') }}" alt="Trendy Closet"
+                     srcset="{{ asset('images/logo-64.png') }} 64w, {{ asset('images/logo-192.png') }} 192w"
+                     sizes="48px" width="48" height="48" loading="lazy" decoding="async"
+                     class="h-12 w-12 shrink-0 object-contain">
                 <span class="tc-wordmark text-[19px] text-ink">Trendy Closet</span>
             </a>
             <div class="text-[17px] font-medium">About Our Store</div>

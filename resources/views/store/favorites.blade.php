@@ -18,7 +18,13 @@
                  rather than leaving a saved-looking piece that no longer is. --}}
             <div data-favorites-grid data-reveal-children class="grid grid-cols-2 gap-[22px] md:grid-cols-4">
                 @foreach($products as $p)
-                    @include('partials.product-card', ['p' => $p, 'h' => 'h-[300px] sm:h-[360px]', 'fav' => true])
+                    {{-- Four up from md (px-10, three 22px gaps), two below. --}}
+                    @include('partials.product-card', [
+                        'p' => $p,
+                        'h' => 'h-[300px] sm:h-[360px]',
+                        'fav' => true,
+                        'imgSizes' => '(min-width: 768px) calc((100vw - 146px) / 4), calc((100vw - 62px) / 2)',
+                    ])
                 @endforeach
             </div>
         @endif

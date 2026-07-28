@@ -1,18 +1,22 @@
 {{-- Product card. $p is an App\Models\Product — eager-load `images` and
      `variants` (the hover rail quick-adds the first in-stock variant).
      $h overrides the image height. $fav pre-fills the heart where the caller
-     already knows the piece is saved (the favourites page). --}}
+     already knows the piece is saved (the favourites page). $imgSizes describes
+     the slot the card sits in, for the responsive image ladder — the default
+     matches the two/three-up grids the card is normally laid out in. It is not
+     called $sizes because @include inherits the caller's scope, and both the
+     listing and the PDP have a $sizes of their own (the size facet). --}}
 @php
     $h = $h ?? 'h-[300px]';
     $fav = $fav ?? false;
+    $imgSizes = $imgSizes ?? '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw';
     $variant = $p->relationLoaded('variants') ? $p->default_variant : null;
 @endphp
 <div class="group relative">
     <div class="tc-card-media relative {{ $h }} overflow-hidden rounded-xl bg-cream">
         <a href="{{ route('product', $p) }}" class="block h-full w-full" aria-label="{{ $p->name }}">
-            @if($p->image_url)
-                <img src="{{ $p->image_url }}" alt="{{ $p->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
-            @endif
+            <x-img :src="$p->image_url" :alt="$p->name" :sizes="$imgSizes"
+                   class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
         </a>
 
         @if($p->badge_label)

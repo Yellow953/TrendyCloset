@@ -1,6 +1,20 @@
 @extends('layouts.storefront')
 
 @php
+    // The frame the main photograph fills, measured: 54% of the row from lg,
+    // less the 138px thumbnail rail and its gap; full width below that. Defined
+    // once because the preload below and the <x-img> in the gallery have to
+    // state the same thing — disagree and the browser fetches one candidate and
+    // then renders another.
+    $mainImageSizes = '(min-width: 1024px) calc(54vw - 197px), (min-width: 768px) calc(100vw - 234px), (min-width: 640px) calc(100vw - 194px), calc(100vw - 40px)';
+@endphp
+
+@push('head')
+    {{-- The main photograph is the LCP. --}}
+    <x-img-preload :src="$product->image_url" :sizes="$mainImageSizes" />
+@endpush
+
+@php
     $inStock = $product->in_stock;
     $stockLeft = $variants->sum('stock');
     // Pre-select the first size that can actually be bought.
@@ -22,9 +36,14 @@
             @if($gallery->count() > 1)
                 <div class="flex flex-row gap-3 sm:flex-col">
                     @foreach($gallery as $g)
+                        {{-- data-srcset travels with data-full so the main image
+                             keeps its responsive ladder after a swap — setting
+                             src alone would leave the old srcset winning. --}}
                         <button type="button" data-gallery-thumb data-full="{{ $g->url }}"
+                                data-srcset="{{ \App\Support\Img::srcset($g->url) }}"
                                 class="h-[110px] w-[92px] flex-none overflow-hidden bg-cream transition sm:h-[168px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
-                            <img src="{{ $g->url }}" alt="{{ $product->name }} view {{ $loop->iteration }}" class="h-full w-full object-cover">
+                            <x-img :src="$g->url" :alt="$product->name.' view '.$loop->iteration" sizes="138px"
+                                   class="h-full w-full object-cover" />
                         </button>
                     @endforeach
                 </div>
@@ -32,9 +51,10 @@
 
             <div class="relative flex-1">
                 <div data-zoom class="relative h-[480px] w-full cursor-zoom-in overflow-hidden bg-cream sm:h-[620px]">
-                    @if($product->image_url)
-                        <img data-gallery-main src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-                    @endif
+                    {{-- The page's LCP. --}}
+                    <x-img data-gallery-main :src="$product->image_url" :alt="$product->name" eager
+                           :sizes="$mainImageSizes"
+                           class="h-full w-full object-cover" />
                 </div>
                 @if($product->badge_label)
                     <div class="pointer-events-none absolute left-4 top-4 bg-blush px-3 py-1.5 text-[12px] font-medium tracking-[0.04em] text-white">{{ $product->badge_label }}</div>
@@ -170,9 +190,7 @@
         <div data-sticky-buy class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 shadow-[0_-8px_24px_rgba(43,37,35,.10)] backdrop-blur">
             <div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-3 md:px-10">
                 <div class="hidden h-[54px] w-[46px] flex-none overflow-hidden bg-cream sm:block">
-                    @if($product->image_url)
-                        <img src="{{ $product->image_url }}" alt="" class="h-full w-full object-cover">
-                    @endif
+                    <x-img :src="$product->image_url" alt="" sizes="46px" class="h-full w-full object-cover" />
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="truncate text-[14.5px] font-normal">{{ $product->name }}</div>
@@ -286,7 +304,12 @@
             <span data-reveal class="tc-heading-rule"></span>
             <div data-reveal-children class="mt-9 grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-4">
                 @foreach($related as $p)
-                    @include('partials.product-card', ['p' => $p, 'h' => 'h-[280px] sm:h-[360px]'])
+                    {{-- Four up from md (px-10, three 28px gaps), two below. --}}
+                    @include('partials.product-card', [
+                        'p' => $p,
+                        'h' => 'h-[280px] sm:h-[360px]',
+                        'imgSizes' => '(min-width: 768px) calc((100vw - 164px) / 4), calc((100vw - 68px) / 2)',
+                    ])
                 @endforeach
             </div>
         </div>

@@ -1,5 +1,11 @@
 @extends('layouts.storefront')
 
+@push('head')
+    {{-- The order number is the only Space Grotesk on the whole storefront, so
+         the family is loaded here rather than on every page. --}}
+    {{ Vite::fonts('space-grotesk') }}
+@endpush
+
 @section('content')
     <div class="mx-auto max-w-[720px] px-5 py-16 md:px-10 md:py-24">
 

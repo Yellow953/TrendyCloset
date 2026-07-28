@@ -26,6 +26,13 @@ class Category extends Model
         'is_active',
     ];
 
+    /**
+     * Cached by {@see selfAndDescendantIds()} for the life of the instance.
+     *
+     * @var array<int, int>|null
+     */
+    private ?array $descendantIds = null;
+
     protected function casts(): array
     {
         return [
@@ -66,17 +73,29 @@ class Category extends Model
      * This category's id plus every id beneath it. Products are filed against
      * leaves, so browsing a parent has to widen to its children to find any.
      *
+     * Walked a level at a time rather than a node at a time: recursing through
+     * the `children` relation cost one query per child, so a section with five
+     * subcategories spent six queries working out six ids. Memoised on top of
+     * that, because a listing asks three times over — the facet scope, the
+     * product scope and the meta description.
+     *
      * @return array<int, int>
      */
     public function selfAndDescendantIds(): array
     {
-        $ids = [$this->id];
-
-        foreach ($this->children as $child) {
-            $ids = array_merge($ids, $child->selfAndDescendantIds());
+        if ($this->descendantIds !== null) {
+            return $this->descendantIds;
         }
 
-        return $ids;
+        $ids = [$this->id];
+        $level = [$this->id];
+
+        while ($level !== []) {
+            $level = static::query()->whereIn('parent_id', $level)->pluck('id')->all();
+            $ids = array_merge($ids, $level);
+        }
+
+        return $this->descendantIds = $ids;
     }
 
     /**

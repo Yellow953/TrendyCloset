@@ -17,7 +17,11 @@ is presentational and nothing writes to `orders`.
 - **Blade** templates (layout inheritance + partials)
 - **Tailwind CSS v4** (CSS-first config via `@theme` in `resources/css/app.css`; no `tailwind.config.js`)
 - **Vite** (`laravel-vite-plugin` + `@tailwindcss/vite`)
-- Google Fonts: Jost (sans), Cormorant Garamond (serif), Space Grotesk (display)
+- Fonts: Jost (sans), Cormorant Garamond (serif), Space Grotesk (display) — **self-hosted**, declared
+  in `vite.config.js` (`bunny(...)`) and emitted by `{{ Vite::fonts([...]) }}` in the layout head,
+  which inlines the `@font-face` rules and preloads the body weights. Nothing loads from
+  fonts.googleapis.com on the storefront; adding a weight there costs every visitor a file, so check
+  the markup first. Space Grotesk appears on `order-confirmed` alone and is requested only there.
 
 ## Commands
 
@@ -114,7 +118,11 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
 rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M · Oat".
 
 **Views** — `resources/views/`:
-- `layouts/storefront.blade.php` — root layout: `<head>` (fonts + `@vite`), header, `@yield('content')`, footer. **Full-bleed** (no max-width wrapper); each section supplies its own horizontal padding (`px-8 md:px-16`).
+- `layouts/storefront.blade.php` — root layout: `<head>` (fonts + `@vite` + a `head` stack), header,
+  `@yield('content')`, footer. **Full-bleed** (no max-width wrapper); each section supplies its own
+  horizontal padding (`px-8 md:px-16`). A page that owns the LCP image pushes
+  `<x-img-preload>` into `@push('head')` — its `sizes` must match the `<x-img>` it preloads
+  exactly, or the browser fetches one candidate and then renders another.
 - `partials/` — `header`, `footer`, `product-card`, `flash`, `pagination`, `drawer` (+
   `drawer-bag` / `drawer-favorites`).
   - `header` is **sticky** (`position: sticky`), with a centred single-line announcement bar that
@@ -256,6 +264,11 @@ rising a few pixels and settling, once. Shared easing/step tokens are `--tc-ease
 - New pages: add a `StoreController` action (pass `active`/`bagCount`/`bagTotal`), a named route,
   and a `store/*.blade.php` that extends the storefront layout.
 - Imagery comes from Unsplash via `img()`; keep the author/credit fields populated.
+- **Never write a bare `<img>` in a storefront view — use `<x-img>`.** It lazy-loads, decodes async
+  and builds a `srcset` from `App\Support\Img`, so a 170px slot stops downloading a 900px file. Pass
+  `sizes` describing the slot in CSS terms (`"200px"`, `"(min-width: 1024px) 25vw, 50vw"`); the
+  default `100vw` is a pessimistic guess. `eager` is for the page's LCP only — one per page, and it
+  is the *only* thing that should not be lazy.
 
 ## Notes
 

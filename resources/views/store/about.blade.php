@@ -3,7 +3,8 @@
 @section('content')
     {{-- Hero --}}
     <div class="relative h-[340px] overflow-hidden bg-tan">
-        <img src="{{ $hero['img'] }}" alt="Trendy Closet studio" class="absolute inset-0 h-full w-full object-cover">
+        <x-img :src="$hero['img']" alt="Trendy Closet studio" eager sizes="100vw"
+               class="absolute inset-0 h-full w-full object-cover" />
         {{-- Scrim keeps the copy readable whatever the photo does --}}
         <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-cream-2/85 via-cream-2/45 to-transparent"></div>
         <div class="pointer-events-none absolute inset-0 flex flex-col justify-center px-8 md:px-16">
@@ -14,7 +15,10 @@
 
     {{-- Story --}}
     <div class="flex flex-col items-center gap-14 px-8 py-14 md:px-16 lg:flex-row">
-        <div class="h-[380px] w-full flex-1 overflow-hidden"><img src="{{ $portrait['img'] }}" alt="Leila Konsol" class="h-full w-full object-cover"></div>
+        <div class="h-[380px] w-full flex-1 overflow-hidden">
+            <x-img :src="$portrait['img']" alt="Leila Konsol" sizes="(min-width: 1024px) 45vw, 100vw"
+                   class="h-full w-full object-cover" />
+        </div>
         <div class="flex flex-1 flex-col gap-4">
             <div class="text-[30px] font-normal">Hi, I'm Leila</div>
             <p class="text-[15px] font-light leading-[1.75] text-muted-3">Trendy Closet started as a small Instagram page sharing outfits I loved. Today it's a curated shop for women, men and kids — every piece hand-picked, every drop styled by me before it ever ships.</p>

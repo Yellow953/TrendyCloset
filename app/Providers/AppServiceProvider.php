@@ -41,21 +41,29 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * The header and footer appear on every storefront page and always need the
-     * same things: the navigation tree, the bag totals and the visitor's
-     * favourites count. Composing them here spares every controller action from
-     * having to remember to pass them.
+     * The header and footer appear on every storefront page and both want the
+     * navigation tree; composing it here spares every controller action from
+     * having to remember to pass it. The Catalog is scoped, so the two partials
+     * share one set of queries.
+     *
+     * The counts are the header's alone — the footer renders neither, and
+     * composing them for it meant counting the visitor's favourites twice on
+     * every page in the shop.
      */
     private function composeChrome(): void
     {
         View::composer(['partials.header', 'partials.footer'], function ($view) {
-            $cart = $this->app->make(Cart::class);
             $catalog = $this->app->make(Catalog::class);
 
             $view->with([
                 'catalog' => $catalog,
                 'navTree' => $catalog->tree(),
-                'bagCount' => $cart->count(),
+            ]);
+        });
+
+        View::composer('partials.header', function ($view) {
+            $view->with([
+                'bagCount' => $this->app->make(Cart::class)->count(),
                 'favoritesCount' => $this->favoritesCount(),
             ]);
         });
