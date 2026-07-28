@@ -17,6 +17,12 @@
             ],
         ],
         [
+            'label' => 'Storefront',
+            'links' => [
+                ['key' => 'slides', 'label' => 'Home slider', 'icon' => 'slides', 'route' => 'admin.slides.index'],
+            ],
+        ],
+        [
             'label' => 'Trade',
             'links' => [
                 ['key' => 'orders', 'label' => 'Orders', 'icon' => 'orders', 'route' => 'admin.orders.index', 'count' => $openOrders ?? 0],

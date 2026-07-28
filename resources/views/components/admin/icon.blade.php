@@ -8,6 +8,7 @@
         'dashboard' => '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
         'products' => '<path d="M3.5 8 12 3l8.5 5v8L12 21l-8.5-5V8Z"/><path d="m3.5 8 8.5 5 8.5-5"/><path d="M12 21v-8"/>',
         'categories' => '<path d="M3 5h18"/><path d="M7 5v14"/><path d="M7 9h14"/><path d="M11 9v10"/><path d="M11 14h10"/>',
+        'slides' => '<rect x="2" y="5" width="20" height="12" rx="2"/><path d="M8 21h8"/><path d="m6 14 3-3 2.5 2.5L15 10l3 4"/>',
         'orders' => '<path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/>',
         'customers' => '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6"/><path d="M17.5 14.3A5.5 5.5 0 0 1 20.5 19"/>',
         'messages' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/>',

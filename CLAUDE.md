@@ -6,10 +6,10 @@ Guidance for working in this repository.
 
 **Trendy Closet by Leila Konsol** — a Laravel storefront (marketing/catalog UI) implemented from
 the "Storefront Explorations" Claude Design doc. The storefront is now **database-driven**:
-categories, products, imagery, pricing, stock, favourites and the bag all come from real data.
-What is still hard-coded is the *editorial* furniture with no table behind it (hero collage,
-Instagram strip, About copy). **Checkout does not place an order yet** — the payment/address form
-is presentational and nothing writes to `orders`.
+categories, products, imagery, pricing, stock, favourites, the bag and the home-page hero all come
+from real data. What is still hard-coded is the *editorial* furniture with no table behind it
+(promise marquee, testimonials, Instagram strip, About copy). **Checkout does not place an order
+yet** — the payment/address form is presentational and nothing writes to `orders`.
 
 ## Stack
 
@@ -97,8 +97,9 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
 
 **Controllers** — `StoreController` (pages) and `CartController` (bag mutations).
 - `StoreController::img($id, $author, $slug, $w)` builds an Unsplash descriptor and is now only for
-  **editorial** imagery (hero, Instagram, sale banner). Catalogue imagery comes from
-  `product_images` / `categories.image_*`.
+  **editorial** imagery (Instagram, sale banner). Catalogue imagery comes from
+  `product_images` / `categories.image_*`, and the hero from `hero_slides.image_url` — all three
+  uploaded through `App\Services\ImageStore`, which is why the views only ever read a URL.
 - Every action passes `active` (nav highlight key: `home` `shop` `new` `sale` `about` …).
   `bagCount`, `bagTotal`, `navTree`, `catalog` and `favoritesCount` are **not** passed by actions —
   a view composer in `AppServiceProvider` supplies them to `partials.header` / `partials.footer`.
@@ -169,8 +170,16 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   rendered `.is-active` so it works without JS), centred section headings (`.tc-heading` +
   `.tc-heading-rule`), category circles, product carousels, an infinite promise marquee
   (`.tc-marquee`, item list rendered twice so the loop has no seam), promo banners, deal countdown,
-  testimonials and the Instagram strip. Hero slides / marquee / testimonials are editorial arrays on
-  `StoreController`; everything else is catalogue data.
+  testimonials and the Instagram strip. Marquee and testimonials are editorial arrays on
+  `StoreController`; everything else is catalogue or `hero_slides` data.
+  - **Hero slides** are the `hero_slides` table (`App\Models\HeroSlide`), managed from the back
+    office at *Storefront → Home slider*. Every line but the headline is optional, so the Blade
+    guards each one; the button falls back to `/shop` when no link is set. With **no active slide**
+    the page renders `HeroSlide::defaults()` — the three slides the shop shipped with, which are
+    also what `HeroSlideSeeder` inserts (idempotently) — because the hero is a 640px band that
+    cannot be blank. Change the defaults in one place: the model.
+  - **Category circles show root categories only** (`Catalog::tree()`, not `flat()`). A parent's
+    count already includes its children, and subcategories are the mega-menu's job.
 - **Product page** — thumbnail rail + main image with cursor-tracking hover zoom (`[data-zoom]`,
   `[data-gallery]`), a purchase panel (size radios + `data-clear-target`, `[data-qty]` stepper,
   Add To Bag and Buy Now as two submits on one form — `action=buy` adds then redirects to checkout),

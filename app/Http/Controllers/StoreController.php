@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\ContactMessage;
+use App\Models\HeroSlide;
 use App\Models\Product;
 use App\Models\ProductFavorite;
 use App\Models\ProductVariant;
@@ -19,9 +20,10 @@ use Illuminate\Support\Str;
 
 /**
  * Trendy Closet storefront. Catalogue content (categories, products, imagery,
- * pricing, stock) is read from the database; only the editorial furniture that
- * has no table behind it — hero slides, the promise marquee, testimonials — is
- * still hard-coded here, via the img() helper.
+ * pricing, stock) is read from the database, as is the home-page hero
+ * (`hero_slides`); only the editorial furniture that has no table behind it —
+ * the promise marquee, testimonials — is still hard-coded here, via the img()
+ * helper.
  */
 class StoreController extends Controller
 {
@@ -54,39 +56,36 @@ class StoreController extends Controller
     }
 
     /**
-     * Rotating hero slides. Editorial copy + imagery (no table behind it), but
-     * every slide points at a real edit or category.
+     * Rotating hero slides, managed from the back office (`hero_slides`).
      *
-     * @return array<int, array<string, string>>
+     * An empty result — nothing seeded yet, or every slide unpublished — falls
+     * back to the slides the shop shipped with, because the hero is a 640px
+     * band that cannot render blank.
+     *
+     * @return array<int, array<string, string|null>>
      */
     private function heroSlides(): array
     {
-        return [
-            [
-                'eyebrow' => 'TRENDY CLOSET · SUMMER '.now()->year,
-                'title' => 'Wear the pieces',
-                'accent' => 'everyone asks about',
-                'copy' => "Hand-picked by Leila and styled before it ever ships. New drops every Friday.",
-                'cta' => 'Shop New In',
-                'href' => route('listing', ['edit' => 'new']),
-            ] + $this->img('photo-1552374196-1ab2a1c593e8', w: 1400, h: 1200),
-            [
-                'eyebrow' => 'THE SALE IS LIVE',
-                'title' => 'Up to 40% off',
-                'accent' => 'your summer favourites',
-                'copy' => 'Marked-down pieces from every section — while sizes last.',
-                'cta' => 'Shop Sale',
-                'href' => route('listing', ['edit' => 'sale']),
-            ] + $this->img('photo-1558769132-cb1aea458c5e', w: 1400, h: 1200),
-            [
-                'eyebrow' => "LEILA'S PICKS",
-                'title' => 'Styled by Leila,',
-                'accent' => 'worn by you',
-                'copy' => 'The edit she keeps restyling — the pieces that go with everything.',
-                'cta' => 'Shop the edit',
-                'href' => route('listing', ['edit' => 'featured']),
-            ] + $this->img('photo-1523381210434-271e8be1f52b', w: 1400, h: 1200),
-        ];
+        $slides = HeroSlide::query()->active()->ordered()->get();
+
+        if ($slides->isEmpty()) {
+            $slides = collect(HeroSlide::defaults())->map(fn (array $attrs) => new HeroSlide($attrs));
+        }
+
+        return $slides
+            ->map(fn (HeroSlide $slide) => [
+                'eyebrow' => $slide->eyebrow,
+                'title' => $slide->title,
+                'accent' => $slide->accent,
+                'copy' => $slide->copy,
+                'cta' => $slide->cta_label,
+                'href' => $slide->linkUrl(),
+                'img' => $slide->image_url,
+                'credit' => $slide->image_credit,
+                'credit_href' => $slide->image_credit_href,
+            ])
+            ->values()
+            ->all();
     }
 
     /**
@@ -156,7 +155,10 @@ class StoreController extends Controller
         $dealEndsAt = $deals->min('sale_ends_at');
         $countdown = $this->countdown($dealEndsAt);
 
-        $categories = $this->catalog->flat();
+        // Top-level sections only: the circles are a way into the shop, not a
+        // map of it. A parent's count already includes everything beneath it,
+        // and the mega-menu is where subcategories belong.
+        $categories = $this->catalog->tree();
         $counts = $this->catalog->counts();
 
         $promos = $this->promos();

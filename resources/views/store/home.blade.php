@@ -19,7 +19,7 @@
                         {{-- Slide one is the LCP: eager and high priority. The
                              rest are lazy — they are behind an opacity fade, so
                              the browser cannot tell they are offscreen. --}}
-                        <x-img :src="$slide['img']" :alt="$slide['title'].' '.$slide['accent']"
+                        <x-img :src="$slide['img']" :alt="trim($slide['title'].' '.$slide['accent'])"
                                :eager="$loop->first"
                                sizes="(min-width: 1024px) 54vw, 100vw"
                                class="h-full w-full object-cover object-center" />
@@ -32,16 +32,27 @@
                     {{-- data-hero-copy: the four lines rise in turn once this
                          slide becomes .is-active (see app.css). --}}
                     <div class="relative flex h-full items-center px-8 md:px-16 lg:w-1/2">
+                        {{-- Every line but the headline is optional in the back
+                             office, so each is guarded rather than rendered as
+                             an empty gap in the stack. --}}
                         <div data-hero-copy class="flex max-w-[520px] flex-col gap-5">
-                            <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">{{ $slide['eyebrow'] }}</div>
+                            @if($slide['eyebrow'])
+                                <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">{{ $slide['eyebrow'] }}</div>
+                            @endif
                             <h1 class="text-[38px] font-light leading-[1.05] tracking-[0.01em] sm:text-[48px] lg:text-[64px]">
-                                {{ $slide['title'] }}<br>
-                                <span class="font-serif font-medium italic text-blush">{{ $slide['accent'] }}</span>
+                                {{ $slide['title'] }}
+                                @if($slide['accent'])
+                                    <br><span class="font-serif font-medium italic text-blush">{{ $slide['accent'] }}</span>
+                                @endif
                             </h1>
-                            <p class="max-w-[420px] text-[15.5px] font-light leading-[1.65] text-muted-2">{{ $slide['copy'] }}</p>
-                            <div class="mt-1.5">
-                                <a href="{{ $slide['href'] }}" class="tc-btn-dark">{{ $slide['cta'] }}</a>
-                            </div>
+                            @if($slide['copy'])
+                                <p class="max-w-[420px] text-[15.5px] font-light leading-[1.65] text-muted-2">{{ $slide['copy'] }}</p>
+                            @endif
+                            @if($slide['cta'])
+                                <div class="mt-1.5">
+                                    <a href="{{ $slide['href'] }}" class="tc-btn-dark">{{ $slide['cta'] }}</a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

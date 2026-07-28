@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -113,6 +114,16 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
     Route::put('categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // The home-page hero. Storefront content rather than catalogue, but it is
+    // merchandising all the same, so any staff member may change it.
+    Route::get('slides', [HeroSlideController::class, 'index'])->name('slides.index');
+    Route::get('slides/create', [HeroSlideController::class, 'create'])->name('slides.create');
+    Route::post('slides', [HeroSlideController::class, 'store'])->name('slides.store');
+    Route::get('slides/{slide}/edit', [HeroSlideController::class, 'edit'])->name('slides.edit');
+    Route::put('slides/{slide}', [HeroSlideController::class, 'update'])->name('slides.update');
+    Route::patch('slides/{slide}/toggle', [HeroSlideController::class, 'toggle'])->name('slides.toggle');
+    Route::delete('slides/{slide}', [HeroSlideController::class, 'destroy'])->name('slides.destroy');
 
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
