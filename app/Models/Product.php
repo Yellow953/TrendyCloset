@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Product extends Model
 {
@@ -136,6 +137,51 @@ class Product extends Model
     public function getInStockAttribute(): bool
     {
         return $this->variants->where('is_active', true)->sum('stock') > 0;
+    }
+
+    /**
+     * The variants a shopper could actually buy right now — and, when the piece
+     * is sold out altogether, the ones it is *made* in, so the card still says
+     * what it is instead of going blank.
+     *
+     * Reads the loaded relation: eager-load `variants` before calling this in a
+     * grid, or every card costs a query.
+     *
+     * @return Collection<int, ProductVariant>
+     */
+    public function getSellableVariantsAttribute(): Collection
+    {
+        $active = $this->variants->where('is_active', true);
+        $stocked = $active->where('stock', '>', 0);
+
+        return $stocked->isNotEmpty() ? $stocked : $active;
+    }
+
+    /**
+     * Distinct colours the piece comes in, in the order the variants were
+     * entered — the card paints its swatches from this.
+     *
+     * @return Collection<int, string>
+     */
+    public function getColorRunAttribute(): Collection
+    {
+        return $this->sellable_variants
+            ->pluck('color')
+            ->filter()
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * Distinct sizes the piece comes in, ordered the way a rail reads.
+     *
+     * @return Collection<int, string>
+     */
+    public function getSizeRunAttribute(): Collection
+    {
+        return ProductVariant::sortSizes(
+            $this->sellable_variants->pluck('size')->filter()->unique()->values()
+        );
     }
 
     public static function money(int|float|string|null $amount): string

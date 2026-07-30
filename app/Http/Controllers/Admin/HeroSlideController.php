@@ -107,7 +107,10 @@ class HeroSlideController extends Controller
 
         if ($request->hasFile('image')) {
             $this->images->forget($slide?->image_path);
-            $stored = $this->images->store($request->file('image'), 'hero');
+            // No crop — the hero band is a different shape at every breakpoint,
+            // so the slide keeps its own frame and object-cover does the rest.
+            // A wider ceiling than the default: this one runs full-bleed.
+            $stored = $this->images->store($request->file('image'), 'hero', maxEdge: 2000);
             $data['image_url'] = $stored['url'];
             $data['image_path'] = $stored['path'];
         }

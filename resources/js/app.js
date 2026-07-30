@@ -44,6 +44,7 @@ function initReveal() {
 //     [data-carousel-track]    horizontally scrolling flex container
 //     [data-carousel-prev]     previous button (optional)
 //     [data-carousel-next]     next button (optional)
+//     [data-carousel-autoplay] milliseconds between advances (optional)
 function initCarousels() {
     document.querySelectorAll('[data-carousel]').forEach((root) => {
         const track = root.querySelector('[data-carousel-track]');
@@ -53,22 +54,78 @@ function initCarousels() {
 
         // Scroll by roughly one "page" (80% of the visible width).
         const step = () => Math.max(Math.round(track.clientWidth * 0.8), 200);
+        const end = () => track.scrollWidth - track.clientWidth - 2;
 
-        prev?.addEventListener('click', () =>
-            track.scrollBy({ left: -step(), behavior: 'smooth' }));
-        next?.addEventListener('click', () =>
-            track.scrollBy({ left: step(), behavior: 'smooth' }));
+        const advance = (direction) =>
+            track.scrollBy({ left: direction * step(), behavior: 'smooth' });
+
+        prev?.addEventListener('click', () => advance(-1));
+        next?.addEventListener('click', () => advance(1));
 
         // Disable arrows at the track's extremes.
         const update = () => {
-            const max = track.scrollWidth - track.clientWidth - 2;
             if (prev) prev.disabled = track.scrollLeft <= 2;
-            if (next) next.disabled = track.scrollLeft >= max;
+            if (next) next.disabled = track.scrollLeft >= end();
         };
         track.addEventListener('scroll', update, { passive: true });
         window.addEventListener('resize', update);
         update();
+
+        autoplayCarousel(root, track, step, end);
     });
+}
+
+// Optional autoplay for a carousel: creep forward a page at a time and wrap
+// back to the start once the track runs out.
+//
+// It only ever runs while it is worth running — the rail is on screen, the tab
+// is in front, nobody is hovering, touching or tabbing through it — and never
+// under prefers-reduced-motion, where a rail that moves on its own is exactly
+// what the setting is asking us not to do.
+function autoplayCarousel(root, track, step, end) {
+    const delay = Number(root.dataset.carouselAutoplay);
+    if (!delay || Number.isNaN(delay)) return;
+
+    let timer = null;
+    let visible = false;
+    let held = false;
+
+    const tick = () => {
+        // Nothing to scroll (everything already fits) — leave it alone.
+        if (end() <= 0) return;
+        const atEnd = track.scrollLeft >= end();
+        track.scrollTo({ left: atEnd ? 0 : track.scrollLeft + step(), behavior: 'smooth' });
+    };
+
+    const sync = () => {
+        const run = visible && !held && !document.hidden && !reducedMotion.matches;
+        if (run && !timer) timer = setInterval(tick, delay);
+        if (!run && timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    };
+
+    const hold = (value) => {
+        held = value;
+        sync();
+    };
+
+    // Anything the visitor does to the rail wins: while they are on it, it is
+    // theirs, and the clock restarts clean when they leave.
+    root.addEventListener('pointerenter', () => hold(true));
+    root.addEventListener('pointerleave', () => hold(false));
+    root.addEventListener('focusin', () => hold(true));
+    root.addEventListener('focusout', () => hold(false));
+    track.addEventListener('touchstart', () => hold(true), { passive: true });
+
+    document.addEventListener('visibilitychange', sync);
+    reducedMotion.addEventListener('change', sync);
+
+    new IntersectionObserver((entries) => {
+        visible = entries[0].isIntersecting;
+        sync();
+    }, { threshold: 0.25 }).observe(root);
 }
 
 // Deal-of-the-week clock. The server renders the opening numbers from the
@@ -132,9 +189,26 @@ function initStickyHeader() {
     update();
 }
 
-// Hero slideshow: cross-fading slides with dots, autoplay, and a pause while
-// the pointer is over it. Slide one is rendered active, so the hero is intact
-// before this runs.
+// Listing filters on a phone: one button, one panel. The hiding is CSS (gated
+// on .tc-js, and only below lg), so this is just the switch and the ARIA state.
+function initFilterPanel() {
+    const toggle = document.querySelector('[data-filter-toggle]');
+    const panel = document.querySelector('[data-filter-panel]');
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener('click', () => {
+        const open = panel.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+    });
+}
+
+// Hero slideshow: cross-fading slides with dots and autoplay. Slide one is
+// rendered active, so the hero is intact before this runs.
+//
+// It does *not* pause on hover: the hero is a full-bleed 640px band, so a
+// resting cursor sits on it more often than not and hover-pause read as "the
+// slideshow is broken". It pauses for the things that actually mean the visitor
+// is not watching — a backgrounded tab — or is working the controls by keyboard.
 function initHero() {
     const hero = document.querySelector('[data-hero]');
     if (!hero) return;
@@ -152,10 +226,16 @@ function initHero() {
         dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
     };
 
-    let timer = setInterval(() => show(index + 1), 6000);
-    const restart = () => {
+    let timer = null;
+    const stop = () => {
         clearInterval(timer);
-        timer = setInterval(() => show(index + 1), 6000);
+        timer = null;
+    };
+    const restart = () => {
+        stop();
+        if (!document.hidden && !hero.contains(document.activeElement)) {
+            timer = setInterval(() => show(index + 1), 6000);
+        }
     };
 
     dots.forEach((dot, i) =>
@@ -173,10 +253,14 @@ function initHero() {
         restart();
     });
 
-    hero.addEventListener('mouseenter', () => clearInterval(timer));
-    hero.addEventListener('mouseleave', restart);
+    // Keyboard users get the pause: while focus is inside the hero they are
+    // driving it, and a slide changing underneath them loses their place.
+    hero.addEventListener('focusin', stop);
+    hero.addEventListener('focusout', restart);
+    document.addEventListener('visibilitychange', restart);
 
     show(index);
+    restart();
 }
 
 // Product gallery: clicking a thumbnail swaps the main image.
@@ -479,8 +563,14 @@ function initAsyncForms() {
         // Only the button that was pressed breathes — the others just go quiet.
         submitter?.classList.add('is-busy');
 
+        // Read the attribute, not form.action: the PDP form has submit buttons
+        // named "action" (add vs buy), and a named control shadows the property
+        // — form.action would hand back a RadioNodeList and we would POST to
+        // /product/[object RadioNodeList].
+        const url = form.getAttribute('action') || window.location.href;
+
         try {
-            const response = await fetch(form.action, {
+            const response = await fetch(url, {
                 method: 'POST',
                 body,
                 headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
@@ -701,6 +791,7 @@ function init() {
     initCountdowns();
     initAutoSubmit();
     initStickyHeader();
+    initFilterPanel();
     initHero();
     initAdminNav();
     initModals();

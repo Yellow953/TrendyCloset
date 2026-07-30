@@ -22,8 +22,8 @@ use Illuminate\Support\Str;
  * Trendy Closet storefront. Catalogue content (categories, products, imagery,
  * pricing, stock) is read from the database, as is the home-page hero
  * (`hero_slides`); only the editorial furniture that has no table behind it —
- * the promise marquee, testimonials — is still hard-coded here, via the img()
- * helper.
+ * testimonials, the listing side banner, the About imagery — is still
+ * hard-coded here, via the img() helper.
  */
 class StoreController extends Controller
 {
@@ -89,22 +89,6 @@ class StoreController extends Controller
     }
 
     /**
-     * The scrolling promise band between sections.
-     *
-     * @return array<int, string>
-     */
-    private function marquee(): array
-    {
-        return [
-            'Free shipping over '.Product::money(Cart::FREE_SHIPPING_THRESHOLD),
-            '30-day easy returns',
-            'Personal styling with Leila',
-            'New drops every Friday',
-            'Secure encrypted checkout',
-        ];
-    }
-
-    /**
      * Customer words. Editorial for now — there is no reviews table yet.
      *
      * @return array<int, array<string, string|int>>
@@ -161,8 +145,6 @@ class StoreController extends Controller
         $categories = $this->catalog->tree();
         $counts = $this->catalog->counts();
 
-        $promos = $this->promos();
-
         $this->seo
             ->page(
                 config('seo.brand_full').config('seo.separator').config('seo.tagline'),
@@ -183,10 +165,8 @@ class StoreController extends Controller
             'dealEndsAt' => $dealEndsAt,
             'countdown' => $countdown,
             'storeRating' => round((float) Product::query()->active()->avg('rating'), 1),
-            'promos' => $promos,
             'catalogSize' => Product::query()->active()->count(),
             'heroSlides' => $this->heroSlides(),
-            'marquee' => $this->marquee(),
             'testimonials' => $this->testimonials(),
             'active' => 'home',
         ]);
@@ -213,47 +193,6 @@ class StoreController extends Controller
             ['k' => 'minutes', 'l' => 'MINS', 'n' => $diff->i],
             ['k' => 'seconds', 'l' => 'SECS', 'n' => $diff->s],
         ];
-    }
-
-    /**
-     * The two banner tiles under Featured Products. Each is a real category —
-     * its own image, its own live "starting at" price.
-     *
-     * @return array<int, array{category: Category, from: ?string, eyebrow: string, image: ?string}>
-     */
-    private function promos(): array
-    {
-        $preferred = ['summer-section', 'winter-section'];
-
-        // Editorial banner art: overhead flat-lays of the season's pieces, shot
-        // on a light ground so the copy still reads over them. Deliberately not
-        // the category's own tile — that is a portrait crop and squeezing it
-        // into this band leaves a meaningless close-up of fabric.
-        $art = [
-            'summer-section' => $this->img('photo-1502301197179-65228ab57f78', w: 1600, h: 480)['img'],
-            'winter-section' => $this->img('photo-1516762689617-e1cffcef479d', w: 1600, h: 480)['img'],
-        ];
-
-        $tree = $this->catalog->tree();
-        $chosen = collect($preferred)
-            ->map(fn (string $slug) => $tree->firstWhere('slug', $slug))
-            ->filter()
-            ->take(2);
-
-        if ($chosen->count() < 2) {
-            $chosen = $tree->take(2);
-        }
-
-        return $chosen->map(function (Category $category) use ($art) {
-            $from = Product::query()->active()->inCategory($category)->min('price');
-
-            return [
-                'category' => $category,
-                'from' => $from !== null ? Product::money($from) : null,
-                'eyebrow' => 'BEST COLLECTION',
-                'image' => $art[$category->slug] ?? $category->image_url,
-            ];
-        })->values()->all();
     }
 
     /**
@@ -504,22 +443,20 @@ class StoreController extends Controller
         $colors = $variants->pluck('color')->filter()->unique()->values();
         $breadcrumb = array_filter([$product->category?->parent, $product->category]);
 
-        $faqs = $this->productFaqs($product, $sizes, $colors);
-
         $this->seo
             ->page($product->name, $this->productDescription($product))
             ->image($product->image_url)
             ->type('product')
+            // No FAQPage here: the Q&A block was taken off the product page, and
+            // structured data for answers a shopper cannot read is exactly the
+            // kind of claim that earns a manual action.
             ->schema(
                 Schema::product($product),
                 Schema::breadcrumbs($this->productTrail($product, $breadcrumb)),
-                // Only claimable because the same Q&As render on the page.
-                Schema::faq($faqs),
             );
 
         return view('store.product', [
             'product' => $product,
-            'faqs' => $faqs,
             'gallery' => $product->images->sortBy('position')->values(),
             'sizes' => $sizes,
             'variants' => $variants->values(),
@@ -553,80 +490,6 @@ class StoreController extends Controller
         return "{$product->name}{$where} at ".config('seo.brand').", {$product->price_label}. "
             .'Hand-picked by Leila Konsol, with free shipping over '
             .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
-    }
-
-    /**
-     * Answer-shaped facts about one piece: sizing, colours, stock, delivery and
-     * returns. This is the GEO surface — the questions a shopper actually types
-     * into an assistant, answered in the page's own words from live data rather
-     * than left implicit in the product panel.
-     *
-     * @param  Collection<int, string>  $sizes
-     * @param  Collection<int, string>  $colors
-     * @return array<int, array{question: string, answer: string}>
-     */
-    private function productFaqs(Product $product, Collection $sizes, Collection $colors): array
-    {
-        $name = $product->name;
-        $free = Product::money(Cart::FREE_SHIPPING_THRESHOLD);
-        $flat = Product::money(Cart::STANDARD_SHIPPING);
-
-        $faqs = [];
-
-        if ($sizes->isNotEmpty()) {
-            $faqs[] = [
-                'question' => "What sizes does the {$name} come in?",
-                'answer' => "The {$name} is stocked in ".$this->sentenceList($sizes)
-                    .'. Our pieces run true to size — size up for knitwear and outerwear. '
-                    .'Full measurements are in the size guide.',
-            ];
-        }
-
-        if ($colors->isNotEmpty()) {
-            $faqs[] = [
-                'question' => "What colours is the {$name} available in?",
-                'answer' => "It is available in ".$this->sentenceList($colors)
-                    .'. Screens vary, so the shade in daylight can read slightly differently to the photograph.',
-            ];
-        }
-
-        $faqs[] = [
-            'question' => "Is the {$name} in stock?",
-            'answer' => $product->in_stock
-                ? "Yes — the {$name} is in stock at {$product->price_label} and ships within one working day."
-                : "The {$name} is currently sold out. Message us and we will tell you when it is back.",
-        ];
-
-        // Express pricing is deliberately not quoted here: the policies page
-        // states $9.00, which is what STANDARD_SHIPPING already costs. Quote
-        // only the figure the code is the source of truth for.
-        $faqs[] = [
-            'question' => "How much is delivery on the {$name}?",
-            'answer' => "Standard delivery is {$flat}, and free on orders over {$free}. "
-                .'Orders placed before 2pm on a working day are packed the same day and arrive in 3–5 business days.',
-        ];
-
-        $faqs[] = [
-            'question' => "Can I return the {$name}?",
-            'answer' => 'Yes. You have 30 days from delivery to return it unworn and unwashed with its tags attached, '
-                .'and we cover return postage. Refunds reach your original payment method within 5 working days.',
-        ];
-
-        return $faqs;
-    }
-
-    /**
-     * "XS, S and M" — a list a person would read aloud, for the FAQ prose.
-     *
-     * @param  Collection<int, string>  $values
-     */
-    private function sentenceList(Collection $values): string
-    {
-        if ($values->count() === 1) {
-            return (string) $values->first();
-        }
-
-        return $values->slice(0, -1)->implode(', ').' and '.$values->last();
     }
 
     /**

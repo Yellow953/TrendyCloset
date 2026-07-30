@@ -240,18 +240,18 @@ body.has-sticky-buy .tc-whatsapp {
     border-color: var(--color-blush);
 }
 
-/* Infinite marquee band. The track holds the item list twice, so translating
-   it by half its width loops seamlessly. */
-@keyframes tc-marquee {
-    to {
-        transform: translateX(-50%);
+/* Listing filters on a phone: the rail is collapsed behind its own button so
+   the products, not the filters, open the page. Both halves are gated on
+   `.tc-js` — with no script the button would do nothing, so it is not shown and
+   the rail stays where it has always been. From lg the rail is a sidebar again
+   and neither rule applies. */
+html:not(.tc-js) [data-filter-toggle] {
+    display: none;
+}
+@media (max-width: 1023px) {
+    .tc-js [data-filter-panel]:not(.is-open) {
+        display: none;
     }
-}
-.tc-marquee-track {
-    animation: tc-marquee 38s linear infinite;
-}
-.tc-marquee:hover .tc-marquee-track {
-    animation-play-state: paused;
 }
 
 /* ---------------------------------------------------------------------------
@@ -271,9 +271,6 @@ body.has-sticky-buy .tc-whatsapp {
 
 @media (prefers-reduced-motion: reduce) {
     .tc-auth-rise {
-        animation: none;
-    }
-    .tc-marquee-track {
         animation: none;
     }
     [data-hero-slide] {

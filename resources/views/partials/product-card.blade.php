@@ -7,10 +7,27 @@
      called $sizes because @include inherits the caller's scope, and both the
      listing and the PDP have a $sizes of their own (the size facet). --}}
 @php
-    $h = $h ?? 'h-[300px]';
+    // Square by default, because that is the shape product photographs are
+    // cropped to on upload (ImageStore::SQUARE) — a fixed pixel height would
+    // letterbox or crop them a second time, differently at every breakpoint.
+    // $h is still honoured for a caller that genuinely needs a fixed frame.
+    $h = $h ?? 'aspect-square';
     $fav = $fav ?? false;
     $imgSizes = $imgSizes ?? '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw';
     $variant = $p->relationLoaded('variants') ? $p->default_variant : null;
+
+    // What the piece comes in, under the price — read off the loaded variants,
+    // so it is what is actually sellable rather than a claim.
+    //
+    // Whichever of the two carries the variety is the one worth the row: a
+    // piece offered in five colours says that with swatches, and one offered in
+    // a single colour says it with its size run instead. Showing both on a
+    // 200px card turns the price into a footnote. Anything past the fifth
+    // collapses into "+N" so every card in a grid keeps the same height.
+    $colors = $p->relationLoaded('variants') ? $p->color_run : collect();
+    $sizes = $p->relationLoaded('variants') && $colors->count() < 2 ? $p->size_run : collect();
+    $extraColors = max($colors->count() - 5, 0);
+    $extraSizes = max($sizes->count() - 5, 0);
 @endphp
 <div class="group relative">
     <div class="tc-card-media relative {{ $h }} overflow-hidden rounded-xl bg-cream">
@@ -62,4 +79,30 @@
         @endif
         <span class="text-[16px] font-semibold text-blush">{{ $p->price_label }}</span>
     </div>
+
+    @if($sizes->isNotEmpty())
+        <div class="mt-2 flex flex-wrap items-center gap-1.5"
+             aria-label="{{ $colors->isNotEmpty() ? $colors->first().'. ' : '' }}Sizes: {{ $sizes->implode(', ') }}">
+            {{-- One colour still earns its dot, leading the size run: it is the
+                 shade of the piece in the photograph, said in 14 pixels. --}}
+            @if($colors->isNotEmpty())
+                <x-swatch :color="$colors->first()" class="mr-0.5" />
+            @endif
+            @foreach($sizes->take(5) as $size)
+                <span class="border border-line px-1.5 py-0.5 text-[11px] font-light leading-none tracking-[0.06em] text-muted-2">{{ $size }}</span>
+            @endforeach
+            @if($extraSizes)
+                <span class="text-[12px] font-light text-muted">+{{ $extraSizes }}</span>
+            @endif
+        </div>
+    @elseif($colors->isNotEmpty())
+        <div class="mt-2 flex items-center gap-1.5" aria-label="Colours: {{ $colors->implode(', ') }}">
+            @foreach($colors->take(5) as $color)
+                <x-swatch :color="$color" />
+            @endforeach
+            @if($extraColors)
+                <span class="text-[12px] font-light text-muted">+{{ $extraColors }}</span>
+            @endif
+        </div>
+    @endif
 </div>

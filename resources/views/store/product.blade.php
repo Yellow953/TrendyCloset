@@ -41,7 +41,7 @@
                              src alone would leave the old srcset winning. --}}
                         <button type="button" data-gallery-thumb data-full="{{ $g->url }}"
                                 data-srcset="{{ \App\Support\Img::srcset($g->url) }}"
-                                class="h-[110px] w-[92px] flex-none overflow-hidden bg-cream transition sm:h-[168px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
+                                class="h-[92px] w-[92px] flex-none overflow-hidden bg-cream transition sm:h-[138px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
                             <x-img :src="$g->url" :alt="$product->name.' view '.$loop->iteration" sizes="138px"
                                    class="h-full w-full object-cover" />
                         </button>
@@ -50,7 +50,10 @@
             @endif
 
             <div class="relative flex-1">
-                <div data-zoom class="relative h-[480px] w-full cursor-zoom-in overflow-hidden bg-cream sm:h-[620px]">
+                {{-- Square, like the file itself: product photographs are cropped
+                     to 1:1 on upload, so a fixed-height frame would crop them a
+                     second time and differently at every breakpoint. --}}
+                <div data-zoom class="relative aspect-square w-full cursor-zoom-in overflow-hidden bg-cream">
                     {{-- The page's LCP. --}}
                     <x-img data-gallery-main :src="$product->image_url" :alt="$product->name" eager
                            :sizes="$mainImageSizes"
@@ -270,33 +273,6 @@
         </div>
     </section>
 
-    {{-- Frequently asked. Built in StoreController::productFaqs() from this
-         piece's real sizes, colours and stock, and published as FAQPage
-         structured data — which is only legitimate because the answers render
-         here, on the page, for a shopper to read. --}}
-    @if(!empty($faqs))
-        <section class="px-5 py-14 md:px-10">
-            <h2 data-reveal class="tc-heading">Frequently asked</h2>
-            <span data-reveal class="tc-heading-rule"></span>
-            <div data-reveal-children class="mx-auto mt-9 max-w-[820px]">
-                @foreach($faqs as $faq)
-                    <details class="group/q border-b border-line">
-                        <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-[16px] font-medium">
-                            <h3 class="text-[16px] font-medium">{{ $faq['question'] }}</h3>
-                            <span class="text-[20px] leading-none text-muted">
-                                <span class="group-open/q:hidden">+</span><span class="hidden group-open/q:inline">−</span>
-                            </span>
-                        </summary>
-                        <p class="pb-5 pr-10 text-[15px] font-light leading-[1.85] text-muted-3">{{ $faq['answer'] }}</p>
-                    </details>
-                @endforeach
-                <p class="mt-6 text-[14px] font-light text-muted">
-                    Still unsure? <a href="{{ route('contact') }}" class="tc-link">Ask us</a> — we reply within 24 hours.
-                </p>
-            </div>
-        </section>
-    @endif
-
     {{-- Related --}}
     @if($related->isNotEmpty())
         <div class="px-5 py-14 md:px-10">
@@ -307,7 +283,6 @@
                     {{-- Four up from md (px-10, three 28px gaps), two below. --}}
                     @include('partials.product-card', [
                         'p' => $p,
-                        'h' => 'h-[280px] sm:h-[360px]',
                         'imgSizes' => '(min-width: 768px) calc((100vw - 164px) / 4), calc((100vw - 68px) / 2)',
                     ])
                 @endforeach

@@ -22,9 +22,30 @@
         </div>
     </div>
 
+    @php
+        // Anything the shopper has narrowed by, for the mobile button's badge.
+        $filterCount = $activeFilters->count() + (($filters['min'] || $filters['max']) ? 1 : 0);
+    @endphp
+
     <div class="flex flex-col gap-9 px-5 py-10 md:px-10 lg:flex-row lg:gap-12">
+        {{-- On a phone the rail is a wall between the shopper and the products,
+             so it collapses behind this button and the grid starts the page.
+             The button hides itself when the script never ran (see app.css), and
+             the rail is a plain sidebar again from lg. --}}
+        <button type="button" data-filter-toggle aria-controls="tc-filters" aria-expanded="false"
+                class="flex items-center justify-center gap-2 border border-ink px-5 py-3 text-[14px] font-medium lg:hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[17px] w-[17px]"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+            <span>Filters</span>
+            @if($filterCount)
+                <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-blush px-1.5 text-[11px] font-medium text-white">{{ $filterCount }}</span>
+            @endif
+        </button>
+
         {{-- Filter rail — each group is a collapsible bordered panel --}}
-        <aside data-reveal="left" class="flex w-full flex-col gap-5 lg:w-[310px] lg:flex-none">
+        {{-- No data-reveal here: a panel that starts display:none never
+             intersects, so it would never be told to arrive and would open
+             blank. Furniture the shopper asked for should just be there. --}}
+        <aside id="tc-filters" data-filter-panel class="flex w-full flex-col gap-5 lg:w-[310px] lg:flex-none">
             <details open class="group/f border border-line">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                     <span class="text-[16px] font-medium">Shop by Category</span>
@@ -197,7 +218,6 @@
                              ladder — 27vw asked for 800px to fill 315. --}}
                         @include('partials.product-card', [
                             'p' => $p,
-                            'h' => 'h-[300px] sm:h-[380px]',
                             'imgSizes' => '(min-width: 1024px) calc((100vw - 494px) / 3), (min-width: 768px) calc((100vw - 136px) / 3), calc((100vw - 68px) / 2)',
                         ])
                     @endforeach

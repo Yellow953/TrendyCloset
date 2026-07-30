@@ -8,7 +8,7 @@ Guidance for working in this repository.
 the "Storefront Explorations" Claude Design doc. The storefront is now **database-driven**:
 categories, products, imagery, pricing, stock, favourites, the bag and the home-page hero all come
 from real data. What is still hard-coded is the *editorial* furniture with no table behind it
-(promise marquee, testimonials, Instagram strip, About copy). **Checkout does not place an order
+(testimonials, Instagram strip, About copy). **Checkout does not place an order
 yet** — the payment/address form is presentational and nothing writes to `orders`.
 
 ## Stack
@@ -47,6 +47,11 @@ and `CartController` (the bag). Named routes: `home` `/`, `listing` `/shop/{cate
 - Filters are query params: `edit`, `size`, `color`, `min`, `max`, `sort`
   (`popular|newest|price-asc|price-desc|rating`). `popular` sorts by real `views_count` from
   `withEngagement()`, not a hard-coded order.
+- The filter rail is a left sidebar from `lg`; **below that it collapses behind a "Filters" button**
+  (`[data-filter-toggle]` / `[data-filter-panel]`, `initFilterPanel()`) so a phone opens on products
+  rather than on a screen of filters. The hiding is CSS gated on `.tc-js`, and the button hides
+  itself without JS — so with no script the rail is simply there. Do not put `data-reveal` on that
+  panel: a `display: none` element never intersects, so it would open blank.
 
 **Auth** — admin-only, for the (not-yet-built) back-office CRM. `Auth::routes()` was replaced by
 explicit route groups; **registration and email verification are removed** — there is no
@@ -100,6 +105,13 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
   **editorial** imagery (Instagram, sale banner). Catalogue imagery comes from
   `product_images` / `categories.image_*`, and the hero from `hero_slides.image_url` — all three
   uploaded through `App\Services\ImageStore`, which is why the views only ever read a URL.
+- **Uploads are never stored as they arrive.** `ImageStore::store($file, $dir, $ratio, $maxEdge)`
+  straightens the EXIF orientation, optionally centre-crops to `$ratio`, scales the longest edge to
+  `$maxEdge` (1600 default) and re-encodes as **WebP q82** with alpha preserved — a 4MB phone JPEG
+  lands as a ~60KB file. Product photographs pass `ImageStore::SQUARE` so the card, thumbnail rail
+  and PDP all line up; the hero passes no ratio (its band is a different shape at every breakpoint)
+  and `maxEdge: 2000`. Re-encoding is **best-effort**: if GD cannot read the file, the original is
+  written unchanged rather than the upload being lost.
 - Every action passes `active` (nav highlight key: `home` `shop` `new` `sale` `about` …).
   `bagCount`, `bagTotal`, `navTree`, `catalog` and `favoritesCount` are **not** passed by actions —
   a view composer in `AppServiceProvider` supplies them to `partials.header` / `partials.footer`.
@@ -149,9 +161,15 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
     load to render on.
   - `footer` is light, five columns (About / Shop / Your Account / Services / Contact) with the
     newsletter as its opening band and a bottom bar of socials, copyright and payment marks.
-  - `product-card` takes a `Product` (`$p`) and optional height `$h`. On hover it reveals a rail of
+  - `product-card` takes a `Product` (`$p`); its media box is **`aspect-square`**, matching the 1:1
+    crop uploads get, so a grid never re-crops the photograph a second time. `$h` still overrides the
+    frame for a caller that needs a fixed height, but no page passes it. On hover it reveals a rail of
     three actions — favourite, quick-add (posts `default_variant`, so eager-load `variants` or the
-    button renders disabled), and view.
+    button renders disabled), and view. Under the price it shows **whichever of colour or size
+    carries the variety**: swatches when the piece comes in 2+ colours, otherwise its size run led by
+    the single colour's dot (`Product->color_run` / `size_run`, both read off the loaded `variants`
+    and both limited to five with a `+N`). Chips are `<x-swatch :color>`, which paints from
+    `App\Support\Swatch`.
 - `layouts/auth.blade.php` — standalone admin-auth layout (no storefront header/footer): a centred
   white card with the wordmark above it and the storefront link below. The old split-screen
   editorial panel was removed. Auth pages fill the `heading` / `subheading` / `form` sections rather
@@ -168,10 +186,12 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `about`, `contact`, `policies`), each `@extends('layouts.storefront')`.
 - **Home sections** — a rotating hero (cross-fading slides + dots, `initHero()`; slide one is
   rendered `.is-active` so it works without JS), centred section headings (`.tc-heading` +
-  `.tc-heading-rule`), category circles, product carousels, an infinite promise marquee
-  (`.tc-marquee`, item list rendered twice so the loop has no seam), promo banners, deal countdown,
-  testimonials and the Instagram strip. Marquee and testimonials are editorial arrays on
-  `StoreController`; everything else is catalogue or `hero_slides` data.
+  `.tc-heading-rule`), category circles, product carousels, deal countdown and testimonials.
+  Testimonials are an editorial array on `StoreController`; everything else is catalogue or
+  `hero_slides` data. (The promise marquee and the seasonal promo banners were removed.)
+  - The hero **autorotates every 6s and does not pause on hover** — it is a full-bleed 640px band,
+    so a resting cursor sits on it and hover-pause read as a broken slideshow. It pauses for a
+    backgrounded tab and while focus is inside it (keyboard users are driving it).
   - **Hero slides** are the `hero_slides` table (`App\Models\HeroSlide`), managed from the back
     office at *Storefront → Home slider*. Every line but the headline is optional, so the Blade
     guards each one; the button falls back to `/shop` when no link is set. With **no active slide**
@@ -224,11 +244,12 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `APP_URL=https://…` in production .env is all that canonicals, OG tags and the sitemap need.
 - `config/seo.php` holds brand strings, the default description/image, currency and the `social`
   handles that become the Organization `sameAs`. Empty values render nothing.
-- **GEO** — what generative engines quote is answer-shaped prose, so: `/llms.txt` describes the shop,
-  its terms and its categories in plain language from live data; product pages carry a visible
-  "Frequently asked" block (`StoreController::productFaqs()`, built from the piece's real sizes,
-  colours and stock) and the policy pages expose their sections as `FAQPage`. **The schema is only
-  legitimate because the answers render on the page** — never emit `FAQPage` for invisible content.
+- **GEO** — what generative engines quote is answer-shaped prose, so `/llms.txt` describes the shop,
+  its terms and its categories in plain language from live data, and the policy pages expose their
+  sections as `FAQPage`. **That schema is only legitimate because the answers render on the page** —
+  never emit `FAQPage` for invisible content. The product page had a "Frequently asked" block and its
+  own `FAQPage`; both were removed together, and if the block ever comes back the schema comes back
+  with it — not before.
 - Prices quoted in copy must come from `Cart::FREE_SHIPPING_THRESHOLD` / `Cart::STANDARD_SHIPPING`,
   not be retyped. (The policies page's "express $9.00" already collides with standard shipping's
   $9.00; that prose is stale, so the FAQ and llms.txt deliberately do not repeat the express figure.)
@@ -270,6 +291,11 @@ rising a few pixels and settling, once. Shared easing/step tokens are `--tc-ease
   plus optional `[data-carousel-prev]` / `[data-carousel-next]` buttons (style with `.tc-arrow`).
   The JS wires the arrows to `scrollBy` and disables them at the track extremes — no library.
   Used on the home page (Shop by Category, Featured Products, Deal of the Week).
+  - Add `data-carousel-autoplay="<ms>"` to the wrapper and it advances a page at a time, wrapping
+    back to the start at the end. It runs **only while it is worth running**: on screen (one
+    `IntersectionObserver`), tab in front, nobody hovering / touching / tabbing through it, and never
+    under `prefers-reduced-motion`. Shop by Category and Featured Products carry it at 4500ms; Deal
+    of the Week deliberately does not — the countdown beside it is already moving.
 - New pages: add a `StoreController` action (pass `active`/`bagCount`/`bagTotal`), a named route,
   and a `store/*.blade.php` that extends the storefront layout.
 - Imagery comes from Unsplash via `img()`; keep the author/credit fields populated.

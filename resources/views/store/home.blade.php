@@ -76,7 +76,7 @@
         <section class="pb-14 pt-14">
             <h2 data-reveal class="tc-heading">Shop by Category</h2>
             <span data-reveal class="tc-heading-rule"></span>
-            <div data-carousel class="relative mt-9">
+            <div data-carousel data-carousel-autoplay="4500" class="relative mt-9">
                 <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-8 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($categories as $c)
                         <a href="{{ route('listing', $c) }}" class="group flex w-[170px] shrink-0 snap-start flex-col items-center gap-3.5 sm:w-[200px]">
@@ -100,11 +100,11 @@
         <section class="pb-14">
             <h2 data-reveal class="tc-heading">Featured Products</h2>
             <span data-reveal class="tc-heading-rule"></span>
-            <div data-carousel class="relative mt-9">
+            <div data-carousel data-carousel-autoplay="4500" class="relative mt-9">
                 <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($featured as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]', 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
+                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
                         </div>
                     @endforeach
                 </div>
@@ -113,39 +113,6 @@
             </div>
         </section>
     @endif
-
-    {{-- Promise band — scrolling marquee --}}
-    <div data-reveal="fade" class="tc-marquee overflow-hidden border-y border-line bg-cream-3 py-4">
-        <div class="tc-marquee-track flex w-max items-center whitespace-nowrap">
-            {{-- The list is rendered twice so the loop has no seam --}}
-            @foreach([1, 2] as $pass)
-                @foreach($marquee as $item)
-                    <span class="flex items-center gap-3 px-8 text-[14.5px] font-light text-ink" @if($pass === 2) aria-hidden="true" @endif>
-                        <span class="text-[13px] text-blush">★</span>{{ $item }}
-                    </span>
-                @endforeach
-            @endforeach
-        </div>
-    </div>
-
-    {{-- Promo banners — real categories, priced from live stock --}}
-    <div data-reveal-children class="flex flex-col gap-6 px-5 md:px-10 py-14 md:flex-row">
-        @foreach($promos as $promo)
-            <a href="{{ route('listing', $promo['category']) }}" class="group relative h-[280px] flex-1 overflow-hidden rounded-2xl bg-[#e9ddd6] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] transition-shadow duration-500 hover:shadow-[0_18px_44px_-20px_rgba(0,0,0,0.45)]">
-                <x-img :src="$promo['image']" :alt="$promo['category']->name"
-                       sizes="(min-width: 768px) 50vw, 100vw"
-                       class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div class="pointer-events-none absolute inset-0 flex flex-col justify-center gap-2 bg-gradient-to-r from-white/92 via-white/55 to-transparent px-7 md:px-11">
-                    <div class="text-[12px] font-medium tracking-[0.24em]">{{ $promo['eyebrow'] }}</div>
-                    @if($promo['from'])
-                        <div class="text-[15px] font-light">Starting at <span class="text-[22px] font-semibold text-blush">{{ $promo['from'] }}</span></div>
-                    @endif
-                    <div class="text-[30px] font-normal leading-[1.2]">{{ $promo['category']->name }}</div>
-                    <div class="mt-1.5 text-[14px] font-medium text-blush underline underline-offset-2">Shop Now</div>
-                </div>
-            </a>
-        @endforeach
-    </div>
 
     {{-- Deal of the week --}}
     @if($deals->isNotEmpty())
@@ -167,7 +134,7 @@
                 <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
                     @foreach($deals as $p)
                         <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'h' => 'h-[340px]', 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
+                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
                         </div>
                     @endforeach
                 </div>

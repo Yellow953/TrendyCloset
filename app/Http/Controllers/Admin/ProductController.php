@@ -249,7 +249,11 @@ class ProductController extends Controller
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
 
         foreach ($files as $file) {
-            $stored = $this->images->store($file, 'products/'.$product->id);
+            // Square, centre-cropped: every product frame on the storefront —
+            // card, thumbnail rail, PDP — is a fixed box the photo is cropped
+            // into anyway. Doing it once on upload means the gallery lines up
+            // instead of each shot deciding its own crop at render time.
+            $stored = $this->images->store($file, 'products/'.$product->id, ImageStore::SQUARE);
 
             $product->images()->create([
                 'url' => $stored['url'],
