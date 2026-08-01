@@ -105,7 +105,7 @@ class StoreController extends Controller
             [
                 'quote' => "Sizing advice over DM, shipped the next morning, and the knit is genuinely the softest thing I own. This is how online shopping should feel.",
                 'name' => 'Marie L.',
-                'meta' => 'Paris · 2 orders',
+                'meta' => 'Jounieh · 2 orders',
                 'stars' => 5,
             ],
             [
@@ -708,7 +708,7 @@ class StoreController extends Controller
                 'intro' => 'Thirty days to change your mind, on almost everything.',
                 'sections' => [
                     ['heading' => 'The window', 'body' => 'You have 30 days from delivery to start a return. Items must be unworn, unwashed and still have their tags attached.'],
-                    ['heading' => 'How to start one', 'body' => 'Email hello@trendycloset.com with your order number and which pieces are going back. We reply with a return label and instructions within one working day.'],
+                    ['heading' => 'How to start one', 'body' => 'Email '.config('seo.email').' with your order number and which pieces are going back. We reply with a return label and instructions within one working day.'],
                     ['heading' => 'Refunds', 'body' => 'Refunds are issued to the original payment method within 5 working days of your parcel reaching us. Your bank may take a few days more to show it.'],
                     ['heading' => 'Exchanges', 'body' => 'The fastest exchange is a return plus a fresh order — that way your new size is reserved immediately rather than waiting on the return to land.'],
                     ['heading' => 'What cannot be returned', 'body' => 'Final-sale pieces, pierced jewellery and swimwear with the hygiene strip removed cannot be returned unless they arrive faulty.'],
@@ -731,7 +731,7 @@ class StoreController extends Controller
                     ['heading' => 'What we collect', 'body' => 'To fulfil an order we keep your name, email, delivery address and phone number. Payment card details are handled by our payment processor and never reach our servers.'],
                     ['heading' => 'Browsing data', 'body' => 'We set a long-lived cookie so your bag and favourites survive between visits, and we count product views to see which pieces resonate. This is tied to a random identifier, not to your identity.'],
                     ['heading' => 'Marketing', 'body' => 'We email you only if you asked us to. Every newsletter carries a one-click unsubscribe, and we never sell or rent your details to anyone.'],
-                    ['heading' => 'Your rights', 'body' => 'You can ask for a copy of everything we hold about you, ask us to correct it, or ask us to delete it. Write to hello@trendycloset.com and we will action it within 30 days.'],
+                    ['heading' => 'Your rights', 'body' => 'You can ask for a copy of everything we hold about you, ask us to correct it, or ask us to delete it. Write to '.config('seo.email').' and we will action it within 30 days.'],
                     ['heading' => 'Retention', 'body' => 'Order records are kept for as long as tax law requires. Everything else is deleted once it stops being useful to you as a customer.'],
                 ],
             ],
@@ -744,7 +744,7 @@ class StoreController extends Controller
                     ['heading' => 'Product imagery', 'body' => 'We photograph pieces as accurately as we can, but screens differ. Colour variation between your screen and the garment is not itself a fault.'],
                     ['heading' => 'Discount codes', 'body' => 'One code per order unless stated otherwise. Codes carry no cash value and may be withdrawn at any time before an order is placed.'],
                     ['heading' => 'Liability', 'body' => 'Nothing here limits your statutory rights as a consumer. Our liability for any order is limited to the value of that order.'],
-                    ['heading' => 'Governing law', 'body' => 'These terms are governed by French law, and disputes fall to the courts of Paris.'],
+                    ['heading' => 'Governing law', 'body' => 'These terms are governed by Lebanese law, and disputes fall to the courts of Beirut.'],
                 ],
             ],
         ];

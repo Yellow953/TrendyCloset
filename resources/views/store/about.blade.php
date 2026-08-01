@@ -1,6 +1,8 @@
 @extends('layouts.storefront')
 
 @section('content')
+    @php($contact = config('store.contact'))
+
     {{-- Hero --}}
     <div class="relative h-[340px] overflow-hidden bg-tan">
         <x-img :src="$hero['img']" alt="Trendy Closet studio" eager sizes="100vw"
@@ -47,17 +49,17 @@
     <div class="flex flex-col border-t border-line lg:flex-row">
         <div class="flex flex-1 flex-col justify-center gap-4 px-8 py-14 md:px-16">
             <div class="text-[12px] font-medium tracking-[0.28em] text-blush">VISIT US</div>
-            <div class="text-[30px] font-normal">Our Flagship Store</div>
+            <div class="text-[30px] font-normal">Our Store</div>
             <p class="text-[15px] font-light leading-[1.8] text-muted-3">Come try pieces on and say hi — Leila's often in on weekends.</p>
             <div class="mt-1.5 text-[14.5px] font-light leading-[1.9] text-ink">
-                123 Rue de la Mode<br>75003 Paris, France<br><br>
-                Tue–Sat, 11am–7pm<br>Sun–Mon, closed
+                Trendy Closet<br>{!! implode('<br>', array_map('e', $contact['address'])) !!}<br><br>
+                {{ $contact['hours'] }}<br>Sunday, closed
             </div>
-            <a href="https://maps.google.com/?q=123+Rue+de+la+Mode,+75003+Paris,+France" target="_blank" rel="noopener"
+            <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener"
                class="tc-link mt-1.5 w-fit text-[13.5px]">Get directions</a>
         </div>
         <div class="relative min-h-[360px] flex-1">
-            <iframe src="https://maps.google.com/maps?q=123%20Rue%20de%20la%20Mode%2C%2075003%20Paris%2C%20France&t=&z=15&ie=UTF8&iwloc=&output=embed" class="absolute inset-0 h-full w-full [filter:saturate(.75)_contrast(1.02)]" style="border:0" loading="lazy" title="Trendy Closet flagship store"></iframe>
+            <iframe src="{{ $contact['map_embed'] }}" class="absolute inset-0 h-full w-full [filter:saturate(.75)_contrast(1.02)]" style="border:0" loading="lazy" title="Trendy Closet on the map"></iframe>
         </div>
     </div>
 

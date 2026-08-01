@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'email' => env('SEO_EMAIL', 'hello@trendycloset.com'),
+    'email' => env('SEO_EMAIL', 'Trendycloset.byleilakonsol@gmail.com'),
 
     'twitter' => env('SEO_TWITTER', ''),
 

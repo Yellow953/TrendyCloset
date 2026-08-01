@@ -138,7 +138,10 @@ class SeoController extends Controller
         $out[] = '- Returns: 30 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';
         $out[] = '- Customers check out as guests — there is no shopper account to create.';
-        $out[] = '- Contact: '.config('seo.email').'. Questions are answered within 24 hours.';
+        $out[] = '- Contact: '.config('seo.email').', or WhatsApp '.config('store.contact.phone_display')
+            .'. Questions are answered within 24 hours.';
+        $out[] = '- The shop is also a physical store: '.implode(', ', config('store.contact.address'))
+            .', open '.config('store.contact.hours').'.';
         $out[] = '';
 
         $out[] = '## Key pages';

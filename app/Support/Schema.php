@@ -60,11 +60,19 @@ class Schema
                 'name' => config('seo.founder'),
             ],
             'sameAs' => $social ?: null,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => 'Tal el Zaatar',
+                'addressLocality' => 'Dekwaneh',
+                'addressRegion' => 'Mount Lebanon',
+                'addressCountry' => 'LB',
+            ],
+            'hasMap' => config('store.contact.map_url'),
             'contactPoint' => [
                 '@type' => 'ContactPoint',
                 'contactType' => 'customer service',
                 'email' => config('seo.email'),
-                'availableLanguage' => ['English', 'French'],
+                'availableLanguage' => ['English', 'Arabic', 'French'],
             ],
         ]);
     }

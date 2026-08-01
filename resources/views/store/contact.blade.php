@@ -1,7 +1,10 @@
 @extends('layouts.storefront')
 
 @section('content')
-    @php($whatsapp = config('store.whatsapp'))
+    @php
+        $whatsapp = config('store.whatsapp');
+        $contact = config('store.contact');
+    @endphp
 
     <div class="bg-cream px-8 py-12 text-center md:px-16">
         <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">WE'D LOVE TO HEAR FROM YOU</div>
@@ -36,27 +39,21 @@
         <div class="flex flex-col gap-6 lg:flex-[0_0_340px]">
             <div>
                 <div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">EMAIL</div>
-                <a href="mailto:hello@trendycloset.com" class="text-[15px] font-light transition-colors hover:text-blush">hello@trendycloset.com</a>
+                <a href="mailto:{{ config('seo.email') }}" class="text-[15px] font-light break-all transition-colors hover:text-blush">{{ config('seo.email') }}</a>
             </div>
             @if(! empty($whatsapp['number']))
                 <div>
                     <div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">WHATSAPP</div>
-                    <a href="https://wa.me/{{ $whatsapp['number'] }}" target="_blank" rel="noopener" class="text-[15px] font-light transition-colors hover:text-blush">Chat with us</a>
+                    <a href="https://wa.me/{{ $whatsapp['number'] }}?text={{ rawurlencode($whatsapp['message']) }}" target="_blank" rel="noopener" class="text-[15px] font-light transition-colors hover:text-blush">{{ $contact['phone_display'] }}</a>
                 </div>
             @endif
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">INSTAGRAM</div><div class="text-[15px] font-light">@trendycloset.byleilakonsol</div></div>
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">HOURS</div><div class="text-[15px] font-light">Mon–Sat, 9am–6pm</div></div>
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">RESPONSE TIME</div><div class="text-[15px] font-light">Within 24 hours</div></div>
-
-            {{-- Answers that don't need a reply --}}
-            <div class="border-t border-line pt-6">
-                <div class="mb-3 text-[14px] font-medium tracking-[0.06em] text-blush">QUICK ANSWERS</div>
-                <div class="flex flex-col gap-2 text-[14.5px] font-light text-muted-2">
-                    <a href="{{ route('policies', 'shipping') }}" class="transition-colors hover:text-blush">How long does delivery take?</a>
-                    <a href="{{ route('policies', 'returns') }}" class="transition-colors hover:text-blush">How do I return something?</a>
-                    <a href="{{ route('policies', 'size-guide') }}" class="transition-colors hover:text-blush">Which size should I order?</a>
-                </div>
+            <div>
+                <div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">VISIT</div>
+                <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="text-[15px] font-light leading-[1.7] transition-colors hover:text-blush">{!! implode('<br>', array_map('e', $contact['address'])) !!}</a>
             </div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">INSTAGRAM</div><div class="text-[15px] font-light">@trendycloset.byleilakonsol</div></div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">HOURS</div><div class="text-[15px] font-light">{{ $contact['hours'] }}</div></div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">RESPONSE TIME</div><div class="text-[15px] font-light">Within 24 hours</div></div>
         </div>
     </div>
 @endsection
