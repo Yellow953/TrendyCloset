@@ -11,9 +11,11 @@
                 <div class="text-[24px] font-normal">Join the Closet</div>
                 <div class="mt-1.5 text-[14px] font-light text-muted-2">10% off your first order, plus new drops from Leila's feed before anyone else.</div>
             </div>
-            <form class="flex w-full max-w-md lg:w-auto">
+            {{-- One rounded field with the button living inside its right end,
+                 rather than two squares butted together. --}}
+            <form class="flex w-full max-w-md overflow-hidden rounded-field border border-line-2 bg-white transition-colors focus-within:border-blush lg:w-auto">
                 <input type="email" placeholder="Your email address" aria-label="Your email address"
-                       class="w-full border border-line-2 bg-white px-5 py-3.5 text-[14px] font-light text-ink placeholder:text-muted outline-none transition-colors focus:border-blush lg:w-[300px]">
+                       class="w-full bg-transparent px-5 py-3.5 text-[14px] font-light text-ink placeholder:text-muted outline-none lg:w-[300px]">
                 <button type="submit" class="whitespace-nowrap bg-ink px-7 py-3.5 text-[14px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">Subscribe</button>
             </form>
         </div>

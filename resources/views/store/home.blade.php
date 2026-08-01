@@ -123,7 +123,7 @@
                 {{-- Rendered server-side; the ticker in app.js counts it down. --}}
                 <div data-reveal="zoom" class="mt-5 flex justify-center gap-2.5" data-countdown="{{ $dealEndsAt->toIso8601String() }}">
                     @foreach($countdown as $t)
-                        <div class="w-16 bg-cream py-2.5 text-center">
+                        <div class="w-16 rounded-field bg-cream py-2.5 text-center">
                             <div class="text-[20px] font-semibold text-blush" data-countdown-part="{{ $t['k'] }}">{{ str_pad((string) $t['n'], 2, '0', STR_PAD_LEFT) }}</div>
                             <div class="text-[11px] font-light tracking-[0.12em] text-muted">{{ $t['l'] }}</div>
                         </div>
@@ -150,7 +150,7 @@
         <span data-reveal class="tc-heading-rule"></span>
         <div data-reveal-children class="mx-auto mt-9 grid max-w-[1200px] gap-6 md:grid-cols-3">
             @foreach($testimonials as $t)
-                <figure class="flex h-full flex-col gap-4 bg-white p-8">
+                <figure class="tc-panel flex h-full flex-col gap-4 p-8">
                     <div class="text-[13px] tracking-[2px] text-gold">{{ str_repeat('★', $t['stars']) . str_repeat('☆', 5 - $t['stars']) }}</div>
                     <blockquote class="flex-1 font-serif text-[18px] italic leading-[1.6] text-muted-3">“{{ $t['quote'] }}”</blockquote>
                     <figcaption class="flex items-center gap-3 border-t border-line pt-4">

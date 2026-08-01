@@ -7,7 +7,7 @@
 
     @if($lines->isEmpty())
         <div class="px-5 md:px-10 pb-20 pt-6">
-            <div class="border border-line bg-cream-3 px-6 py-20 text-center">
+            <div class="tc-panel bg-cream-3 px-6 py-20 text-center">
                 <div class="text-[22px] font-normal">Your bag is empty</div>
                 <div class="mt-2 text-[14.5px] font-light text-muted-2">Nothing saved for later yet — the new drop is a good place to start.</div>
                 <a href="{{ route('listing', ['edit' => 'new']) }}" class="tc-btn-dark mt-6">Shop New In</a>
@@ -25,7 +25,7 @@
                     @php($product = $variant->product)
                     <div class="flex flex-wrap items-center gap-y-4 border-b border-line py-5">
                         <div class="flex w-full items-center gap-4 sm:w-auto sm:flex-[2.2]">
-                            <a href="{{ route('product', $product) }}" class="h-[92px] w-[76px] flex-none overflow-hidden bg-cream">
+                            <a href="{{ route('product', $product) }}" class="tc-media h-[92px] w-[76px] flex-none rounded-field">
                                 <x-img :src="$product->image_url" :alt="$product->name" sizes="76px" class="h-full w-full object-cover" />
                             </a>
                             <div>
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                         <div class="flex flex-1 justify-start sm:justify-center">
-                            <form method="POST" action="{{ route('cart.update', $variant) }}" class="flex items-center border border-line-2">
+                            <form method="POST" action="{{ route('cart.update', $variant) }}" class="tc-stepper">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" name="quantity" value="{{ $line['qty'] - 1 }}" aria-label="Decrease quantity" class="px-3.5 py-2.5 transition-colors hover:text-blush">−</button>
@@ -56,21 +56,21 @@
                     <form method="POST" action="{{ route('cart.coupon.remove') }}" class="mt-5 flex flex-wrap items-center gap-3">
                         @csrf
                         @method('DELETE')
-                        <span class="border border-blush bg-cream-3 px-5 py-3 text-[14px] font-medium text-blush">{{ $summary['coupon']->code }} applied</span>
+                        <span class="tc-badge border border-blush bg-cream-3 px-5 py-3 text-[14px] text-blush">{{ $summary['coupon']->code }} applied</span>
                         <button type="submit" class="text-[13px] font-light text-muted-2 underline underline-offset-2">Remove code</button>
                     </form>
                 @else
                     <form method="POST" action="{{ route('cart.coupon') }}" class="mt-5 flex flex-wrap gap-3">
                         @csrf
-                        <input type="text" name="code" placeholder="Discount code" class="flex-none basis-[260px] border border-line-2 px-5 py-3 text-[14px] font-light text-ink placeholder:text-muted outline-none focus:border-blush">
-                        <button type="submit" class="border border-ink px-6 py-3 text-[14px] font-medium transition-colors hover:bg-ink hover:text-white">Apply</button>
+                        <input type="text" name="code" placeholder="Discount code" class="tc-input w-auto flex-none basis-[260px] px-5 py-3 text-[14px]">
+                        <button type="submit" class="tc-btn-outline tc-btn-sm px-6 py-3 text-[14px]">Apply</button>
                     </form>
                 @endif
             </div>
 
             {{-- Summary --}}
             <div class="w-full lg:max-w-[400px] lg:flex-1">
-                <div class="bg-cream p-7">
+                <div class="tc-panel-quiet">
                     <div class="mb-[18px] text-[18px] font-medium">Order Summary</div>
                     <div class="flex justify-between text-[14.5px] font-light leading-[2.2] text-muted-3"><span>Subtotal</span><span>{{ \App\Models\Product::money($summary['subtotal']) }}</span></div>
                     <div class="flex justify-between text-[14.5px] font-light leading-[2.2] text-muted-3">
@@ -84,10 +84,10 @@
                         </div>
                     @endif
                     <div class="mt-3.5 flex justify-between border-t border-line-3 pt-4 text-[18px] font-semibold"><span>Total</span><span>{{ \App\Models\Product::money($summary['total']) }}</span></div>
-                    <a href="{{ route('checkout') }}" class="mt-5 block bg-ink py-4 text-center text-[14px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">Checkout</a>
+                    <a href="{{ route('checkout') }}" class="tc-btn-dark mt-5 w-full text-[14px]">Checkout</a>
                     <div class="mt-3 text-center text-[13px] font-light text-muted">or <a href="{{ route('listing') }}" class="underline underline-offset-2">continue shopping</a></div>
                 </div>
-                <div class="mt-4 bg-tan px-5 py-4 text-[13.5px] font-light text-ink">
+                <div class="mt-4 rounded-card bg-tan px-5 py-4 text-[13.5px] font-light text-ink">
                     @if($summary['free_shipping'])
                         🎉 You've unlocked <b class="font-medium">free shipping</b>.
                     @else

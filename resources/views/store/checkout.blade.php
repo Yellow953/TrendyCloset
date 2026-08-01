@@ -59,7 +59,7 @@
 
             <div>
                 <div class="mb-3 text-[18px] font-medium">Delivery</div>
-                <div class="flex justify-between border border-blush bg-cream-3 p-4 text-[14px] font-normal">
+                <div class="flex justify-between rounded-card border border-blush bg-cream-3 p-4 text-[14px] font-normal">
                     <span><b class="font-medium">Standard</b> · 3–5 business days</span>
                     <span class="{{ $summary['shipping'] > 0 ? '' : 'text-jade' }}">{{ $summary['shipping'] > 0 ? \App\Models\Product::money($summary['shipping']) : 'Free' }}</span>
                 </div>
@@ -71,25 +71,25 @@
                           class="tc-input resize-y">{{ old('notes') }}</textarea>
             </div>
 
-            <div class="border border-line-2 bg-cream-3 p-4 text-[13.5px] leading-relaxed font-light text-muted-3">
+            <div class="rounded-card border border-line-2 bg-cream-3 p-4 text-[13.5px] leading-relaxed font-light text-muted-3">
                 <b class="font-medium text-ink">Payment</b> is arranged after you place your order — we will email you at the
                 address above to confirm your pieces and settle up. No card details are taken here.
             </div>
 
-            <button type="submit" class="bg-ink py-4 text-center text-[15px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">
+            <button type="submit" class="tc-btn-dark text-[15px]">
                 Place order · {{ \App\Models\Product::money($summary['total']) }}
             </button>
         </form>
 
         {{-- Summary --}}
         <div class="w-full lg:max-w-[420px] lg:flex-1">
-            <div class="bg-cream p-7">
+            <div class="tc-panel-quiet">
                 @foreach($lines as $line)
                     @php($variant = $line['variant'])
                     @php($product = $variant->product)
                     <div class="flex items-center gap-3.5 pb-4">
                         <div class="relative">
-                            <div class="h-[70px] w-[58px] overflow-hidden rounded-md bg-white">
+                            <div class="tc-media h-[70px] w-[58px] rounded-field bg-white">
                                 <x-img :src="$product->image_url" :alt="$product->name" sizes="58px" class="h-full w-full object-cover" />
                             </div>
                             <div class="pointer-events-none absolute -right-[7px] -top-[7px] flex h-5 w-5 items-center justify-center rounded-full bg-blush text-[11px] font-medium text-white">{{ $line['qty'] }}</div>

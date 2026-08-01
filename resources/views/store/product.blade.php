@@ -41,7 +41,7 @@
                              src alone would leave the old srcset winning. --}}
                         <button type="button" data-gallery-thumb data-full="{{ $g->url }}"
                                 data-srcset="{{ \App\Support\Img::srcset($g->url) }}"
-                                class="h-[92px] w-[92px] flex-none overflow-hidden bg-cream transition sm:h-[138px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
+                                class="tc-media h-[92px] w-[92px] flex-none transition sm:h-[138px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
                             <x-img :src="$g->url" :alt="$product->name.' view '.$loop->iteration" sizes="138px"
                                    class="h-full w-full object-cover" />
                         </button>
@@ -53,15 +53,44 @@
                 {{-- Square, like the file itself: product photographs are cropped
                      to 1:1 on upload, so a fixed-height frame would crop them a
                      second time and differently at every breakpoint. --}}
-                <div data-zoom class="relative aspect-square w-full cursor-zoom-in overflow-hidden bg-cream">
+                <div data-zoom class="tc-media relative aspect-square w-full rounded-panel">
                     {{-- The page's LCP. --}}
                     <x-img data-gallery-main :src="$product->image_url" :alt="$product->name" eager
                            :sizes="$mainImageSizes"
                            class="h-full w-full object-cover" />
                 </div>
                 @if($product->badge_label)
-                    <div class="pointer-events-none absolute left-4 top-4 bg-blush px-3 py-1.5 text-[12px] font-medium tracking-[0.04em] text-white">{{ $product->badge_label }}</div>
+                    <div class="tc-badge pointer-events-none absolute left-4 top-4 px-3 py-1.5 tracking-[0.04em]">{{ $product->badge_label }}</div>
                 @endif
+
+                {{-- Actions on the photograph itself. A sibling of [data-zoom]
+                     rather than a child, so moving onto a button leaves the
+                     frame and drops the zoom instead of magnifying under it. --}}
+                <div class="absolute right-4 top-4 z-10 flex flex-col gap-2.5">
+                    <form method="POST" action="{{ route('product.favorite', $product) }}" data-async data-favorite-form>
+                        @csrf
+                        <button type="submit" aria-pressed="{{ $favorited ? 'true' : 'false' }}"
+                                class="tc-card-action h-10 w-10 aria-pressed:text-blush aria-pressed:[&_svg]:fill-current"
+                                title="{{ $favorited ? 'Saved to favourites' : 'Save to favourites' }}"
+                                aria-label="Save {{ $product->name }} to favourites">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[19px] w-[19px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
+                        </button>
+                    </form>
+
+                    <button type="button" class="tc-card-action h-10 w-10"
+                            data-share="{{ route('product', $product) }}" data-share-title="{{ $product->name }}"
+                            title="Share" aria-label="Share {{ $product->name }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[19px] w-[19px]"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.4 10.8 7.2-4.2M8.4 13.2l7.2 4.2"/></svg>
+                    </button>
+
+                    {{-- Zoom is a choice, not a surprise: on a touch screen an
+                         armed frame pans instead of scrolling the page. --}}
+                    <button type="button" data-zoom-toggle aria-pressed="false"
+                            class="tc-card-action h-10 w-10 aria-pressed:bg-ink aria-pressed:text-white"
+                            title="Zoom" aria-label="Toggle zoom on the photograph">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[19px] w-[19px]"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5M8 10.5h5M10.5 8v5"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -129,7 +158,7 @@
                                     <input type="radio" name="variant_id" value="{{ $v->id }}" class="peer sr-only"
                                         @checked($firstAvailable?->is($v))
                                         @disabled(! $v->in_stock)>
-                                    <span class="block min-w-[64px] border border-line-2 px-4 py-3 text-center text-[14.5px] transition-colors peer-checked:border-blush peer-checked:text-blush {{ $v->in_stock ? 'hover:border-blush' : 'text-faint line-through' }}">{{ $v->size }}</span>
+                                    <span class="tc-chip min-w-[64px] px-4 py-3 text-[14.5px] peer-checked:border-blush peer-checked:text-blush {{ $v->in_stock ? '' : 'text-faint line-through hover:border-line-2 hover:text-faint' }}">{{ $v->size }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -140,13 +169,13 @@
                 @endif
 
                 @if($inStock)
-                    <div class="inline-flex w-fit bg-cream-3 px-3 py-1.5 text-[13.5px] font-medium text-jade">{{ $stockLeft }} in stock</div>
+                    <div class="tc-badge bg-cream-3 px-3 py-1.5 text-[13.5px] text-jade">{{ $stockLeft }} in stock</div>
                 @else
-                    <div class="inline-flex w-fit bg-cream-2 px-3 py-1.5 text-[13.5px] font-medium text-blush">Out of stock</div>
+                    <div class="tc-badge bg-cream-2 px-3 py-1.5 text-[13.5px] text-blush">Out of stock</div>
                 @endif
 
                 <div class="flex flex-wrap items-stretch gap-3">
-                    <div data-qty class="flex items-center border border-line-2">
+                    <div data-qty class="tc-stepper">
                         <button type="button" data-qty-down aria-label="Decrease quantity" class="px-4 py-3.5 text-[18px] leading-none transition-colors hover:text-blush">−</button>
                         <input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity"
                                class="w-14 border-x border-line-2 py-3.5 text-center text-[15px] font-medium outline-none [appearance:textfield] focus:border-blush [&::-webkit-inner-spin-button]:appearance-none">
@@ -154,30 +183,20 @@
                     </div>
 
                     <button type="submit" name="action" value="cart" @disabled(! $inStock)
-                            class="flex-1 bg-blush px-8 py-3.5 text-[14.5px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:bg-faint">
+                            class="tc-btn-blush flex-1 py-3.5 text-[14.5px]">
                         {{ $inStock ? 'Add To Bag' : 'Sold Out' }}
                     </button>
                 </div>
 
                 <button type="submit" name="action" value="buy" @disabled(! $inStock)
-                        class="w-full bg-ink py-4 text-[14.5px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush disabled:cursor-not-allowed disabled:bg-faint">
+                        class="tc-btn-dark w-full text-[14.5px]">
                     Buy Now
                 </button>
             </form>
 
-            <div class="flex flex-wrap items-center gap-4">
-                <form method="POST" action="{{ route('product.favorite', $product) }}" data-async data-favorite-form>
-                    @csrf
-                    <button type="submit" aria-pressed="{{ $favorited ? 'true' : 'false' }}"
-                            class="flex items-center gap-2 text-[14px] font-light text-muted-2 transition-colors hover:text-blush aria-pressed:text-blush aria-pressed:[&_svg]:fill-current">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[18px] w-[18px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
-                        <span data-favorite-label>{{ $favorited ? 'Saved to favourites' : 'Add to favourites' }}</span>
-                    </button>
-                </form>
-                @if($inStock && $stockLeft <= 10)
-                    <span class="text-[13.5px] font-light text-blush">Only {{ $stockLeft }} left</span>
-                @endif
-            </div>
+            @if($inStock && $stockLeft <= 10)
+                <div class="text-[13.5px] font-light text-blush">Only {{ $stockLeft }} left</div>
+            @endif
 
             <div class="flex flex-wrap gap-6 border-t border-line pt-5 text-[13px] font-light text-muted-2">
                 <span>🚚 Free shipping over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }}</span>
@@ -190,9 +209,9 @@
     {{-- Sticky buy bar: slides up once the main Add To Bag scrolls out of view.
          Its size select stays in sync with the radios above (see app.js). --}}
     @if($inStock)
-        <div data-sticky-buy class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 shadow-[0_-8px_24px_rgba(43,37,35,.10)] backdrop-blur">
+        <div data-sticky-buy class="fixed inset-x-0 bottom-0 z-30 rounded-t-panel border-t border-line bg-white/95 shadow-[0_-8px_24px_rgba(43,37,35,.10)] backdrop-blur">
             <div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-3 md:px-10">
-                <div class="hidden h-[54px] w-[46px] flex-none overflow-hidden bg-cream sm:block">
+                <div class="tc-media hidden h-[54px] w-[46px] flex-none rounded-field sm:block">
                     <x-img :src="$product->image_url" alt="" sizes="46px" class="h-full w-full object-cover" />
                 </div>
                 <div class="min-w-0 flex-1">
@@ -209,7 +228,7 @@
                     @csrf
                     @if($variants->isNotEmpty())
                         <select name="variant_id" data-sticky-size aria-label="Size"
-                                class="hidden border border-line-2 bg-white px-3 py-2.5 text-[14px] outline-none focus:border-blush sm:block">
+                                class="tc-input tc-input-sm hidden w-auto bg-white text-[14px] sm:block">
                             @foreach($variants as $v)
                                 <option value="{{ $v->id }}" @disabled(! $v->in_stock) @selected($firstAvailable?->is($v))>
                                     {{ $v->size }}{{ $v->in_stock ? '' : ' — sold out' }}
@@ -218,9 +237,9 @@
                         </select>
                     @endif
                     <input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity"
-                           class="hidden w-16 border border-line-2 py-2.5 text-center text-[14px] font-medium outline-none [appearance:textfield] focus:border-blush md:block [&::-webkit-inner-spin-button]:appearance-none">
+                           class="tc-input tc-input-sm hidden w-16 px-0 text-center text-[14px] font-medium [appearance:textfield] md:block [&::-webkit-inner-spin-button]:appearance-none">
                     <button type="submit" name="action" value="cart"
-                            class="whitespace-nowrap bg-blush px-6 py-3 text-[14px] font-medium tracking-[0.04em] text-white transition-colors hover:bg-ink">Add To Bag</button>
+                            class="tc-btn-blush tc-btn-sm whitespace-nowrap px-6 py-3 text-[14px] tracking-[0.04em]">Add To Bag</button>
                 </form>
             </div>
         </div>

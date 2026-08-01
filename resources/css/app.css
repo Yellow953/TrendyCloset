@@ -43,6 +43,21 @@
     --color-gold-deep: #8a6d10;
     --color-rose: #b4443c;
     --color-canvas: #f7f4f2;
+
+    /* Corner vocabulary for the storefront. Named for what they wrap rather
+       than for their size, so a surface picks the token that describes it and
+       the whole shop turns from one place. Deliberately *not* the default
+       --radius-sm/md/lg/xl keys: the back office is built on those, and
+       redefining them would silently restyle every admin screen. */
+    --radius-field: 10px; /* inputs, buttons, selects, steppers, small tiles */
+    --radius-card: 16px; /* panels, summary boxes, image frames, thumbnails */
+    --radius-panel: 20px; /* the large surfaces: drawer, mega menu, receipt */
+    --radius-chip: 999px; /* size / filter / status chips and badges */
+
+    /* Elevation. The shop is warm, so the shadow is tinted with ink rather
+       than black — a grey shadow on cream reads as dirt. */
+    --shadow-soft: 0 1px 2px rgba(43, 37, 35, 0.04), 0 8px 24px -14px rgba(43, 37, 35, 0.16);
+    --shadow-lift: 0 2px 6px rgba(43, 37, 35, 0.05), 0 20px 44px -20px rgba(43, 37, 35, 0.22);
 }
 
 @layer base {
@@ -60,16 +75,63 @@
 /* Reusable brand primitives */
 @layer components {
     .tc-input {
-        @apply w-full border border-line-2 px-4 py-3.5 text-sm font-light text-ink placeholder:text-muted outline-none transition-colors focus:border-blush;
+        @apply w-full rounded-field border border-line-2 px-4 py-3.5 text-sm font-light text-ink placeholder:text-muted outline-none transition-colors focus:border-blush;
+    }
+    /* Same field, at the size that sits inside a rail or a toolbar. */
+    .tc-input-sm {
+        @apply px-3 py-2.5 text-[13.5px];
     }
     .tc-btn-dark {
-        @apply inline-flex items-center justify-center bg-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush;
+        @apply inline-flex items-center justify-center rounded-field bg-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush disabled:cursor-not-allowed disabled:bg-faint;
     }
     .tc-btn-outline {
-        @apply inline-flex items-center justify-center border border-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-ink transition-colors hover:bg-ink hover:text-white;
+        @apply inline-flex items-center justify-center rounded-field border border-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-ink transition-colors hover:bg-ink hover:text-white;
+    }
+    /* The blush call to action — the one button that asks for the sale. */
+    .tc-btn-blush {
+        @apply inline-flex items-center justify-center rounded-field bg-blush px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:bg-faint;
+    }
+    /* Size modifier — pair with any of the three above. */
+    .tc-btn-sm {
+        @apply px-5 py-2.5 text-[13px];
     }
     .tc-link {
         @apply font-medium text-blush underline underline-offset-2;
+    }
+
+    /* Surfaces ------------------------------------------------------------
+       A panel is a thing that sits *on* the page and says so: hairline, soft
+       lift, rounded. A quiet panel is the same shape filled with cream and no
+       border, for summaries that belong to the column they sit in. */
+    .tc-panel {
+        @apply rounded-card border border-line bg-white shadow-soft;
+    }
+    .tc-panel-quiet {
+        @apply rounded-card bg-cream p-7;
+    }
+    /* Every product photograph on the site sits in one of these — one radius
+       for the card, the thumbnail rail, the bag line and the summary. */
+    .tc-media {
+        @apply overflow-hidden rounded-card bg-cream;
+    }
+
+    /* Chips — sizes, colours, applied filters. Fully pill: they are words, not
+       boxes. `.tc-chip-on` is the selected state. */
+    .tc-chip {
+        @apply inline-flex items-center justify-center rounded-chip border border-line-2 px-3 py-1.5 text-[13px] transition-colors hover:border-blush hover:text-blush;
+    }
+    .tc-chip-on {
+        @apply border-blush bg-blush text-white hover:border-blush hover:text-white;
+    }
+    /* Small filled pill: the sale flag over a photograph, a stock line. */
+    .tc-badge {
+        @apply inline-flex w-fit items-center rounded-chip bg-blush px-2.5 py-1 text-[12px] font-medium text-white;
+    }
+
+    /* Quantity stepper. `overflow-hidden` is load-bearing — the middle input
+       carries its own border-x, which would otherwise cross the rounded corner. */
+    .tc-stepper {
+        @apply flex items-center overflow-hidden rounded-field border border-line-2;
     }
     /* Wordmark — set the way the logo is drawn: hairline geometric Jost,
        all-caps, generously letterspaced. Never bold this. */
@@ -202,12 +264,26 @@
     width: 1.75rem;
 }
 
-/* Product gallery: hover-zoom on the main image, active thumbnail ring. */
+/* Product gallery: zoom on the main image, active thumbnail ring. Zoom is
+   armed by its own toggle (see initZoom) — the frame only invites a click
+   while it is on. */
 [data-zoom] img {
     transition: transform 0.35s ease;
 }
 [data-zoom] img.is-zoomed {
     transform: scale(1.9);
+}
+[data-zoom].is-zoom-on {
+    cursor: zoom-in;
+}
+/* On a touch screen an armed frame belongs to the finger, not to the page:
+   without this the browser scrolls away instead of panning the photograph.
+   It is scoped to `.is-zoom-on` so an un-armed image never traps the scroll. */
+@media (pointer: coarse) {
+    [data-zoom].is-zoom-on {
+        cursor: default;
+        touch-action: none;
+    }
 }
 [data-gallery-thumb].is-active {
     outline: 1px solid var(--color-blush);
@@ -246,6 +322,14 @@ body.has-sticky-buy .tc-whatsapp {
    the rail stays where it has always been. From lg the rail is a sidebar again
    and neither rule applies. */
 html:not(.tc-js) [data-filter-toggle] {
+    display: none;
+}
+
+/* Same bargain for the two controls on the product photograph: both are pure
+   script, so with none running they are not offered. The heart beside them is
+   a real form and stays. */
+html:not(.tc-js) [data-zoom-toggle],
+html:not(.tc-js) [data-share] {
     display: none;
 }
 @media (max-width: 1023px) {
@@ -412,7 +496,7 @@ html:not(.tc-js) [data-filter-toggle] {
 }
 .group:hover .tc-card-media {
     transform: translateY(-5px);
-    box-shadow: 0 20px 36px -22px rgba(43, 37, 35, 0.55);
+    box-shadow: var(--shadow-lift);
 }
 /* The hover rail deals its three actions out one after another. */
 [data-card-rail] > * {

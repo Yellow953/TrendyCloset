@@ -305,23 +305,80 @@ function initGalleries() {
     });
 }
 
-// Hover zoom: scale the image and track the cursor with transform-origin, so
-// the point under the pointer is the point magnified.
+// Zoom: scale the image and track the pointer with transform-origin, so the
+// point under the finger or cursor is the point magnified. It used to bail
+// outright on a touch screen, which left phones with no zoom at all; instead
+// [data-zoom-toggle] arms it, and while armed a finger pans the photograph.
+// It starts armed only where a cursor can drive it — arming it on touch takes
+// the image out of the page scroll, which is the shopper's call to make.
 function initZoom() {
     document.querySelectorAll('[data-zoom]').forEach((box) => {
         const img = box.querySelector('img');
-        if (!img || window.matchMedia('(hover: none)').matches) return;
+        if (!img) return;
 
-        box.addEventListener('mousemove', (e) => {
+        const toggle = box.closest('[data-gallery]')?.querySelector('[data-zoom-toggle]');
+        let on = !window.matchMedia('(pointer: coarse)').matches;
+
+        // A finger can travel past the frame; clamping keeps the magnified
+        // point on the photograph rather than panning off its edge.
+        const pct = (v) => Math.min(Math.max(v, 0), 100);
+
+        const focus = (clientX, clientY) => {
             const rect = box.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            const x = pct(((clientX - rect.left) / rect.width) * 100);
+            const y = pct(((clientY - rect.top) / rect.height) * 100);
             img.style.transformOrigin = `${x}% ${y}%`;
-        });
-        box.addEventListener('mouseenter', () => img.classList.add('is-zoomed'));
-        box.addEventListener('mouseleave', () => {
+        };
+
+        const stop = () => {
             img.classList.remove('is-zoomed');
             img.style.transformOrigin = 'center';
+        };
+
+        const arm = () => {
+            box.classList.toggle('is-zoom-on', on);
+            toggle?.setAttribute('aria-pressed', String(on));
+            if (!on) stop();
+        };
+
+        toggle?.addEventListener('click', () => { on = !on; arm(); });
+        arm();
+
+        box.addEventListener('mousemove', (e) => { if (on) focus(e.clientX, e.clientY); });
+        box.addEventListener('mouseenter', () => { if (on) img.classList.add('is-zoomed'); });
+        box.addEventListener('mouseleave', stop);
+
+        box.addEventListener('touchstart', (e) => {
+            if (!on) return;
+            focus(e.touches[0].clientX, e.touches[0].clientY);
+            img.classList.add('is-zoomed');
+        }, { passive: true });
+        box.addEventListener('touchmove', (e) => {
+            if (on) focus(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        box.addEventListener('touchend', stop);
+        box.addEventListener('touchcancel', stop);
+    });
+}
+
+// Share the piece: the native sheet where the browser has one, the clipboard
+// everywhere else. A dismissed sheet is not a failure, so it says nothing.
+function initShare() {
+    document.querySelectorAll('[data-share]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const url = button.dataset.share || window.location.href;
+            const title = button.dataset.shareTitle || document.title;
+
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title, url });
+                    return;
+                }
+                await navigator.clipboard.writeText(url);
+                toast('Link copied');
+            } catch (err) {
+                if (err?.name !== 'AbortError') toast('Could not share that just now.');
+            }
         });
     });
 }
@@ -786,6 +843,7 @@ function init() {
     initStickyBuy();
     initGalleries();
     initZoom();
+    initShare();
     initQuantitySteppers();
     initClearables();
     initCountdowns();

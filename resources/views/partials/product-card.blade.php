@@ -30,14 +30,14 @@
     $extraSizes = max($sizes->count() - 5, 0);
 @endphp
 <div class="group relative">
-    <div class="tc-card-media relative {{ $h }} overflow-hidden rounded-xl bg-cream">
+    <div class="tc-card-media tc-media relative {{ $h }}">
         <a href="{{ route('product', $p) }}" class="block h-full w-full" aria-label="{{ $p->name }}">
             <x-img :src="$p->image_url" :alt="$p->name" :sizes="$imgSizes"
                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
         </a>
 
         @if($p->badge_label)
-            <div class="pointer-events-none absolute left-3 top-3 bg-blush px-2 py-1 text-[12px] font-medium text-white">{{ $p->badge_label }}</div>
+            <div class="tc-badge pointer-events-none absolute left-3 top-3">{{ $p->badge_label }}</div>
         @endif
 
         @if($p->relationLoaded('variants') && ! $p->in_stock)
@@ -89,7 +89,7 @@
                 <x-swatch :color="$colors->first()" class="mr-0.5" />
             @endif
             @foreach($sizes->take(5) as $size)
-                <span class="border border-line px-1.5 py-0.5 text-[11px] font-light leading-none tracking-[0.06em] text-muted-2">{{ $size }}</span>
+                <span class="tc-chip border-line px-1.5 py-0.5 text-[11px] font-light leading-none tracking-[0.06em] text-muted-2">{{ $size }}</span>
             @endforeach
             @if($extraSizes)
                 <span class="text-[12px] font-light text-muted">+{{ $extraSizes }}</span>

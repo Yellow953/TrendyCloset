@@ -17,7 +17,7 @@
         <div class="flex-1 overflow-y-auto px-5 py-4">
             @foreach($lines as $line)
                 <div class="flex gap-3.5 border-b border-line py-4 last:border-0">
-                    <a href="{{ route('product', $line['variant']->product) }}" class="h-[92px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-cream">
+                    <a href="{{ route('product', $line['variant']->product) }}" class="tc-media h-[92px] w-[72px] shrink-0 rounded-field">
                         <x-img :src="$line['variant']->product->image_url" :alt="$line['variant']->product->name"
                                sizes="72px" class="h-full w-full object-cover" />
                     </a>
@@ -25,7 +25,7 @@
                         <a href="{{ route('product', $line['variant']->product) }}" class="block truncate text-[14.5px] font-normal transition-colors hover:text-blush">{{ $line['variant']->product->name }}</a>
                         <div class="mt-0.5 text-[13px] font-light text-muted-2">{{ $line['variant']->label }}</div>
                         <div class="mt-2 flex items-center justify-between gap-3">
-                            <form method="POST" action="{{ route('cart.update', $line['variant']) }}" data-async data-drawer-refresh class="flex items-center border border-line-2">
+                            <form method="POST" action="{{ route('cart.update', $line['variant']) }}" data-async data-drawer-refresh class="tc-stepper">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" name="quantity" value="{{ $line['qty'] - 1 }}" aria-label="Decrease quantity" class="px-2.5 py-1 text-[15px] leading-none transition-colors hover:text-blush">−</button>
@@ -46,7 +46,7 @@
 
         <div class="border-t border-line px-5 py-4">
             @if($freeShippingRemainder > 0)
-                <div class="mb-3 rounded-lg bg-cream-3 px-3 py-2 text-center text-[13px] font-light">
+                <div class="mb-3 rounded-field bg-cream-3 px-3 py-2 text-center text-[13px] font-light">
                     {{ \App\Models\Product::money($freeShippingRemainder) }} away from free shipping
                 </div>
             @endif

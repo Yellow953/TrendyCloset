@@ -33,7 +33,7 @@
              The button hides itself when the script never ran (see app.css), and
              the rail is a plain sidebar again from lg. --}}
         <button type="button" data-filter-toggle aria-controls="tc-filters" aria-expanded="false"
-                class="flex items-center justify-center gap-2 border border-ink px-5 py-3 text-[14px] font-medium lg:hidden">
+                class="tc-btn-outline gap-2 px-5 py-3 text-[14px] lg:hidden">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[17px] w-[17px]"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
             <span>Filters</span>
             @if($filterCount)
@@ -46,7 +46,7 @@
              intersects, so it would never be told to arrive and would open
              blank. Furniture the shopper asked for should just be there. --}}
         <aside id="tc-filters" data-filter-panel class="flex w-full flex-col gap-5 lg:w-[310px] lg:flex-none">
-            <details open class="group/f border border-line">
+            <details open class="tc-panel group/f overflow-hidden">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                     <span class="text-[16px] font-medium">Shop by Category</span>
                     <span class="text-[18px] leading-none text-muted"><span class="group-open/f:hidden">+</span><span class="hidden group-open/f:inline">−</span></span>
@@ -73,7 +73,7 @@
                 </div>
             </details>
 
-            <details open class="group/f border border-line">
+            <details open class="tc-panel group/f overflow-hidden">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                     <span class="text-[16px] font-medium">Highlight</span>
                     <span class="text-[18px] leading-none text-muted"><span class="group-open/f:hidden">+</span><span class="hidden group-open/f:inline">−</span></span>
@@ -88,7 +88,7 @@
             </details>
 
             @if($sizes->isNotEmpty())
-                <details open class="group/f border border-line">
+                <details open class="tc-panel group/f overflow-hidden">
                     <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                         <span class="text-[16px] font-medium">Size</span>
                         <span class="text-[18px] leading-none text-muted"><span class="group-open/f:hidden">+</span><span class="hidden group-open/f:inline">−</span></span>
@@ -97,7 +97,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach($sizes as $s)
                                 <a href="{{ $filters['size'] === $s ? $clearUrl(['size']) : $filterUrl(['size' => $s]) }}"
-                                   class="min-w-[52px] border px-2 py-2 text-center text-[13.5px] transition-colors {{ $filters['size'] === $s ? 'border-blush bg-blush text-white' : 'border-line-2 hover:border-blush hover:text-blush' }}">{{ $s }}</a>
+                                   class="tc-chip min-w-[52px] py-2 text-[13.5px] {{ $filters['size'] === $s ? 'tc-chip-on' : '' }}">{{ $s }}</a>
                             @endforeach
                         </div>
                     </div>
@@ -105,7 +105,7 @@
             @endif
 
             @if($colors->isNotEmpty())
-                <details open class="group/f border border-line">
+                <details open class="tc-panel group/f overflow-hidden">
                     <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                         <span class="text-[16px] font-medium">Colour</span>
                         <span class="text-[18px] leading-none text-muted"><span class="group-open/f:hidden">+</span><span class="hidden group-open/f:inline">−</span></span>
@@ -123,7 +123,7 @@
                 </details>
             @endif
 
-            <details open class="group/f border border-line">
+            <details open class="tc-panel group/f overflow-hidden">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-6 py-4">
                     <span class="text-[16px] font-medium">Price</span>
                     <span class="text-[18px] leading-none text-muted"><span class="group-open/f:hidden">+</span><span class="hidden group-open/f:inline">−</span></span>
@@ -134,12 +134,12 @@
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
                         <div class="flex items-center gap-2">
-                            <input type="number" name="min" min="0" step="1" value="{{ $filters['min'] }}" placeholder="{{ (int) $priceFloor }}" aria-label="Minimum price" class="w-full border border-line-2 px-3 py-2.5 text-[13.5px] font-light outline-none focus:border-blush">
+                            <input type="number" name="min" min="0" step="1" value="{{ $filters['min'] }}" placeholder="{{ (int) $priceFloor }}" aria-label="Minimum price" class="tc-input tc-input-sm">
                             <span class="text-muted">—</span>
-                            <input type="number" name="max" min="0" step="1" value="{{ $filters['max'] }}" placeholder="{{ (int) ceil($priceCeiling) }}" aria-label="Maximum price" class="w-full border border-line-2 px-3 py-2.5 text-[13.5px] font-light outline-none focus:border-blush">
+                            <input type="number" name="max" min="0" step="1" value="{{ $filters['max'] }}" placeholder="{{ (int) ceil($priceCeiling) }}" aria-label="Maximum price" class="tc-input tc-input-sm">
                         </div>
                         <div class="flex items-center gap-3">
-                            <button type="submit" class="border border-ink px-5 py-2 text-[13px] font-medium transition-colors hover:bg-ink hover:text-white">Apply</button>
+                            <button type="submit" class="tc-btn-outline tc-btn-sm">Apply</button>
                             @if($filters['min'] || $filters['max'])
                                 <a href="{{ $clearUrl(['min', 'max']) }}" class="text-[12.5px] font-light text-blush underline underline-offset-2">Reset</a>
                             @endif
@@ -149,7 +149,7 @@
                 </div>
             </details>
 
-            <a href="{{ route('listing', ['edit' => 'sale']) }}" class="group relative block h-[320px] overflow-hidden bg-tan">
+            <a href="{{ route('listing', ['edit' => 'sale']) }}" class="group relative block h-[320px] overflow-hidden rounded-card bg-tan">
                 <x-img :src="$sideBanner['img']" alt="Shop the sale" sizes="310px"
                        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-end gap-1.5 bg-gradient-to-t from-white/85 to-transparent p-6">
@@ -182,7 +182,7 @@
                         <option value="price-desc" @selected($filters['sort'] === 'price-desc')>Price: high to low</option>
                         <option value="rating" @selected($filters['sort'] === 'rating')>Top rated</option>
                     </select>
-                    <noscript><button type="submit" class="border border-line-2 px-3 py-1.5 text-[13px]">Go</button></noscript>
+                    <noscript><button type="submit" class="tc-btn-outline tc-btn-sm">Go</button></noscript>
                 </form>
             </div>
 
@@ -190,7 +190,7 @@
             @if($activeFilters->isNotEmpty())
                 <div class="mb-6 flex flex-wrap items-center gap-2.5">
                     @foreach($activeFilters as $key => $value)
-                        <a href="{{ $clearUrl([$key]) }}" class="flex items-center gap-2 border border-line-2 px-3 py-1.5 text-[13px] font-light transition-colors hover:border-blush hover:text-blush">
+                        <a href="{{ $clearUrl([$key]) }}" class="tc-chip gap-2 font-light">
                             {{ $filterLabels[$key] ?? ucfirst($key) }}: {{ $value }} <span class="text-[14px] leading-none">×</span>
                         </a>
                     @endforeach
@@ -199,7 +199,7 @@
             @endif
 
             @if($products->isEmpty())
-                <div data-reveal class="border border-line bg-cream-3 px-6 py-20 text-center">
+                <div data-reveal class="tc-panel bg-cream-3 px-6 py-20 text-center">
                     @if($filters['q'])
                         <div class="text-[20px] font-normal">Nothing found for “{{ $filters['q'] }}”</div>
                         <div class="mt-2 text-[14px] font-light text-muted-2">Try a shorter word — a colour, a category or part of the name.</div>

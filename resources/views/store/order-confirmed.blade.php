@@ -19,7 +19,7 @@
             </p>
         </div>
 
-        <div class="mt-12 border border-line-2">
+        <div class="mt-12 overflow-hidden rounded-panel border border-line-2 shadow-soft">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line-2 bg-cream-3 px-6 py-4">
                 <div>
                     <div class="text-[11px] font-medium tracking-[0.18em] text-muted uppercase">Order</div>

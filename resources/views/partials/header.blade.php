@@ -43,7 +43,7 @@
             <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">HOME</a>
             <span class="group/mega static">
                 <a href="{{ route('listing') }}" class="inline-flex items-center gap-1.5 py-1 {{ $active === 'shop' ? 'border-b-2 border-blush text-blush' : 'tc-nav-link hover:text-blush' }}">SHOP <span class="text-[10px] transition-transform duration-300 group-hover/mega:rotate-180">▾</span></a>
-                <div class="invisible absolute inset-x-0 top-full z-30 -translate-y-2 columns-4 gap-x-12 border-b border-line-3 bg-white px-16 pb-9 pt-8 opacity-0 shadow-[0_34px_54px_rgba(43,37,35,.14)] transition-all duration-200 ease-out group-hover/mega:visible group-hover/mega:translate-y-0 group-hover/mega:opacity-100">
+                <div class="invisible absolute inset-x-0 top-full z-30 -translate-y-2 columns-4 gap-x-12 overflow-hidden rounded-b-panel border-b border-line-3 bg-white px-16 pb-9 pt-8 opacity-0 shadow-lift transition-all duration-200 ease-out group-hover/mega:visible group-hover/mega:translate-y-0 group-hover/mega:opacity-100">
                     @foreach($navTree as $root)
                         <div class="mb-7 break-inside-avoid">
                             <a href="{{ route('listing', $root) }}" class="mb-3 block text-[12px] font-medium tracking-[0.18em] text-blush hover:underline hover:underline-offset-4">{{ Str::upper($root->name) }}</a>

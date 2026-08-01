@@ -17,7 +17,7 @@
 
     {{-- Story --}}
     <div class="flex flex-col items-center gap-14 px-8 py-14 md:px-16 lg:flex-row">
-        <div class="h-[380px] w-full flex-1 overflow-hidden">
+        <div class="h-[380px] w-full flex-1 overflow-hidden rounded-panel">
             <x-img :src="$portrait['img']" alt="Leila Konsol" sizes="(min-width: 1024px) 45vw, 100vw"
                    class="h-full w-full object-cover" />
         </div>
@@ -67,6 +67,6 @@
     <div class="bg-ink px-8 py-11 text-center text-white md:px-16">
         <div class="text-[26px] font-normal">Follow the journey on Instagram</div>
         <div class="mt-2 text-[14px] font-light text-cream">@trendycloset.byleilakonsol</div>
-        <a href="{{ route('listing') }}" class="mt-6 inline-flex items-center justify-center border border-cream px-8 py-3.5 text-[14px] font-medium tracking-[0.06em] text-cream transition-colors hover:bg-cream hover:text-ink">Shop the closet</a>
+        <a href="{{ route('listing') }}" class="tc-btn-outline mt-6 border-cream py-3.5 text-[14px] text-cream hover:bg-cream hover:text-ink">Shop the closet</a>
     </div>
 @endsection

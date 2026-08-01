@@ -32,7 +32,7 @@
                 <textarea name="message" rows="4" placeholder="Message" required class="tc-input h-[140px] resize-none">{{ old('message') }}</textarea>
                 @error('message')<div class="mt-1 text-[12.5px] text-blush">{{ $message }}</div>@enderror
             </div>
-            <button type="submit" class="w-full bg-ink py-4 text-center text-[14px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush sm:w-[180px]">Send Message</button>
+            <button type="submit" class="tc-btn-dark w-full text-[14px] sm:w-[180px]">Send Message</button>
         </form>
 
         {{-- Info --}}

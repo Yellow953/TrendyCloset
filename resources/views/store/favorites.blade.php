@@ -8,7 +8,7 @@
 
     <div class="px-5 md:px-10 py-9">
         @if($products->isEmpty())
-            <div class="border border-line bg-cream-3 px-6 py-20 text-center">
+            <div class="tc-panel bg-cream-3 px-6 py-20 text-center">
                 <div class="text-[22px] font-normal">Nothing saved yet</div>
                 <div class="mt-2 text-[14.5px] font-light text-muted-2">Tap ♡ on a piece you like and it will wait for you here.</div>
                 <a href="{{ route('listing') }}" class="tc-btn-dark mt-6">Browse the shop</a>

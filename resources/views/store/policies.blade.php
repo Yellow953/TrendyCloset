@@ -8,14 +8,14 @@
 
     <div class="flex flex-col gap-10 px-8 py-12 md:px-16 lg:flex-row">
         {{-- Section nav — one entry per policy page --}}
-        <nav class="flex flex-col gap-0.5 lg:flex-[0_0_260px]">
+        <nav class="flex flex-col gap-1 lg:flex-[0_0_260px]">
             @foreach($topics as $slug => $topic)
                 <a href="{{ route('policies', $slug) }}"
-                   class="border-b border-line px-[18px] py-3.5 text-[14px] transition-colors {{ $slug === $current ? 'border-ink bg-ink font-medium text-white' : 'text-muted-3 hover:text-blush' }}">
+                   class="rounded-field px-[18px] py-3.5 text-[14px] transition-colors {{ $slug === $current ? 'bg-ink font-medium text-white' : 'text-muted-3 hover:bg-cream-3 hover:text-blush' }}">
                     {{ $topic['title'] }}
                 </a>
             @endforeach
-            <div class="mt-6 bg-cream-3 p-5 text-[13.5px] font-light leading-[1.7] text-muted-2">
+            <div class="mt-6 rounded-card bg-cream-3 p-5 text-[13.5px] font-light leading-[1.7] text-muted-2">
                 Still stuck? <a href="{{ route('contact') }}" class="tc-link">Message us</a> — we answer within 24 hours.
             </div>
         </nav>
@@ -40,7 +40,7 @@
                                 <div class="mb-2 text-[13px] font-medium tracking-[0.08em] text-blush">{{ Str::upper($label) }}</div>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($sizes as $size)
-                                        <span class="min-w-[52px] border border-line-2 py-2 text-center text-[14px]">{{ $size }}</span>
+                                        <span class="tc-chip min-w-[52px] py-2 text-[14px]">{{ $size }}</span>
                                     @endforeach
                                 </div>
                             </div>
@@ -50,7 +50,7 @@
 
                 <section>
                     <h2 class="mb-3 text-[17px] font-medium">Measurements</h2>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto rounded-card border border-line px-5">
                         <table class="w-full min-w-[460px] border-collapse text-[14px] font-light">
                             <thead>
                                 <tr class="border-b border-line-2 text-left text-[12.5px] font-medium tracking-[0.08em] text-muted">
@@ -59,7 +59,7 @@
                             </thead>
                             <tbody class="text-muted-3">
                                 @foreach([['XS', '78–82', '60–64', '86–90'], ['S', '82–86', '64–68', '90–94'], ['M', '86–92', '68–74', '94–100'], ['L', '92–98', '74–80', '100–106'], ['XL', '98–104', '80–86', '106–112'], ['2XL', '104–112', '86–94', '112–120']] as $row)
-                                    <tr class="border-b border-line">
+                                    <tr class="border-b border-line last:border-0">
                                         <td class="py-2.5 pr-4 font-medium text-ink">{{ $row[0] }}</td>
                                         <td class="py-2.5 pr-4">{{ $row[1] }}</td>
                                         <td class="py-2.5 pr-4">{{ $row[2] }}</td>

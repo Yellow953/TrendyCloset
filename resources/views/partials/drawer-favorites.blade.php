@@ -17,7 +17,7 @@
         <div class="flex-1 overflow-y-auto px-5 py-4">
             @foreach($products as $p)
                 <div class="flex gap-3.5 border-b border-line py-4 last:border-0">
-                    <a href="{{ route('product', $p) }}" class="h-[92px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-cream">
+                    <a href="{{ route('product', $p) }}" class="tc-media h-[92px] w-[72px] shrink-0 rounded-field">
                         <x-img :src="$p->image_url" :alt="$p->name" sizes="72px" class="h-full w-full object-cover" />
                     </a>
                     <div class="min-w-0 flex-1">
@@ -28,7 +28,7 @@
                                 <form method="POST" action="{{ route('cart.add') }}" data-async data-drawer-refresh>
                                     @csrf
                                     <input type="hidden" name="variant_id" value="{{ $p->default_variant->id }}">
-                                    <button type="submit" class="border border-ink px-3 py-1.5 text-[12.5px] font-medium transition-colors hover:bg-ink hover:text-white">Add to bag</button>
+                                    <button type="submit" class="tc-btn-outline tc-btn-sm">Add to bag</button>
                                 </form>
                             @else
                                 <span class="text-[12.5px] font-light text-muted-2">Sold out</span>
