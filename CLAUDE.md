@@ -8,8 +8,9 @@ Guidance for working in this repository.
 the "Storefront Explorations" Claude Design doc. The storefront is now **database-driven**:
 categories, products, imagery, pricing, stock, favourites, the bag and the home-page hero all come
 from real data. What is still hard-coded is the *editorial* furniture with no table behind it
-(testimonials, Instagram strip, About copy). **Checkout does not place an order
-yet** — the payment/address form is presentational and nothing writes to `orders`.
+(testimonials, Instagram strip, About copy). **Checkout places a real order** (`App\Services\Checkout`)
+as `pending`; there is no payment gateway, so no card details are collected and the back office
+arranges payment.
 
 ## Stack
 
@@ -68,11 +69,19 @@ and do not add auth traits to `Customer` without revisiting this decision.
   `UserRole::managesStore()`. Since only staff can log in, `auth` alone gates the CRM; the `admin`
   middleware alias (`EnsureUserIsAdmin`, registered in `bootstrap/app.php`) is the narrower gate for
   user management, coupons, and store settings.
-- `Customer::forEmail($email, $attrs)` matches-or-creates on a normalised (lowercased, trimmed)
-  email — use it at checkout so repeat buyers collapse into one record.
+- **Phone is the identity, not email.** Checkout asks for a name and a phone number; email is
+  optional and nullable on both `customers` and `orders`. `Customer::forPhone($phone, $attrs)`
+  matches-or-creates on `Customer::normalizePhone()` output (digits only, `00`/`+` stripped, a bare
+  local number given `store.contact.country_code`), so "76 158 735" and "+961 76 158 735" are one
+  record. `customers.phone` is unique and stores the **normalised** form; `orders.ship_phone` stores
+  the number **as typed**. Email is filled in when offered but never matched on.
+- The back office reaches customers on WhatsApp: order and customer pages link `wa.me`, never
+  `tel:`, and show email only when there is one. Search covers phone, email and name.
 - `orders.customer_id` is nullable + `nullOnDelete` so deleting a customer never destroys sales
   history. The `email` / `ship_*` columns on `orders` are a deliberate **snapshot of the order as
-  placed** — never refactor them into a join on `customers`.
+  placed** — never refactor them into a join on `customers`. `ship_country` is not asked for at
+  checkout (the address form is name / phone / street / city only) and defaults to
+  `store.contact.country`.
 **The bag** — `App\Support\Cart` (scoped binding, session key `tc_cart`). There is still **no `Cart`
 model or `carts` table**: an abandoned bag is not a CRM record, and shoppers check out as guests.
 - The session stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are
@@ -118,9 +127,10 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
   The listing action passes `navTree`/`catalog` explicitly because its sidebar walks the same tree.
 
 **Shared support** (`app/Support/`) — `Cart`, `Visitor`, plus:
-- `Catalog` (scoped) — the navigation tree, flattened list, per-category product counts (a parent's
-  count includes its children) and the mega-menu `spotlight()` product. Resolved once per request so
-  header, sidebar and home carousel share one set of queries.
+- `Catalog` (scoped) — the navigation tree, flattened list and per-category product counts (a
+  parent's count includes its children). Resolved once per request so header, sidebar and home
+  carousel share one set of queries. (It used to expose a `spotlight()` product for the mega-menu's
+  image panel; that panel was removed, and the query with it.)
 - `Swatch` — maps variant colour names to hex for the filter/PDP swatches; unknown colours fall back
   to a neutral chip rather than vanishing.
 
@@ -140,7 +150,8 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `drawer-bag` / `drawer-favorites`).
   - `header` is **sticky** (`position: sticky`), with a centred single-line announcement bar that
     collapses on scroll: `initStickyHeader()` toggles `.is-scrolled`, the CSS does the rest. Nav is
-    HOME / SHOP (mega-menu from the category tree) / ABOUT / CONTACT; the right side is three icon
+    HOME / SHOP (mega-menu from the category tree — link columns only; the promoted-product image
+    panel that used to sit on its right was removed) / ABOUT / CONTACT; the right side is three icon
     actions — search, favourites, bag — with count badges (`[data-fav-count]`, `[data-bag-count]`,
     updated in place by `app.js`). There is deliberately **no account icon**: only staff log in, and
     the login page is not shopper-facing.
@@ -211,6 +222,12 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   floating WhatsApp button lifts clear of it.
 - **WhatsApp** — `partials/whatsapp.blade.php` renders a floating button on every storefront page
   from `config/store.php` (`WHATSAPP_NUMBER` / `WHATSAPP_MESSAGE`); an empty number hides it.
+- **Contact details are config, never markup.** `config/store.php`'s `contact` block holds the
+  address lines, the display number, the Google Maps links and the opening hours; `config/seo.php`'s
+  `email` holds the address (it is also what the Organization schema and `/llms.txt` quote). Footer,
+  contact page, About's "Visit us" map and the policy prose all read from those two keys — if a
+  detail changes, it changes in one place. The number is **WhatsApp-only**: link it to `wa.me`,
+  never `tel:`, and do not put `telephone` in the schema.
 - **Blade gotcha:** the inline `@php(...)` form has miscompiled here (emitting `<?php(...)` with no
   closing tag, which swallows the rest of the file). Prefer a `@php ... @endphp` block, and keep it
   **inside** `@section`.
