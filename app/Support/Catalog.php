@@ -20,8 +20,6 @@ class Catalog
     /** @var array<int, int>|null */
     private ?array $counts = null;
 
-    private ?Product $spotlight = null;
-
     /**
      * Active root categories with their active children, in merchandised order.
      *
@@ -87,18 +85,4 @@ class Catalog
         return $this->counts()[$category->id] ?? 0;
     }
 
-    /**
-     * The product the mega-menu puts a picture to — the newest featured piece
-     * that actually has imagery.
-     */
-    public function spotlight(): ?Product
-    {
-        return $this->spotlight ??= Product::query()
-            ->active()
-            ->featured()
-            ->whereHas('images')
-            ->with('images')
-            ->orderByDesc('id')
-            ->first();
-    }
 }

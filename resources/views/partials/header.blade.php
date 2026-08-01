@@ -2,11 +2,6 @@
      composer in AppServiceProvider. --}}
 @php
     $active = $active ?? null;
-    $spotlight = $catalog->spotlight();
-    // Roots with subcategories become mega-menu columns; the rest are listed
-    // together so a flat category is never unreachable from the nav.
-    $columns = $navTree->filter(fn ($c) => $c->children->isNotEmpty())->take(3);
-    $flatRoots = $navTree->filter(fn ($c) => $c->children->isEmpty());
 @endphp
 {{-- Sticky: the nav follows the page, and the announcement bar above it
      collapses on scroll (see .is-scrolled in app.css, driven by app.js). --}}
@@ -48,45 +43,19 @@
             <a href="{{ route('home') }}" class="{{ $active === 'home' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">HOME</a>
             <span class="group/mega static">
                 <a href="{{ route('listing') }}" class="inline-flex items-center gap-1.5 py-1 {{ $active === 'shop' ? 'border-b-2 border-blush text-blush' : 'tc-nav-link hover:text-blush' }}">SHOP <span class="text-[10px] transition-transform duration-300 group-hover/mega:rotate-180">▾</span></a>
-                {{-- Mega menu, built from the category tree --}}
-                <div class="invisible absolute inset-x-0 top-full z-30 flex -translate-y-2 gap-14 border-b border-line-3 bg-white px-16 pb-10 pt-8 opacity-0 shadow-[0_34px_54px_rgba(43,37,35,.14)] transition-all duration-200 ease-out group-hover/mega:visible group-hover/mega:translate-y-0 group-hover/mega:opacity-100">
-                    @foreach($columns as $column)
-                        <div class="flex-1">
-                            <a href="{{ route('listing', $column) }}" class="mb-3.5 block text-[12px] font-medium tracking-[0.18em] text-blush">{{ Str::upper($column->name) }}</a>
-                            <div class="flex flex-col text-[14px] font-light leading-[2.2] text-muted-3">
-                                @foreach($column->children as $child)
+                <div class="invisible absolute inset-x-0 top-full z-30 -translate-y-2 columns-4 gap-x-12 border-b border-line-3 bg-white px-16 pb-9 pt-8 opacity-0 shadow-[0_34px_54px_rgba(43,37,35,.14)] transition-all duration-200 ease-out group-hover/mega:visible group-hover/mega:translate-y-0 group-hover/mega:opacity-100">
+                    @foreach($navTree as $root)
+                        <div class="mb-7 break-inside-avoid">
+                            <a href="{{ route('listing', $root) }}" class="mb-3 block text-[12px] font-medium tracking-[0.18em] text-blush hover:underline hover:underline-offset-4">{{ Str::upper($root->name) }}</a>
+                            <div class="flex flex-col text-[14px] font-light leading-[2.1] text-muted-3">
+                                @forelse($root->children as $child)
                                     <a href="{{ route('listing', $child) }}" class="hover:text-blush">{{ $child->name }}</a>
-                                @endforeach
+                                @empty
+                                    <a href="{{ route('listing', $root) }}" class="hover:text-blush">Shop all</a>
+                                @endforelse
                             </div>
                         </div>
                     @endforeach
-
-                    <div class="flex-1">
-                        <div class="mb-3.5 text-[12px] font-medium tracking-[0.18em] text-blush">EDITS</div>
-                        <div class="flex flex-col text-[14px] font-light leading-[2.2] text-muted-3">
-                            <a href="{{ route('listing', ['edit' => 'new']) }}" class="hover:text-blush">New in</a>
-                            <a href="{{ route('listing', ['edit' => 'featured']) }}" class="hover:text-blush">Leila's picks</a>
-                            <a href="{{ route('listing', ['edit' => 'sale']) }}" class="hover:text-blush">Sale</a>
-                            @foreach($flatRoots as $root)
-                                <a href="{{ route('listing', $root) }}" class="hover:text-blush">{{ $root->name }}</a>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    @if($spotlight)
-                        <div class="flex-[0_0_300px]">
-                            {{-- The mega-menu sits inside the viewport even while
-                                 hidden, so `lazy` cannot defer this one — keeping
-                                 it to the 300px it renders at is what makes it
-                                 cheap. --}}
-                            <div class="h-[180px] overflow-hidden rounded">
-                                <x-img :src="$spotlight->image_url" :alt="$spotlight->name" sizes="300px"
-                                       class="h-full w-full object-cover" />
-                            </div>
-                            <div class="mt-3 text-[15px] font-normal">{{ $spotlight->name }}</div>
-                            <a href="{{ route('product', $spotlight) }}" class="mt-1 inline-block text-[13px] font-medium text-blush underline underline-offset-2">Shop the piece</a>
-                        </div>
-                    @endif
                 </div>
             </span>
             <a href="{{ route('about') }}" class="{{ $active === 'about' ? 'text-blush' : 'tc-nav-link hover:text-blush' }}">ABOUT</a>
@@ -131,10 +100,31 @@
         <nav class="flex flex-col px-5 py-2 text-[15px] font-medium tracking-[0.04em]">
             <a href="{{ route('home') }}" class="border-b border-line py-3.5 {{ $active === 'home' ? 'text-blush' : '' }}">HOME</a>
             @foreach($navTree as $root)
-                <a href="{{ route('listing', $root) }}" class="flex items-center justify-between border-b border-line py-3.5">
-                    {{ Str::upper($root->name) }}
-                    <span class="text-[12px] font-light text-muted">{{ $catalog->countFor($root) }}</span>
-                </a>
+                @if($root->children->isNotEmpty())
+                    <details class="group border-b border-line">
+                        <summary class="flex cursor-pointer list-none items-center justify-between py-3.5 [&::-webkit-details-marker]:hidden">
+                            {{ Str::upper($root->name) }}
+                            <span class="flex items-center gap-3 text-[12px] font-light text-muted">
+                                {{ $catalog->countFor($root) }}
+                                <span class="text-[10px] transition-transform duration-200 group-open:rotate-180">▾</span>
+                            </span>
+                        </summary>
+                        <div class="tc-rise-in flex flex-col pb-2 pl-3 text-[14px] font-light tracking-normal text-muted-3">
+                            <a href="{{ route('listing', $root) }}" class="py-2">All {{ $root->name }}</a>
+                            @foreach($root->children as $child)
+                                <a href="{{ route('listing', $child) }}" class="flex items-center justify-between py-2">
+                                    {{ $child->name }}
+                                    <span class="text-[12px] text-muted">{{ $catalog->countFor($child) }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </details>
+                @else
+                    <a href="{{ route('listing', $root) }}" class="flex items-center justify-between border-b border-line py-3.5">
+                        {{ Str::upper($root->name) }}
+                        <span class="text-[12px] font-light text-muted">{{ $catalog->countFor($root) }}</span>
+                    </a>
+                @endif
             @endforeach
             <a href="{{ route('about') }}" class="border-b border-line py-3.5 {{ $active === 'about' ? 'text-blush' : '' }}">ABOUT</a>
             <a href="{{ route('contact') }}" class="border-b border-line py-3.5 {{ $active === 'contact' ? 'text-blush' : '' }}">CONTACT</a>
