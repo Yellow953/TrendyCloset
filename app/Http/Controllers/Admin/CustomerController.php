@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 /**
  * The CRM side. Customers never sign in (see the identity split in CLAUDE.md) —
- * these are records matched on email at checkout, so the shop can see repeat
+ * these are records matched on phone at checkout, so the shop can see repeat
  * business and keep notes against a name.
  */
 class CustomerController extends Controller
@@ -53,14 +54,19 @@ class CustomerController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('customers', 'email')->ignore($customer)],
-            'phone' => ['nullable', 'string', 'max:40'],
+            'phone' => ['required', 'string', 'min:6', 'max:40'],
+            'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'marketing_opt_in' => ['nullable', 'boolean'],
         ]);
 
-        $data['email'] = mb_strtolower(trim($data['email']));
+        $data['phone'] = Customer::normalizePhone($data['phone']);
+        $data['email'] = $data['email'] ? mb_strtolower(trim($data['email'])) : null;
         $data['marketing_opt_in'] = $request->boolean('marketing_opt_in');
+
+        Validator::make($data, [
+            'phone' => [Rule::unique('customers', 'phone')->ignore($customer)],
+        ])->validate();
 
         $customer->update($data);
 

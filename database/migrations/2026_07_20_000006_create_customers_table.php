@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('phone')->unique();
+            $table->string('email')->nullable();
             $table->boolean('marketing_opt_in')->default(false);
             $table->text('notes')->nullable();
             $table->timestamps();

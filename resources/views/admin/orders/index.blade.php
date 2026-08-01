@@ -9,7 +9,7 @@
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
                 <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Order number, email or name…" class="ad-input">
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Order number, phone or name…" class="ad-input">
             </div>
 
             <div class="w-[160px]">
@@ -61,7 +61,7 @@
                                 <td>
                                     <div class="max-w-[220px]">
                                         <div class="truncate font-normal">{{ $order->customer?->name ?? $order->ship_name }}</div>
-                                        <div class="truncate text-[11.5px] font-normal text-slate-400">{{ $order->email }}</div>
+                                        <div class="truncate text-[11.5px] font-normal text-slate-400">{{ $order->ship_phone }}</div>
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap">

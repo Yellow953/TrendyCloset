@@ -2,14 +2,14 @@
 
 @section('title', 'Customers')
 @section('heading', 'Customers')
-@section('subheading', number_format($customers->total()).' '.Str::plural('record', $customers->total()).'. Customers never sign in — these are CRM records matched on email at checkout.')
+@section('subheading', number_format($customers->total()).' '.Str::plural('record', $customers->total()).'. Customers never sign in — these are CRM records matched on phone at checkout.')
 
 @section('content')
     <div class="ad-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
                 <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, email or phone…" class="ad-input">
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, phone or email…" class="ad-input">
             </div>
 
             <div class="w-[170px]">
@@ -37,14 +37,14 @@
 
         @if($customers->isEmpty())
             <x-admin.empty icon="◍" title="No customers match"
-                           body="A record is created the first time someone checks out with a given email address." />
+                           body="A record is created the first time someone checks out with a given phone number." />
         @else
             <div class="overflow-x-auto">
                 <table class="ad-table">
                     <thead>
                         <tr>
                             <th>Customer</th>
-                            <th>Email</th>
+                            <th>Phone</th>
                             <th class="text-right">Orders</th>
                             <th class="text-right">Lifetime</th>
                             <th>Last order</th>
@@ -58,12 +58,12 @@
                                 <td>
                                     <a href="{{ route('admin.customers.show', $customer) }}" class="flex items-center gap-2.5 group">
                                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[12px] font-medium text-slate-900">
-                                            {{ strtoupper(mb_substr($customer->name ?: $customer->email, 0, 1)) }}
+                                            {{ strtoupper(mb_substr($customer->label(), 0, 1)) }}
                                         </span>
                                         <span class="max-w-[180px] truncate font-medium group-hover:text-slate-900">{{ $customer->name ?: '—' }}</span>
                                     </a>
                                 </td>
-                                <td class="max-w-[220px] truncate font-normal text-slate-600">{{ $customer->email }}</td>
+                                <td class="ad-figure max-w-[220px] truncate font-normal text-slate-600">{{ $customer->phone }}</td>
                                 <td class="ad-figure text-right">{{ $customer->orders_count }}</td>
                                 <td class="ad-figure text-right font-medium">{{ \App\Models\Product::money($customer->lifetime_value ?? 0) }}</td>
                                 <td class="font-normal whitespace-nowrap text-slate-400">

@@ -14,17 +14,17 @@ return new class extends Migration
             $table->foreignId('coupon_id')->nullable()->constrained()->nullOnDelete();
             $table->string('order_number')->unique();
             $table->string('status')->default('pending');
-            $table->string('email');
+            $table->string('email')->nullable();
 
             // Shipping details
             $table->string('ship_name');
+            $table->string('ship_phone');
             $table->string('ship_line1');
             $table->string('ship_line2')->nullable();
             $table->string('ship_city');
             $table->string('ship_region')->nullable();
             $table->string('ship_postcode')->nullable();
-            $table->string('ship_country');
-            $table->string('ship_phone')->nullable();
+            $table->string('ship_country')->nullable();
 
             // Money
             $table->decimal('subtotal', 10, 2)->default(0);

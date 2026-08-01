@@ -138,8 +138,8 @@ class Order extends Model
     }
 
     /**
-     * Back-office search: order number, customer email or the name on the
-     * parcel — whichever the person on the phone reads out.
+     * Back-office search: order number, phone, email or the name on the parcel
+     * — whichever the person on the phone reads out.
      *
      * @param  Builder<Order>  $query
      */
@@ -149,6 +149,7 @@ class Order extends Model
 
         $query->where(function (Builder $q) use ($like) {
             $q->where('order_number', 'like', $like)
+                ->orWhere('ship_phone', 'like', $like)
                 ->orWhere('email', 'like', $like)
                 ->orWhere('ship_name', 'like', $like);
         });

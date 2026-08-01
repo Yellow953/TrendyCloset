@@ -164,23 +164,24 @@ class CartController extends Controller
         }
 
         $data = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
             'ship_name' => ['required', 'string', 'max:255'],
+            'ship_phone' => ['required', 'string', 'min:6', 'max:40'],
+            'email' => ['nullable', 'email', 'max:255'],
             'ship_line1' => ['required', 'string', 'max:255'],
-            'ship_line2' => ['nullable', 'string', 'max:255'],
             'ship_city' => ['required', 'string', 'max:120'],
-            'ship_region' => ['nullable', 'string', 'max:120'],
-            'ship_postcode' => ['nullable', 'string', 'max:32'],
-            'ship_country' => ['required', 'string', 'max:120'],
-            'ship_phone' => ['nullable', 'string', 'max:40'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'marketing_opt_in' => ['nullable', 'boolean'],
+        ], [
+            'ship_name.required' => 'We need a name for the delivery.',
+            'ship_phone.required' => 'We need a phone number to arrange delivery.',
+            'ship_line1.required' => 'Please tell us the street and building.',
+            'ship_city.required' => 'Please tell us the city or area.',
         ]);
 
         try {
             $order = $checkout->place($data);
         } catch (RuntimeException $e) {
-            return back()->withInput()->withErrors(['email' => $e->getMessage()]);
+            return back()->withInput()->withErrors(['ship_name' => $e->getMessage()]);
         }
 
         // The confirmation page is gated on this, not on the order number:

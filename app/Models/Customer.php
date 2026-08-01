@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A customer of the store. Deliberately NOT authenticatable: customers check
- * out as guests and never sign in. This is a CRM record, matched on email at
- * checkout, so the back office can see repeat business and keep notes.
+ * out as guests and never sign in. This is a CRM record, matched on phone at
+ * checkout (email is optional), so the back office can see repeat business.
  */
 class Customer extends Model
 {
@@ -40,15 +40,53 @@ class Customer extends Model
     }
 
     /**
-     * Find the customer for an email, or create one. Emails are normalised so
-     * "Leila@Example.com " and "leila@example.com" are the same person.
+     * A phone number in one canonical form, so matching is exact: "76 158 735",
+     * "076158735" and "+961 76 158 735" all become +96176158735. A number that
+     * already carries another country's code is left alone.
      */
-    public static function forEmail(string $email, array $attributes = []): self
+    public static function normalizePhone(string $phone): string
     {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return '';
+        }
+
+        $code = (string) config('store.contact.country_code', '961');
+
+        $digits = preg_replace('/^00/', '', $digits) ?? $digits;
+
+        if (str_starts_with($digits, $code)) {
+            return '+'.$digits;
+        }
+
+        $local = ltrim($digits, '0');
+
+        return mb_strlen($local) <= 8 ? '+'.$code.$local : '+'.$digits;
+    }
+
+    /**
+     * Find the customer behind a checkout, or create one. Email is filled in
+     * when given but never matched on — plenty of orders arrive without one.
+     */
+    public static function forPhone(string $phone, array $attributes = []): self
+    {
+        $attributes['email'] = isset($attributes['email']) && $attributes['email'] !== null
+            ? mb_strtolower(trim($attributes['email']))
+            : null;
+
         return static::firstOrCreate(
-            ['email' => mb_strtolower(trim($email))],
+            ['phone' => static::normalizePhone($phone)],
             $attributes,
         );
+    }
+
+    /**
+     * What to call this record in a list.
+     */
+    public function label(): string
+    {
+        return $this->name ?: ($this->phone ?: ($this->email ?: 'Customer #'.$this->id));
     }
 
     /**

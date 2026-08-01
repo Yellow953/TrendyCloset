@@ -17,34 +17,43 @@
             @csrf
 
             <div>
-                <div class="text-[18px] font-medium">Contact</div>
-                <input type="email" name="email" value="{{ old('email') }}" required placeholder="Email address" class="tc-input mt-3">
-                @error('email')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                <div class="text-[18px] font-medium">Your details</div>
+                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                        <input name="ship_name" value="{{ old('ship_name') }}" required autocomplete="name"
+                               placeholder="Full name" class="tc-input">
+                        @error('ship_name')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <input type="tel" name="ship_phone" value="{{ old('ship_phone') }}" required autocomplete="tel"
+                               inputmode="tel" placeholder="Phone number" class="tc-input">
+                        @error('ship_phone')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <input type="email" name="email" value="{{ old('email') }}" autocomplete="email"
+                               placeholder="Email address (optional)" class="tc-input">
+                        @error('email')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                </div>
                 <label class="mt-2.5 flex items-center gap-2 text-[13px] font-light text-muted-2">
                     <input type="checkbox" name="marketing_opt_in" value="1" @checked(old('marketing_opt_in')) class="h-4 w-4 accent-blush">
-                    Email me new drops and offers
+                    Send me new drops and offers
                 </label>
             </div>
 
             <div>
-                <div class="mb-3 text-[18px] font-medium">Shipping address</div>
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    @foreach([
-                        ['ship_name', 'Full name', true, 'sm:col-span-2'],
-                        ['ship_line1', 'Street address', true, 'sm:col-span-2'],
-                        ['ship_line2', 'Apartment, suite (optional)', false, 'sm:col-span-2'],
-                        ['ship_city', 'City', true, ''],
-                        ['ship_postcode', 'Postal code', false, ''],
-                        ['ship_region', 'Region / state (optional)', false, ''],
-                        ['ship_country', 'Country', true, ''],
-                        ['ship_phone', 'Phone (optional)', false, 'sm:col-span-2'],
-                    ] as [$field, $placeholder, $required, $span])
-                        <div class="{{ $span }}">
-                            <input name="{{ $field }}" value="{{ old($field) }}" placeholder="{{ $placeholder }}"
-                                   @required($required) class="tc-input">
-                            @error($field)<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
-                        </div>
-                    @endforeach
+                <div class="mb-3 text-[18px] font-medium">Delivery address</div>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <input name="ship_line1" value="{{ old('ship_line1') }}" required autocomplete="street-address"
+                               placeholder="Street, building, floor" class="tc-input">
+                        @error('ship_line1')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <input name="ship_city" value="{{ old('ship_city') }}" required autocomplete="address-level2"
+                               placeholder="City / area" class="tc-input">
+                        @error('ship_city')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
                 </div>
             </div>
 

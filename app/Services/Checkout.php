@@ -29,7 +29,7 @@ class Checkout
     public function __construct(private readonly Cart $cart) {}
 
     /**
-     * @param  array{email: string, ship_name: string, ship_line1: string, ship_line2?: ?string, ship_city: string, ship_region?: ?string, ship_postcode?: ?string, ship_country: string, ship_phone?: ?string, notes?: ?string, marketing_opt_in?: bool}  $data
+     * @param  array{ship_name: string, ship_phone: string, email?: ?string, ship_line1: string, ship_city: string, ship_country?: ?string, notes?: ?string, marketing_opt_in?: bool}  $data
      *
      * @throws RuntimeException when the bag is empty or a line has since sold out
      */
@@ -63,17 +63,19 @@ class Checkout
                 }
             }
 
-            $customer = Customer::forEmail($data['email'], [
+            $email = isset($data['email']) && trim((string) $data['email']) !== ''
+                ? mb_strtolower(trim($data['email']))
+                : null;
+
+            $customer = Customer::forPhone($data['ship_phone'], [
                 'name' => $data['ship_name'],
-                'phone' => $data['ship_phone'] ?? null,
+                'email' => $email,
                 'marketing_opt_in' => (bool) ($data['marketing_opt_in'] ?? false),
             ]);
 
-            // A returning shopper keeps their CRM record but may have moved or
-            // changed their mind about email — fill in what we did not know.
             $customer->fill(array_filter([
                 'name' => $customer->name ?: $data['ship_name'],
-                'phone' => $customer->phone ?: ($data['ship_phone'] ?? null),
+                'email' => $customer->email ?: $email,
             ]));
 
             if (! empty($data['marketing_opt_in'])) {
@@ -87,15 +89,15 @@ class Checkout
                 'coupon_id' => $coupon?->id,
                 'order_number' => Order::nextNumber(),
                 'status' => OrderStatus::Pending,
-                'email' => mb_strtolower(trim($data['email'])),
+                'email' => $email,
                 'ship_name' => $data['ship_name'],
                 'ship_line1' => $data['ship_line1'],
                 'ship_line2' => $data['ship_line2'] ?? null,
                 'ship_city' => $data['ship_city'],
                 'ship_region' => $data['ship_region'] ?? null,
                 'ship_postcode' => $data['ship_postcode'] ?? null,
-                'ship_country' => $data['ship_country'],
-                'ship_phone' => $data['ship_phone'] ?? null,
+                'ship_country' => $data['ship_country'] ?? config('store.contact.country'),
+                'ship_phone' => $data['ship_phone'],
                 'subtotal' => $summary['subtotal'],
                 'discount_total' => $summary['discount'],
                 'shipping_total' => $summary['shipping'],

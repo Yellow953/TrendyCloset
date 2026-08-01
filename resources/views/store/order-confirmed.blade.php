@@ -14,8 +14,8 @@
             <h1 class="mt-7 font-serif text-[36px] leading-tight font-normal md:text-[44px]">Thank you</h1>
             <span class="tc-heading-rule"></span>
             <p class="mx-auto mt-5 max-w-[46ch] text-[14.5px] leading-relaxed font-light text-muted-2">
-                Your order is with us. We have sent nothing yet — we will email
-                <b class="font-medium text-ink">{{ $order->email }}</b> to confirm your pieces and arrange payment.
+                Your order is with us. We have sent nothing yet — we will message you on
+                <b class="font-medium text-ink">{{ $order->ship_phone }}</b> to confirm your pieces and arrange payment.
             </p>
         </div>
 

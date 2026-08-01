@@ -1,17 +1,18 @@
 @extends('layouts.admin')
 
-@section('title', $customer->name ?: $customer->email)
-@section('heading', $customer->name ?: $customer->email)
+@section('title', $customer->label())
+@section('heading', $customer->label())
 @section('subheading', 'On the books since '.$customer->created_at->format('j F Y'))
 
 @section('breadcrumb')
     <a href="{{ route('admin.customers.index') }}" class="hover:text-slate-900">Customers</a>
     <span class="text-slate-200">/</span>
-    <span class="text-slate-600">{{ $customer->name ?: $customer->email }}</span>
+    <span class="text-slate-600">{{ $customer->label() }}</span>
 @endsection
 
 @section('actions')
-    <a href="mailto:{{ $customer->email }}" class="ad-btn">Email</a>
+    <a href="https://wa.me/{{ ltrim($customer->phone ?? '', '+') }}" target="_blank" rel="noopener" class="ad-btn">WhatsApp</a>
+    @if($customer->email)<a href="mailto:{{ $customer->email }}" class="ad-btn">Email</a>@endif
     <button type="button" data-modal-open="edit-customer" class="ad-btn-primary">Edit details</button>
     <button type="button" data-modal-open="delete-customer" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
 @endsection
@@ -46,7 +47,7 @@
 
             @if($customer->orders->isEmpty())
                 <x-admin.empty icon="❏" title="No orders yet"
-                               body="This record exists because the email was entered at checkout or added here by hand." />
+                               body="This record exists because the number was entered at checkout or added here by hand." />
             @else
                 <div class="overflow-x-auto">
                     <table class="ad-table">
@@ -75,12 +76,16 @@
                 <div class="ad-card-head"><div class="ad-card-title">Details</div></div>
                 <div class="flex flex-col gap-3.5 px-5 py-5 text-[13px]">
                     <div class="flex justify-between gap-3">
-                        <span class="font-normal text-slate-400">Email</span>
-                        <a href="mailto:{{ $customer->email }}" class="truncate font-normal hover:text-slate-900">{{ $customer->email }}</a>
+                        <span class="font-normal text-slate-400">Phone</span>
+                        <a href="https://wa.me/{{ ltrim($customer->phone ?? '', '+') }}" target="_blank" rel="noopener" class="font-normal hover:text-slate-900">{{ $customer->phone ?: '—' }}</a>
                     </div>
                     <div class="flex justify-between gap-3">
-                        <span class="font-normal text-slate-400">Phone</span>
-                        <span class="font-normal">{{ $customer->phone ?: '—' }}</span>
+                        <span class="font-normal text-slate-400">Email</span>
+                        @if($customer->email)
+                            <a href="mailto:{{ $customer->email }}" class="truncate font-normal hover:text-slate-900">{{ $customer->email }}</a>
+                        @else
+                            <span class="font-normal text-slate-400">—</span>
+                        @endif
                     </div>
                     <div class="flex items-center justify-between gap-3">
                         <span class="font-normal text-slate-400">Email list</span>
@@ -113,14 +118,14 @@
 @endsection
 
 @section('modals')
-    <x-admin.modal id="edit-customer" title="Edit customer" subtitle="Changing the email re-points future checkouts at this record.">
+    <x-admin.modal id="edit-customer" title="Edit customer" subtitle="Changing the phone number re-points future checkouts at this record.">
         <form method="POST" action="{{ route('admin.customers.update', $customer) }}">
             @csrf @method('PUT')
 
             <div class="flex flex-col gap-4 px-6 py-5">
                 <x-admin.field name="name" label="Name" :value="$customer->name" required />
-                <x-admin.field name="email" label="Email" type="email" :value="$customer->email" required />
-                <x-admin.field name="phone" label="Phone" :value="$customer->phone" />
+                <x-admin.field name="phone" label="Phone" :value="$customer->phone" required />
+                <x-admin.field name="email" label="Email" type="email" :value="$customer->email" />
                 <x-admin.field name="notes" label="Notes" type="textarea" :rows="4" :value="$customer->notes"
                                placeholder="Sizing, preferences, anything worth remembering…" />
                 <x-admin.toggle name="marketing_opt_in" label="Subscribed to email" :checked="$customer->marketing_opt_in"
@@ -136,7 +141,7 @@
 
     <x-admin.confirm id="delete-customer"
                      :action="route('admin.customers.destroy', $customer)"
-                     :title="'Delete '.($customer->name ?: $customer->email).'?'"
+                     :title="'Delete '.$customer->label().'?'"
                      confirm="Delete customer"
                      body="Their orders are kept — the sales history stays intact and simply stops pointing at a customer record. This cannot be undone." />
 @endsection

@@ -13,7 +13,10 @@
 @section('actions')
     <x-admin.status :status="$order->status" />
     <button type="button" data-modal-open="status" class="ad-btn-primary">Change status</button>
-    <a href="mailto:{{ $order->email }}?subject={{ rawurlencode('Your Trendy Closet order '.$order->order_number) }}" class="ad-btn">Email customer</a>
+    <a href="https://wa.me/{{ ltrim(\App\Models\Customer::normalizePhone($order->ship_phone), '+') }}?text={{ rawurlencode('Hi '.$order->ship_name.', about your Trendy Closet order '.$order->order_number.'…') }}" target="_blank" rel="noopener" class="ad-btn">WhatsApp customer</a>
+    @if($order->email)
+        <a href="mailto:{{ $order->email }}?subject={{ rawurlencode('Your Trendy Closet order '.$order->order_number) }}" class="ad-btn">Email customer</a>
+    @endif
 @endsection
 
 @section('content')
@@ -114,7 +117,7 @@
                             </span>
                             <div class="min-w-0">
                                 <div class="truncate text-[14px] font-medium group-hover:text-slate-900">{{ $order->customer->name }}</div>
-                                <div class="truncate text-[12px] font-normal text-slate-400">{{ $order->customer->email }}</div>
+                                <div class="truncate text-[12px] font-normal text-slate-400">{{ $order->customer->phone ?: $order->customer->email }}</div>
                             </div>
                         </a>
 
@@ -131,7 +134,7 @@
                     @else
                         <p class="text-[13px] font-normal text-slate-500">
                             The customer record for this order has been deleted. The order itself is untouched —
-                            <span class="text-slate-800">{{ $order->email }}</span> is what it was placed with.
+                            <span class="text-slate-800">{{ $order->ship_phone }}</span> is what it was placed with.
                         </p>
                     @endif
                 </div>
@@ -148,13 +151,13 @@
 
                     <div class="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-[13px]">
                         <div class="flex justify-between gap-3">
-                            <span class="font-normal text-slate-400">Email</span>
-                            <a href="mailto:{{ $order->email }}" class="truncate font-normal hover:text-slate-900">{{ $order->email }}</a>
+                            <span class="font-normal text-slate-400">Phone</span>
+                            <a href="https://wa.me/{{ ltrim(\App\Models\Customer::normalizePhone($order->ship_phone), '+') }}" target="_blank" rel="noopener" class="font-normal hover:text-slate-900">{{ $order->ship_phone }}</a>
                         </div>
-                        @if($order->ship_phone)
+                        @if($order->email)
                             <div class="flex justify-between gap-3">
-                                <span class="font-normal text-slate-400">Phone</span>
-                                <a href="tel:{{ $order->ship_phone }}" class="font-normal hover:text-slate-900">{{ $order->ship_phone }}</a>
+                                <span class="font-normal text-slate-400">Email</span>
+                                <a href="mailto:{{ $order->email }}" class="truncate font-normal hover:text-slate-900">{{ $order->email }}</a>
                             </div>
                         @endif
                     </div>
