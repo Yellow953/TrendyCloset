@@ -3,9 +3,9 @@
 @foreach($urls as $url)
     <url>
         <loc>{{ $url['loc'] }}</loc>
-@if($url['lastmod'])
+        @if($url['lastmod'])
         <lastmod>{{ $url['lastmod']->format(DATE_ATOM) }}</lastmod>
-@endif
+        @endif
         <changefreq>{{ $url['freq'] }}</changefreq>
         <priority>{{ $url['priority'] }}</priority>
     </url>

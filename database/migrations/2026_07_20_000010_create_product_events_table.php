@@ -16,7 +16,11 @@ return new class extends Migration
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('created_at')->useCurrent();
 
+            // Per product, for a product's own figures; and by type alone, for
+            // "every view in this window" — which cannot use the first index,
+            // since that one leads with product_id.
             $table->index(['product_id', 'type', 'created_at']);
+            $table->index(['type', 'created_at']);
         });
     }
 

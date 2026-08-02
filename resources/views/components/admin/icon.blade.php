@@ -6,6 +6,7 @@
 @php
     $icons = [
         'dashboard' => '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+        'analytics' => '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/>',
         'products' => '<path d="M3.5 8 12 3l8.5 5v8L12 21l-8.5-5V8Z"/><path d="m3.5 8 8.5 5 8.5-5"/><path d="M12 21v-8"/>',
         'categories' => '<path d="M3 5h18"/><path d="M7 5v14"/><path d="M7 9h14"/><path d="M11 9v10"/><path d="M11 14h10"/>',
         'slides' => '<rect x="2" y="5" width="20" height="12" rx="2"/><path d="M8 21h8"/><path d="m6 14 3-3 2.5 2.5L15 10l3 4"/>',
@@ -21,6 +22,7 @@
         'menu' => '<path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/>',
         'sidebar' => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
         'close' => '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+        'chevron' => '<path d="m6 9 6 6 6-6"/>',
         'bell' => '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
         'plus' => '<path d="M12 5v14"/><path d="M5 12h14"/>',
         'warning' => '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',

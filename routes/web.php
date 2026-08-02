@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -65,6 +66,12 @@ Route::get('/contact', [StoreController::class, 'contact'])->name('contact');
 Route::post('/contact', [StoreController::class, 'sendContact'])->name('contact.send');
 // Five policy documents behind one action; /policies opens the first.
 Route::get('/policies/{topic?}', [StoreController::class, 'policies'])->name('policies');
+
+// A tap on a wa.me link, reported by app.js as the browser leaves. Throttled
+// because it is the one analytics write a visitor can trigger directly.
+Route::post('/track/whatsapp', [StoreController::class, 'trackWhatsapp'])
+    ->middleware('throttle:30,1')
+    ->name('track.whatsapp');
 
 /*
 | Admin authentication — the storefront is public; these routes gate the
@@ -140,8 +147,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::patch('messages/{message}/unread', [MessageController::class, 'unread'])->name('messages.unread');
     Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 
-    // Admin-only: discount codes and who may sign in.
+    // Admin-only: trading figures, discount codes and who may sign in.
     Route::middleware('admin')->group(function () {
+        Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
         // Both are short forms, so they are created and edited in modals on
         // their own index rather than on a page of their own.
         Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');

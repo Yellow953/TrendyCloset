@@ -6,7 +6,15 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            // Two bundles, because they are two design systems: the shop
+            // (blush, Jost, `.tc-*`) and the back office (slate, Inter,
+            // `.ad-*`). Sign-in ships with the back office it opens into.
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/css/admin.css',
+                'resources/js/admin.js',
+            ],
             refresh: true,
             // Self-hosted at build time, so the storefront's critical path holds
             // no third-party stylesheet: Vite::fonts() inlines the @font-face

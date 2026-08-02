@@ -10,6 +10,13 @@
             ],
         ],
         [
+            'label' => 'Insight',
+            'admin' => true,
+            'links' => [
+                ['key' => 'analytics', 'label' => 'Analytics', 'icon' => 'analytics', 'route' => 'admin.analytics'],
+            ],
+        ],
+        [
             'label' => 'Catalogue',
             'links' => [
                 ['key' => 'products', 'label' => 'Products', 'icon' => 'products', 'route' => 'admin.products.index'],
@@ -104,24 +111,5 @@
         @endforeach
     </nav>
 
-    {{-- Who is signed in --}}
-    <div class="border-t border-white/10 px-3.5 py-4">
-        <div class="flex items-center gap-3 rounded-lg px-3 py-2">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[12px] font-semibold text-white">
-                {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
-            </span>
-            <div class="ad-hide-collapsed min-w-0 flex-1">
-                <div class="truncate text-[12.5px] font-semibold text-white">{{ auth()->user()->name }}</div>
-                <div class="text-[11px] font-normal text-slate-400">{{ auth()->user()->role->label() }}</div>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('logout') }}" class="mt-1">
-            @csrf
-            <button type="submit" class="ad-nav-link w-full text-left" title="Sign out">
-                <span class="ad-nav-icon"><x-admin.icon name="logout" /></span>
-                <span class="ad-hide-collapsed whitespace-nowrap">Sign out</span>
-            </button>
-        </form>
-    </div>
+    {{-- Who is signed in, and the way out, live in the top bar. --}}
 </aside>

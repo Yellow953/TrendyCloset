@@ -230,17 +230,28 @@ class Product extends Model
 
     /**
      * Eager-load engagement counts for the CRM dashboard, optionally windowed
-     * to events since a given date. Adds `views_count`, `add_to_cart_count`
+     * to events between two dates. Adds `views_count`, `add_to_cart_count`
      * and `favorites_count` — favourites are never windowed, since the row
      * represents current state rather than something that happened.
      *
+     * `$until` matters only to a report looking at a period that already
+     * closed; leave it off and the window runs to now.
+     *
      * @param  Builder<Product>  $query
      */
-    public function scopeWithEngagement(Builder $query, ?\DateTimeInterface $since = null): void
+    public function scopeWithEngagement(Builder $query, ?\DateTimeInterface $since = null, ?\DateTimeInterface $until = null): void
     {
-        $window = fn (Builder $q) => $since
-            ? $q->where('product_events.created_at', '>=', $since)
-            : $q;
+        $window = function (Builder $q) use ($since, $until) {
+            if ($since) {
+                $q->where('product_events.created_at', '>=', $since);
+            }
+
+            if ($until) {
+                $q->where('product_events.created_at', '<=', $until);
+            }
+
+            return $q;
+        };
 
         $query->withCount([
             'events as views_count' => fn (Builder $q) => $window(

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\ProductVariant;
+use App\Enums\SiteEventType;
 use App\Services\Checkout;
 use App\Services\ProductAnalytics;
+use App\Services\SiteAnalytics;
 use App\Support\Cart;
 use App\Support\Seo;
 use Illuminate\Http\Request;
@@ -128,6 +130,10 @@ class CartController extends Controller
             return back()->withErrors(['code' => 'That code is not valid for this bag.']);
         }
 
+        app(SiteAnalytics::class)->record(SiteEventType::CouponApplied, [
+            'code' => mb_strtoupper($data['code']),
+        ]);
+
         return back()->with('status', 'Discount applied.');
     }
 
@@ -145,6 +151,12 @@ class CartController extends Controller
         }
 
         $this->seo->page('Checkout')->noindex();
+
+        // Reaching the form, not paying — the gap between this and
+        // `order_placed` is the checkout drop-off.
+        app(SiteAnalytics::class)->record(SiteEventType::CheckoutStarted, [
+            'value' => (float) $this->cart->summary()['total'],
+        ]);
 
         return view('store.checkout', [
             'lines' => $this->cart->lines(),
@@ -183,6 +195,12 @@ class CartController extends Controller
         } catch (RuntimeException $e) {
             return back()->withInput()->withErrors(['ship_name' => $e->getMessage()]);
         }
+
+        app(SiteAnalytics::class)->record(
+            SiteEventType::OrderPlaced,
+            ['value' => (float) $order->grand_total],
+            order: $order,
+        );
 
         // The confirmation page is gated on this, not on the order number:
         // knowing someone's order number must not reveal their address.

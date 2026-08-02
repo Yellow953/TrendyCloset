@@ -18,7 +18,7 @@
          never flashes open on load. --}}
     <script>try{if(localStorage.getItem('ad-collapsed')==='1')document.documentElement.classList.add('ad-collapsed')}catch(e){}</script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
 </head>
 <body class="ad-root min-h-screen bg-slate-100 text-slate-800 antialiased">
 
@@ -60,7 +60,5 @@
 {{-- Modal host. Any [data-modal-open="id"] opens the [data-modal="id"] below;
      pages stack their own dialogs into this section. --}}
 @yield('modals')
-
-<div class="tc-toasts" data-toasts></div>
 </body>
 </html>

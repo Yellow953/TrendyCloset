@@ -2,48 +2,65 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\OrderStatus;
 use App\Enums\ProductEventType;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
-use App\Models\Customer;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductEvent;
 use App\Models\ProductVariant;
+use App\Models\SiteEvent;
+use App\Support\DateRange;
+use App\Support\Stats;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
- * The back office landing screen: what happened, what needs doing, what is
- * running out. Every figure is derived — nothing here is stored.
+ * The back office landing screen: how the shop is trading right now, and what
+ * needs doing. Deliberately short — anything that invites a question rather
+ * than an action belongs on Analytics, which has the date range to answer it.
+ *
+ * Every figure is derived; nothing here is stored.
  */
 class DashboardController extends Controller
 {
     /** A garment at or below this stock level is worth flagging. */
-    private const LOW_STOCK = 3;
+    public const LOW_STOCK = 3;
 
-    public function index()
+    /**
+     * The periods the trend chart offers, longest first as the default.
+     *
+     * @var array<string, array{label: string, days: int}>
+     */
+    public const TRENDS = [
+        '30d' => ['label' => 'Last 30 days', 'days' => 30],
+        '7d' => ['label' => 'Last 7 days', 'days' => 7],
+        'today' => ['label' => 'Today', 'days' => 1],
+    ];
+
+    public function index(Request $request)
     {
         $since = now()->subDays(29)->startOfDay();
         $previous = now()->subDays(59)->startOfDay();
 
+        $trend = $request->input('trend');
+        $trend = array_key_exists($trend, self::TRENDS) ? $trend : array_key_first(self::TRENDS);
+
         return view('admin.dashboard', [
             'active' => 'dashboard',
             'kpis' => $this->kpis($since, $previous),
-            'revenueSeries' => $this->revenueSeries(),
-            'statusCounts' => $this->statusCounts(),
-            'recentOrders' => Order::with('customer')->latest()->limit(8)->get(),
-            'topProducts' => $this->topProducts($since),
+            'trend' => $trend,
+            'funnel' => $this->funnel(DateRange::lastDays(self::TRENDS[$trend]['days'])),
+            'recentOrders' => Order::with('customer')->latest()->limit(7)->get(),
             'lowStock' => $this->lowStock(),
             'unreadMessages' => ContactMessage::whereNull('read_at')->latest()->limit(5)->get(),
         ]);
     }
 
     /**
-     * The four headline figures, each with its change against the preceding
-     * window of the same length — a number without a direction is not news.
+     * Four figures, each against the preceding window of the same length — a
+     * number without a direction is not news.
      *
      * @return array<int, array{label: string, value: string, delta: ?float, hint: string}>
      */
@@ -55,115 +72,87 @@ class DashboardController extends Controller
         $orders = Order::where('created_at', '>=', $since)->count();
         $ordersPrior = Order::whereBetween('created_at', [$previous, $since])->count();
 
-        $customers = Customer::where('created_at', '>=', $since)->count();
-        $customersPrior = Customer::whereBetween('created_at', [$previous, $since])->count();
+        // Sittings, not people — the same unit Analytics calls "visits".
+        $visits = SiteEvent::where('created_at', '>=', $since)->distinct()->count('session_id');
+        $visitsPrior = SiteEvent::whereBetween('created_at', [$previous, $since])->distinct()->count('session_id');
 
-        $views = ProductEvent::where('type', ProductEventType::View)->where('created_at', '>=', $since)->count();
-        $viewsPrior = ProductEvent::where('type', ProductEventType::View)->whereBetween('created_at', [$previous, $since])->count();
+        $rate = $visits > 0 ? Stats::share($orders, $visits) : 0.0;
+        $ratePrior = $visitsPrior > 0 ? Stats::share($ordersPrior, $visitsPrior) : 0.0;
 
         return [
             [
                 'label' => 'Revenue',
                 'value' => Product::money($revenue),
-                'delta' => $this->delta($revenue, $revenuePrior),
-                'hint' => 'Last 30 days, excluding cancelled and refunded',
+                'delta' => Stats::delta($revenue, $revenuePrior),
+                'hint' => 'Excluding cancelled and refunded',
             ],
             [
                 'label' => 'Orders',
                 'value' => number_format($orders),
-                'delta' => $this->delta($orders, $ordersPrior),
-                'hint' => $orders > 0 ? Product::money($revenue / max($orders, 1)).' average basket' : 'No orders yet',
+                'delta' => Stats::delta($orders, $ordersPrior),
+                'hint' => $orders > 0 ? Product::money($revenue / $orders).' average basket' : 'No orders yet',
             ],
             [
-                'label' => 'New customers',
-                'value' => number_format($customers),
-                'delta' => $this->delta($customers, $customersPrior),
-                'hint' => number_format(Customer::count()).' on the books',
+                'label' => 'Visits',
+                'value' => number_format($visits),
+                'delta' => Stats::delta($visits, $visitsPrior),
+                'hint' => 'Sessions on the storefront',
             ],
             [
-                'label' => 'Product views',
-                'value' => number_format($views),
-                'delta' => $this->delta($views, $viewsPrior),
-                'hint' => 'Deduplicated per visitor',
+                'label' => 'Conversion',
+                'value' => $visits > 0 ? $rate.'%' : '—',
+                'delta' => Stats::delta($rate, $ratePrior),
+                'hint' => 'Visits that ended in an order',
             ],
         ];
     }
 
     /**
-     * Percentage change, or null when there is no baseline to compare against
-     * (showing "+100%" against zero would be theatre, not information).
-     */
-    private function delta(float $now, float $prior): ?float
-    {
-        if ($prior <= 0) {
-            return null;
-        }
-
-        return round((($now - $prior) / $prior) * 100, 1);
-    }
-
-    /**
-     * Revenue per day for the last 14 days, zero-filled so the chart has a bar
-     * for every day rather than skipping the quiet ones.
+     * Views → added to bag → orders, as three lines on one shared scale over
+     * the chosen period. One scale, never two: a second y-axis lets any pair of
+     * lines be made to cross wherever you like. Views dwarfing the other two is
+     * the true shape of a shop, and the legend totals plus the rates underneath
+     * carry the exact numbers the lower lines cannot show.
      *
-     * @return Collection<int, array{label: string, day: string, value: float}>
+     * @return array{lines: array<int, array<string, mixed>>, buckets: Collection<int, array<string, mixed>>, steps: array<int, array<string, mixed>>}
      */
-    private function revenueSeries(): Collection
+    private function funnel(DateRange $range): array
     {
-        $start = now()->subDays(13)->startOfDay();
+        $views = Stats::series(ProductEvent::query()->where('type', ProductEventType::View), $range);
+        $bags = Stats::series(ProductEvent::query()->where('type', ProductEventType::AddToCart), $range);
+        $orders = Stats::series(Order::revenue(), $range);
 
-        $totals = Order::revenue()
-            ->where('created_at', '>=', $start)
-            ->get(['created_at', 'grand_total'])
-            ->groupBy(fn (Order $o) => $o->created_at->toDateString())
-            ->map(fn (Collection $group) => (float) $group->sum('grand_total'));
+        $totals = [
+            'views' => (int) $views->sum('value'),
+            'bags' => (int) $bags->sum('value'),
+            'orders' => (int) $orders->sum('value'),
+        ];
 
-        return collect(range(0, 13))->map(function (int $offset) use ($start, $totals) {
-            $date = $start->copy()->addDays($offset);
+        // Categorical slots 1–3 of the validated palette, in fixed order. The
+        // hue belongs to the step, not to its rank, so it never moves when the
+        // period changes.
+        $lines = [
+            ['label' => 'Product views', 'color' => '#2a78d6', 'values' => $views->pluck('value')->all(), 'total' => $totals['views']],
+            ['label' => 'Added to bag', 'color' => '#eb6834', 'values' => $bags->pluck('value')->all(), 'total' => $totals['bags']],
+            ['label' => 'Orders', 'color' => '#1baf7a', 'values' => $orders->pluck('value')->all(), 'total' => $totals['orders']],
+        ];
 
-            return [
-                'label' => $date->format('j M'),
-                'day' => $date->format('D'),
-                'value' => (float) ($totals[$date->toDateString()] ?? 0),
-            ];
-        });
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    private function statusCounts(): array
-    {
-        $counts = Order::selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        return collect(OrderStatus::cases())
-            ->mapWithKeys(fn (OrderStatus $s) => [$s->value => (int) ($counts[$s->value] ?? 0)])
-            ->all();
-    }
-
-    /**
-     * Best sellers by units actually sold, falling back to engagement when
-     * nothing has sold yet — a new shop still wants to know what is looked at.
-     *
-     * @return Collection<int, Product>
-     */
-    private function topProducts(Carbon $since): Collection
-    {
-        return Product::query()
-            ->select('products.*')
-            ->with('category')
-            ->withEngagement($since)
-            ->addSelect(['units_sold' => OrderItem::query()
-                ->selectRaw('COALESCE(SUM(order_items.quantity), 0)')
-                ->join('product_variants', 'product_variants.id', '=', 'order_items.product_variant_id')
-                ->whereColumn('product_variants.product_id', 'products.id'),
-            ])
-            ->orderByDesc('units_sold')
-            ->orderByDesc('views_count')
-            ->limit(6)
-            ->get();
+        return [
+            'lines' => $lines,
+            'buckets' => $views,
+            'steps' => [
+                [
+                    'label' => 'View → bag',
+                    'rate' => $totals['views'] > 0 ? Stats::share($totals['bags'], $totals['views']) : null,
+                    'hint' => number_format($totals['bags']).' of '.number_format($totals['views']),
+                ],
+                [
+                    'label' => 'Bag → order',
+                    'rate' => $totals['bags'] > 0 ? Stats::share($totals['orders'], $totals['bags']) : null,
+                    'hint' => number_format($totals['orders']).' of '.number_format($totals['bags']),
+                ],
+            ],
+        ];
     }
 
     /**
@@ -176,7 +165,7 @@ class DashboardController extends Controller
             ->where('stock', '<=', self::LOW_STOCK)
             ->whereHas('product', fn ($q) => $q->where('is_active', true))
             ->orderBy('stock')
-            ->limit(8)
+            ->limit(6)
             ->get();
     }
 }

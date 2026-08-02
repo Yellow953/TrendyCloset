@@ -8,7 +8,9 @@ use App\Models\HeroSlide;
 use App\Models\Product;
 use App\Models\ProductFavorite;
 use App\Models\ProductVariant;
+use App\Enums\SiteEventType;
 use App\Services\ProductAnalytics;
+use App\Services\SiteAnalytics;
 use App\Support\Cart;
 use App\Support\Catalog;
 use App\Support\Schema;
@@ -223,6 +225,16 @@ class StoreController extends Controller
 
         $scopeIds = $scope()->pluck('id');
         $facets = $this->facets($scopeIds);
+
+        // Recorded with its result count, so the report can separate searches
+        // that found something from the ones that came back empty — the second
+        // list is a buying signal the catalogue is missing.
+        if ($term !== '') {
+            app(SiteAnalytics::class)->record(SiteEventType::Search, [
+                'q' => mb_substr($term, 0, 120),
+                'results' => $scopeIds->count(),
+            ]);
+        }
 
         $size = $request->query('size');
         $color = $request->query('color');
@@ -519,6 +531,12 @@ class StoreController extends Controller
 
         $favorited = $analytics->toggleFavorite($product);
 
+        // `product_favorites` is state — unhearting deletes the row — so only
+        // an event gives the back office a history of when hearts happened.
+        if ($favorited) {
+            app(SiteAnalytics::class)->record(SiteEventType::FavouriteAdded, product: $product);
+        }
+
         $status = $favorited
             ? 'Saved to your favourites.'
             : 'Removed from your favourites.';
@@ -638,7 +656,27 @@ class StoreController extends Controller
 
         ContactMessage::create($data);
 
+        app(SiteAnalytics::class)->record(SiteEventType::ContactFormSent);
+
         return back()->with('status', 'Thanks — your message is with Leila. We reply within 24 hours.');
+    }
+
+    /**
+     * A tap on any `wa.me` link — the floating button, the footer, the contact
+     * page. The shop's number is its front door, so how much of the traffic
+     * leaves through it is worth knowing, and the browser cannot tell us any
+     * other way once it has navigated to WhatsApp.
+     *
+     * Deliberately single-purpose: the client cannot name the event, so this
+     * cannot be used to write arbitrary rows into `site_events`.
+     */
+    public function trackWhatsapp(Request $request)
+    {
+        app(SiteAnalytics::class)->record(SiteEventType::WhatsappClick, [
+            'from' => mb_substr((string) $request->input('from', ''), 0, 120) ?: null,
+        ]);
+
+        return response()->noContent();
     }
 
     /**

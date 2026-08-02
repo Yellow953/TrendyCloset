@@ -34,6 +34,11 @@ return new class extends Migration
 
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            // The reporting screens filter by date, and usually by status with
+            // it — every figure on the analytics page leans on one of these.
+            $table->index(['status', 'created_at']);
+            $table->index('created_at');
         });
     }
 
