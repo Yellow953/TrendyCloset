@@ -10,23 +10,18 @@
             ],
         ],
         [
-            'label' => 'Insight',
-            'admin' => true,
-            'links' => [
-                ['key' => 'analytics', 'label' => 'Analytics', 'icon' => 'analytics', 'route' => 'admin.analytics'],
-            ],
-        ],
-        [
             'label' => 'Catalogue',
             'links' => [
-                ['key' => 'products', 'label' => 'Products', 'icon' => 'products', 'route' => 'admin.products.index'],
                 ['key' => 'categories', 'label' => 'Categories', 'icon' => 'categories', 'route' => 'admin.categories.index'],
+                ['key' => 'products', 'label' => 'Products', 'icon' => 'products', 'route' => 'admin.products.index'],
             ],
         ],
         [
-            'label' => 'Storefront',
+            'label' => 'Shop',
             'links' => [
                 ['key' => 'slides', 'label' => 'Home slider', 'icon' => 'slides', 'route' => 'admin.slides.index'],
+                ['key' => 'messages', 'label' => 'Contact', 'icon' => 'messages', 'route' => 'admin.messages.index', 'count' => $unreadMessageCount ?? 0],
+                ['key' => 'analytics', 'label' => 'Analytics', 'icon' => 'analytics', 'route' => 'admin.analytics'],
             ],
         ],
         [
@@ -34,7 +29,6 @@
             'links' => [
                 ['key' => 'orders', 'label' => 'Orders', 'icon' => 'orders', 'route' => 'admin.orders.index', 'count' => $openOrders ?? 0],
                 ['key' => 'customers', 'label' => 'Customers', 'icon' => 'customers', 'route' => 'admin.customers.index'],
-                ['key' => 'messages', 'label' => 'Messages', 'icon' => 'messages', 'route' => 'admin.messages.index', 'count' => $unreadMessageCount ?? 0],
             ],
         ],
         [
