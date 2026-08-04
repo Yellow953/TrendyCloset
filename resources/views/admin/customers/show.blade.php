@@ -46,7 +46,7 @@
             <div class="ad-card-head"><div class="ad-card-title">Order history</div></div>
 
             @if($customer->orders->isEmpty())
-                <x-admin.empty icon="❏" title="No orders yet"
+                <x-admin.empty icon="orders" title="No orders yet"
                                body="This record exists because the number was entered at checkout or added here by hand." />
             @else
                 <div class="overflow-x-auto">

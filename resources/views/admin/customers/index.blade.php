@@ -5,6 +5,16 @@
 @section('subheading', number_format($customers->total()).' '.Str::plural('record', $customers->total()).'. Customers never sign in — these are CRM records matched on phone at checkout.')
 
 @section('content')
+    @php
+        $showOptions = ['' => 'Everyone', 'repeat' => 'Repeat buyers', 'subscribed' => 'Opted into email', 'never' => 'Never ordered'];
+        // `sort` is deliberately absent: re-ordering a list cannot empty it, so
+        // it is never the reason nothing showed up.
+        $filters = \App\Support\AdminFilters::active([
+            'q' => 'Search',
+            'filter' => ['Show', $showOptions],
+        ]);
+    @endphp
+
     <div class="ad-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
@@ -15,7 +25,7 @@
             <div class="w-[170px]">
                 <label for="filter" class="ad-label">Show</label>
                 <select id="filter" name="filter" class="ad-input">
-                    @foreach(['' => 'Everyone', 'repeat' => 'Repeat buyers', 'subscribed' => 'Opted into email', 'never' => 'Never ordered'] as $value => $label)
+                    @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -35,9 +45,13 @@
             @endif
         </form>
 
-        @if($customers->isEmpty())
-            <x-admin.empty icon="◍" title="No customers match"
-                           body="A record is created the first time someone checks out with a given phone number." />
+        @if($customers->isEmpty() && $filters)
+            <x-admin.no-results noun="customers" :filters="$filters" :reset="route('admin.customers.index')" />
+        @elseif($customers->isEmpty())
+            <x-admin.empty icon="customers" title="No customers yet"
+                           body="A record is created the first time someone checks out with a given phone number — there is nothing to add by hand. Take an order and the buyer appears here.">
+                <a href="{{ route('admin.orders.index') }}" class="ad-btn">Go to orders</a>
+            </x-admin.empty>
         @else
             <div class="overflow-x-auto">
                 <table class="ad-table">

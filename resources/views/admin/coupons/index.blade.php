@@ -9,6 +9,14 @@
 @endsection
 
 @section('content')
+    @php
+        $showOptions = ['' => 'All codes', 'active' => 'Active', 'expired' => 'Expired'];
+        $filters = \App\Support\AdminFilters::active([
+            'q' => 'Search',
+            'filter' => ['Show', $showOptions],
+        ]);
+    @endphp
+
     <div class="ad-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
@@ -18,7 +26,7 @@
             <div class="w-[160px]">
                 <label for="filter" class="ad-label">Show</label>
                 <select id="filter" name="filter" class="ad-input">
-                    @foreach(['' => 'All codes', 'active' => 'Active', 'expired' => 'Expired'] as $value => $label)
+                    @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -29,8 +37,12 @@
             @endif
         </form>
 
-        @if($coupons->isEmpty())
-            <x-admin.empty icon="％" title="No codes yet"
+        @if($coupons->isEmpty() && $filters)
+            <x-admin.no-results noun="codes" :filters="$filters" :reset="route('admin.coupons.index')">
+                <button type="button" data-modal-open="coupon-new" class="ad-btn-primary">＋ New code</button>
+            </x-admin.no-results>
+        @elseif($coupons->isEmpty())
+            <x-admin.empty icon="coupons" title="No codes yet"
                            body="Create a percentage off, a fixed amount, or a free-shipping code — with optional minimum spend, usage cap and expiry.">
                 <button type="button" data-modal-open="coupon-new" class="ad-btn-primary">＋ New code</button>
             </x-admin.empty>

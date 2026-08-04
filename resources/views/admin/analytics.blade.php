@@ -115,7 +115,7 @@
             </div>
 
             @if($trafficSeries->sum('value') <= 0)
-                <x-admin.empty icon="◔" title="No traffic recorded in this period"
+                <x-admin.empty icon="analytics" title="No traffic recorded in this period"
                                body="Page views are logged from the moment the tracking went live — earlier periods will be empty." />
             @else
                 <x-admin.bar-chart :series="$trafficSeries" class="px-5 py-6" />
@@ -129,7 +129,7 @@
             </div>
 
             @if($sources->isEmpty())
-                <x-admin.empty icon="◔" title="Nothing to attribute" body="No visits were recorded in this period." />
+                <x-admin.empty icon="analytics" title="Nothing to attribute" body="No visits were recorded in this period." />
             @else
                 @php $sourcePeak = $sources->max('visits'); @endphp
                 <div class="flex flex-col gap-3.5 px-5 py-5">
@@ -151,7 +151,7 @@
             </div>
 
             @if($topPages->isEmpty())
-                <x-admin.empty icon="◔" title="No pages recorded" body="Nothing was opened in this period." />
+                <x-admin.empty icon="analytics" title="No pages recorded" body="Nothing was opened in this period." />
             @else
                 <div class="overflow-x-auto">
                     <table class="ad-table">
@@ -203,7 +203,7 @@
             </div>
 
             @if($searches->isEmpty())
-                <x-admin.empty icon="⌕" title="No searches yet" body="Terms typed into the header search appear here." />
+                <x-admin.empty icon="search" title="No searches yet" body="Terms typed into the header search appear here." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($searches as $search)
@@ -244,7 +244,7 @@
             </div>
 
             @if($revenueSeries->sum('value') <= 0)
-                <x-admin.empty icon="❏" title="Nothing taken in this period"
+                <x-admin.empty icon="orders" title="Nothing taken in this period"
                                body="Widen the window, or check that orders have not all been cancelled." />
             @else
                 <x-admin.bar-chart :series="$revenueSeries" format="money" class="px-5 py-6" />
@@ -277,7 +277,7 @@
             </div>
 
             @if($categoryRevenue->isEmpty())
-                <x-admin.empty icon="⬚" title="No sales to split" body="Nothing sold in this period." />
+                <x-admin.empty icon="products" title="No sales to split" body="Nothing sold in this period." />
             @else
                 @php $categoryPeak = $categoryRevenue->max('revenue'); @endphp
                 <div class="flex flex-col gap-3.5 px-5 py-5">
@@ -317,7 +317,7 @@
             </div>
 
             @if($coupons->isEmpty())
-                <x-admin.empty icon="◇" title="No codes used" body="Nothing in this period was ordered with a discount code." />
+                <x-admin.empty icon="coupons" title="No codes used" body="Nothing in this period was ordered with a discount code." />
             @else
                 {{-- A list rather than a table: this card is a third of a row,
                      and four numeric columns would scroll sideways in it. --}}
@@ -371,7 +371,7 @@
             </div>
 
             @if($unsold->isEmpty())
-                <x-admin.empty icon="✓" title="Nothing stranded" body="Every piece that drew views in this period also sold." />
+                <x-admin.empty icon="check" title="Nothing stranded" body="Every piece that drew views in this period also sold." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($unsold as $product)
@@ -397,7 +397,7 @@
             </div>
 
             @if($mostSaved->isEmpty())
-                <x-admin.empty icon="♡" title="Nothing saved yet" body="Favourites appear here once shoppers start hearting pieces." />
+                <x-admin.empty icon="heart" title="Nothing saved yet" body="Favourites appear here once shoppers start hearting pieces." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($mostSaved as $product)
@@ -424,7 +424,7 @@
         </div>
 
         @if($products->isEmpty())
-            <x-admin.empty icon="⬚" title="No products yet"
+            <x-admin.empty icon="products" title="No products yet"
                            body="Add your first piece and its engagement will show up here.">
                 <a href="{{ route('admin.products.create') }}" class="ad-btn-primary">＋ New product</a>
             </x-admin.empty>
@@ -491,7 +491,7 @@
             </div>
 
             @if($topCustomers->isEmpty())
-                <x-admin.empty icon="☺" title="Nobody has ordered yet" body="Customers appear here once an order is placed in this period." />
+                <x-admin.empty icon="customers" title="Nobody has ordered yet" body="Customers appear here once an order is placed in this period." />
             @else
                 <div class="overflow-x-auto">
                     <table class="ad-table">
@@ -527,7 +527,7 @@
             </div>
 
             @if($customerSeries->sum('value') <= 0)
-                <x-admin.empty icon="☺" title="Nobody new" body="No first-time customer records were created in this period." />
+                <x-admin.empty icon="customers" title="Nobody new" body="No first-time customer records were created in this period." />
             @else
                 <x-admin.bar-chart :series="$customerSeries" height="150px" class="px-5 py-6" />
             @endif
@@ -555,7 +555,7 @@
             </div>
 
             @if($deadStock->isEmpty())
-                <x-admin.empty icon="✓" title="Everything has sold" body="No active piece with stock is still waiting for its first sale." />
+                <x-admin.empty icon="check" title="Everything has sold" body="No active piece with stock is still waiting for its first sale." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($deadStock as $product)
@@ -581,7 +581,7 @@
             </div>
 
             @if($stockByCategory->isEmpty())
-                <x-admin.empty icon="⬚" title="No stock recorded" body="Add sizes with stock against a product and they appear here." />
+                <x-admin.empty icon="products" title="No stock recorded" body="Add sizes with stock against a product and they appear here." />
             @else
                 @php $stockPeak = $stockByCategory->max('units'); @endphp
                 <div class="flex flex-col gap-3.5 px-5 py-5">

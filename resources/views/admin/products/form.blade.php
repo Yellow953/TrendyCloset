@@ -102,7 +102,7 @@
                     </div>
 
                     <div data-repeater-empty class="{{ count($variants) ? 'hidden' : '' }}">
-                        <x-admin.empty icon="▤" title="No sizes yet"
+                        <x-admin.empty icon="ruler" title="No sizes yet"
                                        body="Add a row for each size and colour you stock. Leave the size blank for one-size pieces." />
                     </div>
 
@@ -215,7 +215,7 @@
             </div>
 
             @if($product->images->isEmpty())
-                <x-admin.empty icon="▨" title="No photographs yet"
+                <x-admin.empty icon="image" title="No photographs yet"
                                body="Upload some from the panel above — a piece with no imagery renders as an empty frame on the shop." />
             @else
                 <div class="grid grid-cols-2 gap-4 px-5 py-5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">

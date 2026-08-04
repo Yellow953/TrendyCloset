@@ -163,6 +163,10 @@
     .ad-badge-bad {
         @apply border-rose-200 bg-rose-50 text-rose-600;
     }
+    /* A filter currently in force, on the no-results state. Clicking drops it. */
+    .ad-chip {
+        @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1.5 pr-2.5 pl-3 text-[12.5px] font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900;
+    }
 }
 
 /* ---------------------------------------------------------------------------

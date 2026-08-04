@@ -9,6 +9,17 @@
 @endsection
 
 @section('content')
+    @php
+        // One source for the status wording: the select below and the filter
+        // chips on the no-results state read the same array.
+        $statusOptions = ['' => 'Everything', 'active' => 'Live', 'draft' => 'Draft', 'featured' => 'Featured', 'sale' => 'On sale'];
+        $filters = \App\Support\AdminFilters::active([
+            'q' => 'Search',
+            'category' => ['Category', $categories->pluck('name', 'id')->all()],
+            'status' => ['Status', $statusOptions],
+        ]);
+    @endphp
+
     <div class="ad-card">
         {{-- Filters. A plain GET form, so every view of this list is a URL you
              can bookmark or send to someone. --}}
@@ -31,7 +42,7 @@
             <div class="w-[150px]">
                 <label for="status" class="ad-label">Status</label>
                 <select id="status" name="status" class="ad-input">
-                    @foreach(['' => 'Everything', 'active' => 'Live', 'draft' => 'Draft', 'featured' => 'Featured', 'sale' => 'On sale'] as $value => $label)
+                    @foreach($statusOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -43,12 +54,14 @@
             @endif
         </form>
 
-        @if($products->isEmpty())
-            <x-admin.empty icon="⬚" title="No products match"
-                           body="Either the catalogue is empty or the filters above are too narrow.">
+        @if($products->isEmpty() && $filters)
+            <x-admin.no-results noun="products" :filters="$filters" :reset="route('admin.products.index')" />
+        @elseif($products->isEmpty())
+            <x-admin.empty icon="products" title="The catalogue is empty"
+                           body="Nothing is filed yet, so the shop has no rails to browse. A piece needs a name, a price and at least one size before it can go live.">
                 <a href="{{ route('admin.products.create') }}" class="ad-btn-primary">＋ New product</a>
-                @if(request()->hasAny(['q', 'category', 'status']))
-                    <a href="{{ route('admin.products.index') }}" class="ad-btn">Clear filters</a>
+                @if($categories->isEmpty())
+                    <a href="{{ route('admin.categories.create') }}" class="ad-btn">Start with a category</a>
                 @endif
             </x-admin.empty>
         @else

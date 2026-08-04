@@ -5,6 +5,14 @@
 @section('subheading', $unread > 0 ? $unread.' unread of '.number_format($messages->total()) : 'Inbox clear · '.number_format($messages->total()).' total')
 
 @section('content')
+    @php
+        $showOptions = ['' => 'All', 'unread' => 'Unread', 'read' => 'Read'];
+        $filters = \App\Support\AdminFilters::active([
+            'q' => 'Search',
+            'filter' => ['Show', $showOptions],
+        ]);
+    @endphp
+
     <div class="ad-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
@@ -14,7 +22,7 @@
             <div class="w-[150px]">
                 <label for="filter" class="ad-label">Show</label>
                 <select id="filter" name="filter" class="ad-input">
-                    @foreach(['' => 'All', 'unread' => 'Unread', 'read' => 'Read'] as $value => $label)
+                    @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -25,9 +33,19 @@
             @endif
         </form>
 
-        @if($messages->isEmpty())
-            <x-admin.empty icon="✉" title="No messages match"
-                           body="Everything sent through the storefront contact form lands here." />
+        @if($messages->isEmpty() && request('filter') === 'unread' && ! request('q'))
+            {{-- An empty unread list is the goal, not a failed search. --}}
+            <x-admin.empty icon="check" title="Inbox clear"
+                           body="Nothing is waiting on a reply. Everything sent through the contact form has been read.">
+                <a href="{{ route('admin.messages.index') }}" class="ad-btn">Show all messages</a>
+            </x-admin.empty>
+        @elseif($messages->isEmpty() && $filters)
+            <x-admin.no-results noun="messages" :filters="$filters" :reset="route('admin.messages.index')" />
+        @elseif($messages->isEmpty())
+            <x-admin.empty icon="messages" title="No messages yet"
+                           body="Everything sent through the storefront contact form lands here, newest first — there is nothing to set up.">
+                <a href="{{ route('contact') }}" target="_blank" rel="noopener" class="ad-btn">View the contact page ↗</a>
+            </x-admin.empty>
         @else
             <div class="flex flex-col divide-y divide-slate-100">
                 @foreach($messages as $message)

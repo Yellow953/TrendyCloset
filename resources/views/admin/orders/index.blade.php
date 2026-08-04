@@ -5,6 +5,15 @@
 @section('subheading', number_format($orders->total()).' '.Str::plural('order', $orders->total()).' · '.\App\Models\Product::money($revenue).' in revenue from this selection')
 
 @section('content')
+    @php
+        $rangeOptions = ['' => 'All time', 'today' => 'Today', 'week' => 'Past week', 'month' => 'Past month'];
+        $filters = \App\Support\AdminFilters::active([
+            'q' => 'Search',
+            'status' => ['Status', collect($statuses)->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all()],
+            'range' => ['Placed', $rangeOptions],
+        ]);
+    @endphp
+
     <div class="ad-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
@@ -25,7 +34,7 @@
             <div class="w-[150px]">
                 <label for="range" class="ad-label">Placed</label>
                 <select id="range" name="range" class="ad-input">
-                    @foreach(['' => 'All time', 'today' => 'Today', 'week' => 'Past week', 'month' => 'Past month'] as $value => $label)
+                    @foreach($rangeOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('range') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -37,9 +46,13 @@
             @endif
         </form>
 
-        @if($orders->isEmpty())
-            <x-admin.empty icon="❏" title="No orders match"
-                           body="Orders arrive here the moment someone completes checkout. Nothing is charged — they land as pending for you to work through." />
+        @if($orders->isEmpty() && $filters)
+            <x-admin.no-results noun="orders" :filters="$filters" :reset="route('admin.orders.index')" />
+        @elseif($orders->isEmpty())
+            <x-admin.empty icon="orders" title="No orders yet"
+                           body="Orders arrive here the moment someone completes checkout. Nothing is charged — they land as pending for you to arrange payment and delivery.">
+                <a href="{{ route('home') }}" target="_blank" rel="noopener" class="ad-btn">View the shop ↗</a>
+            </x-admin.empty>
         @else
             <div class="overflow-x-auto">
                 <table class="ad-table">

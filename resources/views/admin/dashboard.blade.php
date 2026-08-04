@@ -77,7 +77,7 @@
             </div>
 
             @if($recentOrders->isEmpty())
-                <x-admin.empty icon="❏" title="No orders yet"
+                <x-admin.empty icon="orders" title="No orders yet"
                                body="When someone checks out, their order lands here as pending." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
@@ -107,7 +107,7 @@
             </div>
 
             @if($lowStock->isEmpty())
-                <x-admin.empty icon="✓" title="Everything is stocked" body="No active size is down to its last few." />
+                <x-admin.empty icon="check" title="Everything is stocked" body="No active size is down to its last few." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($lowStock as $variant)
@@ -133,7 +133,7 @@
             </div>
 
             @if($unreadMessages->isEmpty())
-                <x-admin.empty icon="✉" title="Inbox clear" body="Every contact-form message has been read." />
+                <x-admin.empty icon="check" title="Inbox clear" body="Every contact-form message has been read." />
             @else
                 <div class="flex flex-col divide-y divide-slate-100">
                     @foreach($unreadMessages as $message)

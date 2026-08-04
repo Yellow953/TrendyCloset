@@ -19,7 +19,7 @@
 
     <div class="ad-card">
         @if($roots->isEmpty())
-            <x-admin.empty icon="⋔" title="No categories yet"
+            <x-admin.empty icon="categories" title="No categories yet"
                            body="The shop nav is built from this tree, so start with a top-level section such as “Winter” or “Dresses”.">
                 <a href="{{ route('admin.categories.create') }}" class="ad-btn-primary">＋ New category</a>
             </x-admin.empty>

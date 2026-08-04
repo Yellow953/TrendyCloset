@@ -12,7 +12,7 @@
 @section('content')
     <div class="ad-card">
         @if($slides->isEmpty())
-            <x-admin.empty icon="▭" title="No slides yet"
+            <x-admin.empty icon="slides" title="No slides yet"
                            body="With no slides the home page falls back to the three it shipped with. Add one to take it over.">
                 <a href="{{ route('admin.slides.create') }}" class="ad-btn-primary">＋ New slide</a>
             </x-admin.empty>
