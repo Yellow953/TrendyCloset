@@ -179,11 +179,28 @@ function initAutoSubmit() {
 // Sticky header: once the page has scrolled past the announcement bar, mark
 // the header so CSS can collapse the bar and drop a shadow. The header itself
 // is position:sticky, so no layout maths here.
+//
+// The two thresholds are not decoration. Collapsing the bar takes its height
+// out of the document and the browser holds the content still by pulling the
+// scroll position back by that much. So the point it collapses at has to sit
+// further down than the bar is tall, and re-opening has to happen further up
+// still — otherwise the pull-back lands on the other side of a single
+// threshold and the header flickers open and shut every frame.
 function initStickyHeader() {
     const header = document.querySelector('[data-header]');
     if (!header) return;
 
-    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 30);
+    const bar = header.querySelector('[data-announcement]');
+    let barHeight = 0;
+
+    const update = () => {
+        const collapsed = header.classList.contains('is-scrolled');
+        if (!collapsed && bar) barHeight = bar.scrollHeight;
+
+        if (collapsed ? window.scrollY < 8 : window.scrollY > barHeight + 24) {
+            header.classList.toggle('is-scrolled', !collapsed);
+        }
+    };
 
     window.addEventListener('scroll', update, { passive: true });
     update();
