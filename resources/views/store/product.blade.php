@@ -294,17 +294,22 @@
 
     {{-- Related --}}
     @if($related->isNotEmpty())
-        <div class="px-5 py-14 md:px-10">
+        <div class="py-14">
             <h2 data-reveal class="tc-heading">You may also like</h2>
             <span data-reveal class="tc-heading-rule"></span>
-            <div data-reveal-children class="mt-9 grid grid-cols-2 gap-x-7 gap-y-10 md:grid-cols-4">
-                @foreach($related as $p)
-                    {{-- Four up from md (px-10, three 28px gaps), two below. --}}
-                    @include('partials.product-card', [
-                        'p' => $p,
-                        'imgSizes' => '(min-width: 768px) calc((100vw - 164px) / 4), calc((100vw - 68px) / 2)',
-                    ])
-                @endforeach
+            <div data-carousel class="relative mt-9">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 scroll-smooth px-5 sm:gap-6 md:scroll-px-10 md:px-10">
+                    @foreach($related as $p)
+                        <div class="w-[47%] shrink-0 snap-start md:w-[31%] lg:w-[23.5%]">
+                            @include('partials.product-card', [
+                                'p' => $p,
+                                'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), calc(47vw - 19px)',
+                            ])
+                        </div>
+                    @endforeach
+                </div>
+                <button type="button" data-carousel-prev aria-label="Previous products" class="tc-arrow absolute left-2 top-[35%] -translate-y-1/2 md:left-3">&lsaquo;</button>
+                <button type="button" data-carousel-next aria-label="Next products" class="tc-arrow absolute right-2 top-[35%] -translate-y-1/2 md:right-3">&rsaquo;</button>
             </div>
         </div>
     @endif

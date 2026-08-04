@@ -77,15 +77,15 @@
             <h2 data-reveal class="tc-heading">Shop by Category</h2>
             <span data-reveal class="tc-heading-rule"></span>
             <div data-carousel data-carousel-autoplay="4500" class="relative mt-9">
-                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-8 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 scroll-smooth px-5 sm:gap-8 md:scroll-px-10 md:px-10">
                     @foreach($categories as $c)
-                        <a href="{{ route('listing', $c) }}" class="group flex w-[170px] shrink-0 snap-start flex-col items-center gap-3.5 sm:w-[200px]">
-                            <div class="h-[170px] w-[170px] overflow-hidden rounded-full bg-cream sm:h-[200px] sm:w-[200px]">
-                                <x-img :src="$c->image_url" :alt="$c->name" sizes="200px"
+                        <a href="{{ route('listing', $c) }}" class="group flex w-[104px] shrink-0 snap-start flex-col items-center gap-2.5 sm:w-[170px] sm:gap-3.5 md:w-[200px]">
+                            <div class="h-[104px] w-[104px] overflow-hidden rounded-full bg-cream sm:h-[170px] sm:w-[170px] md:h-[200px] md:w-[200px]">
+                                <x-img :src="$c->image_url" :alt="$c->name" sizes="(min-width: 768px) 200px, (min-width: 640px) 170px, 104px"
                                        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                             </div>
-                            <div class="text-center text-[16px] font-medium transition-colors group-hover:text-blush">{{ $c->name }}</div>
-                            <div class="-mt-2.5 text-[13px] font-light text-muted">{{ $counts[$c->id] ?? 0 }} {{ Str::plural('product', $counts[$c->id] ?? 0) }}</div>
+                            <div class="text-center text-[13.5px] font-medium leading-[1.35] transition-colors group-hover:text-blush sm:text-[16px]">{{ $c->name }}</div>
+                            <div class="-mt-1.5 text-[12px] font-light text-muted sm:-mt-2.5 sm:text-[13px]">{{ $counts[$c->id] ?? 0 }} {{ Str::plural('product', $counts[$c->id] ?? 0) }}</div>
                         </a>
                     @endforeach
                 </div>
@@ -101,10 +101,10 @@
             <h2 data-reveal class="tc-heading">Featured Products</h2>
             <span data-reveal class="tc-heading-rule"></span>
             <div data-carousel data-carousel-autoplay="4500" class="relative mt-9">
-                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 scroll-smooth px-5 sm:gap-6 md:scroll-px-10 md:px-10">
                     @foreach($featured as $p)
-                        <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
+                        <div class="w-[47%] shrink-0 snap-start md:w-[31%] lg:w-[23.5%]">
+                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), calc(47vw - 19px)'])
                         </div>
                     @endforeach
                 </div>
@@ -131,10 +131,10 @@
                 </div>
             @endif
             <div data-carousel class="relative mt-9">
-                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-5 scroll-smooth px-5 md:scroll-px-10 md:px-10">
+                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 scroll-smooth px-5 sm:gap-6 md:scroll-px-10 md:px-10">
                     @foreach($deals as $p)
-                        <div class="w-[70%] shrink-0 snap-start sm:w-[46%] md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), (min-width: 640px) calc(46vw - 18px), calc(70vw - 28px)'])
+                        <div class="w-[47%] shrink-0 snap-start md:w-[31%] lg:w-[23.5%]">
+                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), calc(47vw - 19px)'])
                         </div>
                     @endforeach
                 </div>
