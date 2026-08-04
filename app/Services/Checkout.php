@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Support\Cart;
+use App\Support\Countries;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -29,7 +30,7 @@ class Checkout
     public function __construct(private readonly Cart $cart) {}
 
     /**
-     * @param  array{ship_name: string, ship_phone: string, email?: ?string, ship_line1: string, ship_city: string, ship_country?: ?string, notes?: ?string, marketing_opt_in?: bool}  $data
+     * @param  array{ship_name: string, ship_phone: string, email?: ?string, ship_street: string, ship_building?: ?string, ship_floor?: ?string, ship_details?: ?string, ship_city: string, ship_country?: ?string, notes?: ?string, marketing_opt_in?: bool}  $data
      *
      * @throws RuntimeException when the bag is empty or a line has since sold out
      */
@@ -91,12 +92,14 @@ class Checkout
                 'status' => OrderStatus::Pending,
                 'email' => $email,
                 'ship_name' => $data['ship_name'],
-                'ship_line1' => $data['ship_line1'],
-                'ship_line2' => $data['ship_line2'] ?? null,
+                'ship_street' => $data['ship_street'],
+                'ship_building' => $data['ship_building'] ?? null,
+                'ship_floor' => $data['ship_floor'] ?? null,
+                'ship_details' => $data['ship_details'] ?? null,
                 'ship_city' => $data['ship_city'],
                 'ship_region' => $data['ship_region'] ?? null,
                 'ship_postcode' => $data['ship_postcode'] ?? null,
-                'ship_country' => $data['ship_country'] ?? config('store.contact.country'),
+                'ship_country' => ($data['ship_country'] ?? null) ?: Countries::defaultName(),
                 'ship_phone' => $data['ship_phone'],
                 'subtotal' => $summary['subtotal'],
                 'discount_total' => $summary['discount'],

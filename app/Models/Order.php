@@ -21,8 +21,10 @@ class Order extends Model
         'status',
         'email',
         'ship_name',
-        'ship_line1',
-        'ship_line2',
+        'ship_street',
+        'ship_building',
+        'ship_floor',
+        'ship_details',
         'ship_city',
         'ship_region',
         'ship_postcode',
@@ -79,16 +81,23 @@ class Order extends Model
     }
 
     /**
-     * The shipping address as the lines you would write on a label.
+     * The shipping address as the lines you would write on a label. Building
+     * and floor share a line, the way an address is actually read out.
      *
      * @return array<int, string>
      */
     public function addressLines(): array
     {
+        $building = trim(implode(', ', array_filter([
+            $this->ship_building,
+            $this->ship_floor ? 'Floor '.$this->ship_floor : null,
+        ])));
+
         return array_values(array_filter([
             $this->ship_name,
-            $this->ship_line1,
-            $this->ship_line2,
+            $this->ship_street,
+            $building,
+            $this->ship_details,
             trim(implode(' ', array_filter([$this->ship_city, $this->ship_postcode]))),
             $this->ship_region,
             $this->ship_country,

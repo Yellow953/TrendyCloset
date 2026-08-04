@@ -75,13 +75,22 @@ and do not add auth traits to `Customer` without revisiting this decision.
   local number given `store.contact.country_code`), so "76 158 735" and "+961 76 158 735" are one
   record. `customers.phone` is unique and stores the **normalised** form; `orders.ship_phone` stores
   the number **as typed**. Email is filled in when offered but never matched on.
+  - The phone field is a **dial-code select + the local number** (`ship_phone_code` + `ship_phone`,
+    defaulting to `store.contact.country_code`); the controller joins them into `"+961 76 158 735"`
+    before anything sees the data, so `ship_phone` is always stored with its code. `normalizePhone()`
+    therefore **trusts a leading `+`** and returns those digits untouched — without that a short
+    foreign number (`+33 6 12 34 56`) would be read as a local one and get a `961` glued on.
 - The back office reaches customers on WhatsApp: order and customer pages link `wa.me`, never
   `tel:`, and show email only when there is one. Search covers phone, email and name.
 - `orders.customer_id` is nullable + `nullOnDelete` so deleting a customer never destroys sales
   history. The `email` / `ship_*` columns on `orders` are a deliberate **snapshot of the order as
-  placed** — never refactor them into a join on `customers`. `ship_country` is not asked for at
-  checkout (the address form is name / phone / street / city only) and defaults to
-  `store.contact.country`.
+  placed** — never refactor them into a join on `customers`.
+- **The delivery address is asked for a field at a time**, so the back office can read a label off
+  the order instead of parsing prose: `ship_street` (required), `ship_building`, `ship_floor`,
+  `ship_details` (landmark / directions), `ship_city` (required) and a `ship_country` **select**
+  defaulting to `store.contact.country`. `Order::addressLines()` is what composes them back into
+  label lines — building and floor share one — so no view ever concatenates an address itself.
+  `ship_region` / `ship_postcode` exist on the table but nothing asks for them.
 **The bag** — `App\Support\Cart` (scoped binding, session key `tc_cart`). There is still **no `Cart`
 model or `carts` table**: an abandoned bag is not a CRM record, and shoppers check out as guests.
 - The session stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are
@@ -131,6 +140,10 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
   parent's count includes its children). Resolved once per request so header, sidebar and home
   carousel share one set of queries. (It used to expose a `spotlight()` product for the mega-menu's
   image panel; that panel was removed, and the query with it.)
+- `Countries` — the list behind checkout's two selects (delivery country, phone dial code), read
+  from `config/countries.php` (ISO code → name + dial). `dialCodes()` deduplicates shared codes so
+  44 is offered once. Orders store the country **name**, not the ISO code — the column always has,
+  and the back office prints it onto the parcel.
 - `Swatch` — maps variant colour names to hex for the filter/PDP swatches; unknown colours fall back
   to a neutral chip rather than vanishing.
 
@@ -275,7 +288,10 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - Brand palette as `--color-*` tokens (e.g. `ink`, `blush`, `tan`, `cream`, `muted`, `jade`) →
   use as Tailwind utilities like `bg-cream`, `text-blush`, `border-line-2`.
 - Font tokens `--font-sans/serif/display` → `font-sans`, `font-serif`, `font-display`.
-- Reusable component classes: `.tc-input`, `.tc-btn-dark`, `.tc-btn-outline`, `.tc-link`.
+- Reusable component classes: `.tc-input`, `.tc-select` (the same field as a `<select>`, native
+  arrow swapped for a brand chevron), `.tc-field-label` (the small-caps label above a field, for
+  forms with enough inputs that placeholders stop telling them apart), `.tc-btn-dark`,
+  `.tc-btn-outline`, `.tc-link`.
 - `@source '../views'` ensures Blade class names are scanned.
 
 **Motion** — one vocabulary, all of it in the `MOTION` section of `app.css`: things *arrive* by

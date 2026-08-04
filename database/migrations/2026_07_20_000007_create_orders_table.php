@@ -16,11 +16,15 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->string('email')->nullable();
 
-            // Shipping details
+            // Shipping details — the address is asked for a piece at a time at
+            // checkout, so the back office can read a label off the order
+            // instead of parsing one free-text line.
             $table->string('ship_name');
             $table->string('ship_phone');
-            $table->string('ship_line1');
-            $table->string('ship_line2')->nullable();
+            $table->string('ship_street');
+            $table->string('ship_building')->nullable();
+            $table->string('ship_floor', 60)->nullable();
+            $table->string('ship_details')->nullable();
             $table->string('ship_city');
             $table->string('ship_region')->nullable();
             $table->string('ship_postcode')->nullable();

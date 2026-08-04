@@ -18,20 +18,32 @@
 
             <div>
                 <div class="text-[18px] font-medium">Your details</div>
-                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="mt-3 flex flex-col gap-3">
                     <div>
-                        <input name="ship_name" value="{{ old('ship_name') }}" required autocomplete="name"
+                        <label for="ship_name" class="tc-field-label">Full name</label>
+                        <input id="ship_name" name="ship_name" value="{{ old('ship_name') }}" required autocomplete="name"
                                placeholder="Full name" class="tc-input">
                         @error('ship_name')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <input type="tel" name="ship_phone" value="{{ old('ship_phone') }}" required autocomplete="tel"
-                               inputmode="tel" placeholder="Phone number" class="tc-input">
+                        <label for="ship_phone" class="tc-field-label">Phone number</label>
+                        <div class="flex gap-2">
+                            <select name="ship_phone_code" required autocomplete="tel-country-code"
+                                    aria-label="Phone country code" class="tc-select w-[150px] shrink-0 sm:w-[200px]">
+                                @foreach($dialCodes as $dial)
+                                    <option value="{{ $dial['dial'] }}" @selected(old('ship_phone_code', $defaultDial) === $dial['dial'])>+{{ $dial['dial'] }} · {{ $dial['name'] }}</option>
+                                @endforeach
+                            </select>
+                            <input id="ship_phone" type="tel" name="ship_phone" value="{{ old('ship_phone') }}" required
+                                   autocomplete="tel-national" inputmode="tel" placeholder="76 158 735" class="tc-input">
+                        </div>
+                        @error('ship_phone_code')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                         @error('ship_phone')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                     </div>
-                    <div class="sm:col-span-2">
-                        <input type="email" name="email" value="{{ old('email') }}" autocomplete="email"
-                               placeholder="Email address (optional)" class="tc-input">
+                    <div>
+                        <label for="email" class="tc-field-label">Email <span class="font-light normal-case tracking-normal text-muted">(optional)</span></label>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email"
+                               placeholder="you@example.com" class="tc-input">
                         @error('email')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -43,16 +55,45 @@
 
             <div>
                 <div class="mb-3 text-[18px] font-medium">Delivery address</div>
-                <div class="flex flex-col gap-3">
-                    <div>
-                        <input name="ship_line1" value="{{ old('ship_line1') }}" required autocomplete="street-address"
-                               placeholder="Street, building, floor" class="tc-input">
-                        @error('ship_line1')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="ship_street" class="tc-field-label">Street</label>
+                        <input id="ship_street" name="ship_street" value="{{ old('ship_street') }}" required autocomplete="address-line1"
+                               placeholder="Street name" class="tc-input">
+                        @error('ship_street')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <input name="ship_city" value="{{ old('ship_city') }}" required autocomplete="address-level2"
+                        <label for="ship_building" class="tc-field-label">Building</label>
+                        <input id="ship_building" name="ship_building" value="{{ old('ship_building') }}" autocomplete="address-line2"
+                               placeholder="Building name or number" class="tc-input">
+                        @error('ship_building')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="ship_floor" class="tc-field-label">Floor</label>
+                        <input id="ship_floor" name="ship_floor" value="{{ old('ship_floor') }}"
+                               placeholder="e.g. 4" class="tc-input">
+                        @error('ship_floor')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="ship_details" class="tc-field-label">Address details <span class="font-light normal-case tracking-normal text-muted">(optional)</span></label>
+                        <input id="ship_details" name="ship_details" value="{{ old('ship_details') }}"
+                               placeholder="Landmark, nearest junction, anything that helps the driver" class="tc-input">
+                        @error('ship_details')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="ship_city" class="tc-field-label">City / area</label>
+                        <input id="ship_city" name="ship_city" value="{{ old('ship_city') }}" required autocomplete="address-level2"
                                placeholder="City / area" class="tc-input">
                         @error('ship_city')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="ship_country" class="tc-field-label">Country</label>
+                        <select id="ship_country" name="ship_country" required autocomplete="country-name" class="tc-select">
+                            @foreach($countries as $country)
+                                <option value="{{ $country }}" @selected(old('ship_country', $defaultCountry) === $country)>{{ $country }}</option>
+                            @endforeach
+                        </select>
+                        @error('ship_country')<p class="mt-1.5 text-[12.5px] font-normal text-blush">{{ $message }}</p>@enderror
                     </div>
                 </div>
             </div>

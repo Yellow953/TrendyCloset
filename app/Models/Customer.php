@@ -52,6 +52,13 @@ class Customer extends Model
             return '';
         }
 
+        // An explicit "+" means the country code is already in front of the
+        // number — checkout puts it there from the code select, so a short
+        // foreign number must not be read as a local one.
+        if (str_starts_with(ltrim($phone), '+')) {
+            return '+'.$digits;
+        }
+
         $code = (string) config('store.contact.country_code', '961');
 
         $digits = preg_replace('/^00/', '', $digits) ?? $digits;

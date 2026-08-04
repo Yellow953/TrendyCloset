@@ -85,6 +85,20 @@
     .tc-input-sm {
         @apply px-3 py-2.5 text-[13.5px];
     }
+    /* The small caps label above a field — used where a form has enough
+       fields that placeholders alone stop being enough to tell them apart. */
+    .tc-field-label {
+        @apply mb-1.5 block text-[11.5px] font-medium uppercase tracking-[0.08em] text-muted-3;
+    }
+    /* The field as a <select>: the native arrow traded for a brand chevron so
+       a country list sits beside a text input without looking bolted on. */
+    .tc-select {
+        @apply w-full appearance-none rounded-field border border-line-2 bg-white py-3.5 pl-4 pr-10 text-sm font-light text-ink outline-none transition-colors focus:border-blush;
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23111' stroke-width='1.4'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 11px;
+    }
     .tc-btn-dark {
         @apply inline-flex items-center justify-center rounded-field bg-ink px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush disabled:cursor-not-allowed disabled:bg-faint;
     }

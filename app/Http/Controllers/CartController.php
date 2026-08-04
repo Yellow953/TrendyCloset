@@ -9,8 +9,10 @@ use App\Services\Checkout;
 use App\Services\ProductAnalytics;
 use App\Services\SiteAnalytics;
 use App\Support\Cart;
+use App\Support\Countries;
 use App\Support\Seo;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use RuntimeException;
 
 /**
@@ -161,6 +163,10 @@ class CartController extends Controller
         return view('store.checkout', [
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
+            'countries' => Countries::names(),
+            'dialCodes' => Countries::dialCodes(),
+            'defaultCountry' => Countries::defaultName(),
+            'defaultDial' => Countries::defaultDial(),
             'active' => null,
         ]);
     }
@@ -177,18 +183,30 @@ class CartController extends Controller
 
         $data = $request->validate([
             'ship_name' => ['required', 'string', 'max:255'],
-            'ship_phone' => ['required', 'string', 'min:6', 'max:40'],
+            'ship_phone_code' => ['required', 'string', Rule::in(array_column(Countries::dialCodes(), 'dial'))],
+            'ship_phone' => ['required', 'string', 'min:5', 'max:40'],
             'email' => ['nullable', 'email', 'max:255'],
-            'ship_line1' => ['required', 'string', 'max:255'],
+            'ship_street' => ['required', 'string', 'max:255'],
+            'ship_building' => ['nullable', 'string', 'max:255'],
+            'ship_floor' => ['nullable', 'string', 'max:60'],
+            'ship_details' => ['nullable', 'string', 'max:255'],
             'ship_city' => ['required', 'string', 'max:120'],
+            'ship_country' => ['required', 'string', Rule::in(Countries::names())],
             'notes' => ['nullable', 'string', 'max:1000'],
             'marketing_opt_in' => ['nullable', 'boolean'],
         ], [
             'ship_name.required' => 'We need a name for the delivery.',
             'ship_phone.required' => 'We need a phone number to arrange delivery.',
-            'ship_line1.required' => 'Please tell us the street and building.',
+            'ship_phone_code.in' => 'Please pick a country code.',
+            'ship_street.required' => 'Please tell us the street.',
             'ship_city.required' => 'Please tell us the city or area.',
+            'ship_country.in' => 'Please pick a country from the list.',
         ]);
+
+        // The number is stored as it was given, with the code the shopper
+        // picked in front of it — Customer::normalizePhone() then trusts the
+        // leading "+" rather than assuming a Lebanese local number.
+        $data['ship_phone'] = '+'.$data['ship_phone_code'].' '.trim($data['ship_phone']);
 
         try {
             $order = $checkout->place($data);
