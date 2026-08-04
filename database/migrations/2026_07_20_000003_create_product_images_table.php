@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->string('disk_path')->nullable()->after('url');
+            $table->string('disk_path')->nullable();
             $table->string('url');
             $table->string('credit')->nullable();
             $table->string('credit_href')->nullable();

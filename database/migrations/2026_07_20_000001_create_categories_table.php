@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->string('image_url')->nullable();
-            $table->string('image_path')->nullable()->after('image_url');
+            $table->string('image_path')->nullable();
             $table->string('image_credit')->nullable();
             $table->string('image_credit_href')->nullable();
             $table->integer('position')->default(0);
