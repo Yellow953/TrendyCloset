@@ -10,6 +10,7 @@ use App\Support\Catalog;
 use App\Support\Seo;
 use App\Support\Visitor;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -34,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->composeChrome();
         $this->composeAdminChrome();
+
+        // 191 * 4 bytes fits under InnoDB's 767-byte per-column index prefix on
+        // the COMPACT row format old shared hosts still default to; utf8mb4
+        // varchar(255) does not. Affects new migrations only — the engine is
+        // pinned to InnoDB in config/database.php, which is the other half.
+        Schema::defaultStringLength(191);
 
         // partials/seo renders whatever the controller put on the scoped Seo
         // instance; resolving it here keeps every action from passing it along.
