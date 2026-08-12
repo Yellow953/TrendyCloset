@@ -16,7 +16,7 @@
                 </a>
             @endforeach
             <div class="mt-6 rounded-card bg-cream-3 p-5 text-[13.5px] font-light leading-[1.7] text-muted-2">
-                Still stuck? <a href="{{ route('contact') }}" class="tc-link">Message us</a> — we answer within 24 hours.
+                Still stuck? <a href="{{ route('contact') }}" class="tc-link">Message us</a> — we answer {{ config('store.contact.response_time') }}.
             </div>
         </nav>
 

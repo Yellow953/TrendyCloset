@@ -344,3 +344,4 @@ rising a few pixels and settling, once. Shared easing/step tokens are `--tc-ease
   the storefront home).
 - The legacy Bootstrap scaffolding (`welcome.blade.php`, `home.blade.php`, `layouts/app.blade.php`,
   `HomeController`) has been deleted — it was unrouted and referenced the removed `register` route.
+- Try not writing many comments in the code and if you have to just leave minimal ones.

@@ -77,19 +77,24 @@ class CatalogSeeder extends Seeder
                 ['Cardigans', 'photo-1490481651871-ab68de25d43d'],
                 ['Sets', 'photo-1576871337622-98d48d1cf531'],
                 ['Coats & Jackets', 'photo-1539533018447-63fcce2678e3'],
+                ['Vest', 'photo-1644140821708-bd32b2796e39'],
             ]],
             ['Summer Section', 'photo-1594633312681-425c7b97ccd1', [
                 ['Basics', 'photo-1515372039744-b8f02a3ae446'],
                 ['Tops', 'photo-1618354691373-d851c5c3a990'],
                 ['Sets', 'photo-1622470953794-aa9c70b0fb9d'],
                 ['Dresses', 'photo-1572804013309-59a88b7e92f1'],
+                ['Vest', 'photo-1525171254930-643fc658b64e'],
             ]],
-            ['Shirts', 'photo-1487222477894-8943e31ef7b2', []],
+            ['Shirts', 'photo-1770294758906-c8762abb2c8b', []],
             ['Pants', 'photo-1627577279497-4b24bf1021b6', [
                 ['Mom cut', 'photo-1591369822096-ffd140ec948f'],
                 ['Wide legs', 'photo-1604176354204-9268737828e4'],
             ]],
-            ['Shorts & Skirts', 'photo-1620012253295-c15cc3e65df4', []],
+            ['Shorts & Skirts', 'photo-1639818023520-ab4c21c5892b', []],
+            ['Pyjamas', 'photo-1768696082915-bdc6774f94c7', []],
+            ['Scarf', 'photo-1571498521264-5fcaa7f8edf4', []],
+            ['Accessories', 'photo-1492707892479-7bc8d5a4ee93', []],
         ];
 
         $cats = [];
@@ -156,6 +161,8 @@ class CatalogSeeder extends Seeder
             ['winter-section-sets', 'Knit Lounge Set — Grey', 72, null, 'NEW', 5, false, false, 'photo-1576871337622-98d48d1cf531'],
             ['winter-section-coats-jackets', 'Wool Blend Coat — Camel', 128, 160, '-20%', 5, true, true, 'photo-1539533018447-63fcce2678e3'],
             ['winter-section-coats-jackets', 'Padded Puffer Jacket — Black', 98, null, 'NEW', 4, false, false, 'photo-1608063615781-e2ef8c73d114'],
+            ['winter-section-vest', 'Padded Puffer Vest — Forest', 64, null, 'NEW', 5, true, false, 'photo-1644140821708-bd32b2796e39'],
+            ['winter-section-vest', 'Quilted Vest — Black', 58, 72, '-19%', 4, false, true, 'photo-1577910473180-55de54e7ff30'],
 
             // Summer Section
             ['summer-section-basics', 'Cotton Basics Tee — White', 18, null, null, 4, false, false, 'photo-1515372039744-b8f02a3ae446'],
@@ -164,10 +171,11 @@ class CatalogSeeder extends Seeder
             ['summer-section-sets', 'Two-Piece Summer Set — Terracotta', 64, 78, '-18%', 5, true, true, 'photo-1622470953794-aa9c70b0fb9d'],
             ['summer-section-dresses', 'Floral Midi Dress — Blush', 58, null, 'NEW', 5, true, false, 'photo-1572804013309-59a88b7e92f1'],
             ['summer-section-dresses', 'Satin Slip Dress — Champagne', 54, 66, '-18%', 5, false, true, 'photo-1594633312681-425c7b97ccd1'],
+            ['summer-section-vest', 'Ribbed Cami Vest — Black', 22, null, 'NEW', 4, false, false, 'photo-1525171254930-643fc658b64e'],
 
             // Shirts (no subcategories)
-            ['shirts', 'Oversized Poplin Shirt — White', 44, null, 'NEW', 5, true, false, 'photo-1596755094514-f87e34085b2c'],
-            ['shirts', 'Checked Flannel Shirt — Rust', 42, null, null, 4, false, false, 'photo-1487222477894-8943e31ef7b2'],
+            ['shirts', 'Oversized Poplin Shirt — White', 44, null, 'NEW', 5, true, false, 'photo-1611235116156-0cbda6649efb'],
+            ['shirts', 'Checked Flannel Shirt — Rust', 42, null, null, 4, false, false, 'photo-1610886886310-be2828d6afd5'],
             ['shirts', 'Relaxed Linen Shirt — Sand', 46, 56, '-18%', 4, false, true, 'photo-1619086303291-0ef7699e4b31'],
 
             // Pants
@@ -175,9 +183,21 @@ class CatalogSeeder extends Seeder
             ['pants-wide-legs', 'Wide Leg Trousers — Black', 54, 66, '-18%', 5, true, true, 'photo-1627577279497-4b24bf1021b6'],
 
             // Shorts & Skirts (no subcategories)
-            ['shorts-skirts', 'Denim Shorts — Light Wash', 36, null, 'NEW', 4, true, false, 'photo-1620012253295-c15cc3e65df4'],
+            ['shorts-skirts', 'Denim Shorts — Light Wash', 36, null, 'NEW', 4, true, false, 'photo-1591195853828-11db59a44f6b'],
             ['shorts-skirts', 'Pleated Mini Skirt — Camel', 40, 50, '-20%', 5, false, true, 'photo-1583496661160-fb5886a0aaaa'],
             ['shorts-skirts', 'Satin Midi Skirt — Champagne', 48, null, null, 5, false, false, 'photo-1495121605193-b116b5b9c5fe'],
+
+            // Pyjamas (no subcategories)
+            ['pyjamas', 'Cotton Pyjama Set — Sky', 42, null, 'NEW', 5, true, false, 'photo-1768696082915-bdc6774f94c7'],
+            ['pyjamas', 'Printed Satin Pyjamas — Crimson', 56, 68, '-18%', 5, false, true, 'photo-1654512462970-8191bc8742bd'],
+
+            // Scarf (no subcategories)
+            ['scarf', 'Woven Winter Scarf — Sage', 28, null, 'NEW', 5, true, false, 'photo-1457545195570-67f207084966'],
+            ['scarf', 'Lightweight Scarf — Olive', 24, 30, '-20%', 4, false, true, 'photo-1643312892626-80632ef6d7dc'],
+
+            // Accessories (no subcategories)
+            ['accessories', 'Statement Earrings — Gold', 18, null, 'NEW', 5, true, false, 'photo-1549439602-43ebca2327af'],
+            ['accessories', 'Structured Handbag — Powder Blue', 68, 84, '-19%', 5, false, true, 'photo-1575202332411-b01fe9ace7a8'],
         ];
 
         $slugSeen = [];
@@ -197,7 +217,7 @@ class CatalogSeeder extends Seeder
                 'category_id' => $cats[$catSlug]->id,
                 'name' => $name,
                 'slug' => $slug,
-                'description' => 'A Trendy Closet staple, styled by Leila Konsol.',
+                'description' => 'A Trendy Closet staple, styled by Pamela.',
                 'price' => $price,
                 'compare_at_price' => $compare,
                 'badge' => $badge,
@@ -223,6 +243,7 @@ class CatalogSeeder extends Seeder
 
         $sizes = match ($rootSlug) {
             'jeans', 'pants', 'shorts-skirts' => ['24', '26', '28', '30', '32', '34'],
+            'scarf', 'accessories' => ['One Size'],
             default => ['XS', 'S', 'M', 'L', 'XL', '2XL'],
         };
 

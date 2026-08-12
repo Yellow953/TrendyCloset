@@ -556,17 +556,6 @@ html:not(.tc-js) [data-share] {
     cursor: progress;
 }
 
-/* Countdown digits tick over rather than blink. */
-@keyframes tc-tick {
-    from {
-        opacity: 0;
-        transform: translateY(-45%);
-    }
-}
-.tc-tick {
-    animation: tc-tick 0.3s var(--tc-ease);
-}
-
 /* --- Disclosure and swap --------------------------------------------------
    Anything that appears in place — a filter panel, an FAQ answer, a tab, the
    search bar, a freshly fetched drawer — uses the same short rise. */
@@ -653,7 +642,6 @@ details[open] > *:not(summary),
     [data-search-panel]:not([hidden]),
     .tc-pop,
     .tc-bump,
-    .tc-tick,
     .tc-fade-up,
     .is-busy {
         animation: none;

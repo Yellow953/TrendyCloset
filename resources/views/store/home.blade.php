@@ -114,36 +114,6 @@
         </section>
     @endif
 
-    {{-- Deal of the week --}}
-    @if($deals->isNotEmpty())
-        <section class="pb-14">
-            <h2 data-reveal class="tc-heading">Deal of the Week</h2>
-            <span data-reveal class="tc-heading-rule"></span>
-            @if($countdown)
-                {{-- Rendered server-side; the ticker in app.js counts it down. --}}
-                <div data-reveal="zoom" class="mt-5 flex justify-center gap-2.5" data-countdown="{{ $dealEndsAt->toIso8601String() }}">
-                    @foreach($countdown as $t)
-                        <div class="w-16 rounded-field bg-cream py-2.5 text-center">
-                            <div class="text-[20px] font-semibold text-blush" data-countdown-part="{{ $t['k'] }}">{{ str_pad((string) $t['n'], 2, '0', STR_PAD_LEFT) }}</div>
-                            <div class="text-[11px] font-light tracking-[0.12em] text-muted">{{ $t['l'] }}</div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-            <div data-carousel class="relative mt-9">
-                <div data-carousel-track data-reveal-children class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 scroll-smooth px-5 sm:gap-6 md:scroll-px-10 md:px-10">
-                    @foreach($deals as $p)
-                        <div class="w-[47%] shrink-0 snap-start md:w-[31%] lg:w-[23.5%]">
-                            @include('partials.product-card', ['p' => $p, 'imgSizes' => '(min-width: 1024px) calc(23.5vw - 19px), (min-width: 768px) calc(31vw - 25px), calc(47vw - 19px)'])
-                        </div>
-                    @endforeach
-                </div>
-                <button type="button" data-carousel-prev aria-label="Previous deals" class="tc-arrow absolute left-2 top-[35%] -translate-y-1/2 md:left-3">&lsaquo;</button>
-                <button type="button" data-carousel-next aria-label="Next deals" class="tc-arrow absolute right-2 top-[35%] -translate-y-1/2 md:right-3">&rsaquo;</button>
-            </div>
-        </section>
-    @endif
-
     {{-- Testimonials --}}
     <section class="bg-cream px-5 py-14 md:px-10">
         <h2 data-reveal class="tc-heading">What the Closet Says</h2>

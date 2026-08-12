@@ -139,18 +139,18 @@ class SeoController extends Controller
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';
         $out[] = '- Customers check out as guests — there is no shopper account to create.';
         $out[] = '- Contact: '.config('seo.email').', or WhatsApp '.config('store.contact.phone_display')
-            .'. Questions are answered within 24 hours.';
+            .'. Questions are answered '.config('store.contact.response_time').'.';
         $out[] = '- The shop is also a physical store: '.implode(', ', config('store.contact.address'))
-            .', open '.config('store.contact.hours').'.';
+            .'. Opening hours: '.implode('; ', config('store.contact.hours')).'.';
         $out[] = '';
 
         $out[] = '## Key pages';
         $out[] = '';
-        $out[] = '- [Home]('.route('home').'): featured pieces, current edits and the deal of the week.';
+        $out[] = '- [Home]('.route('home').'): featured pieces and the current edits.';
         $out[] = '- [Shop all]('.route('listing').'): the full catalogue, filterable by size, colour and price.';
         $out[] = '- [New in]('.route('listing', ['edit' => 'new']).'): the most recent arrivals.';
         $out[] = '- [Sale]('.route('listing', ['edit' => 'sale']).'): everything currently discounted.';
-        $out[] = '- [Our story]('.route('about').'): who Leila Konsol is and how the shop is curated.';
+        $out[] = '- [Our story]('.route('about').'): who Pamela is and how the shop is curated.';
         $out[] = '- [Contact]('.route('contact').'): email, WhatsApp and the contact form.';
         $out[] = '';
 

@@ -16,8 +16,9 @@ return [
     */
 
     'brand' => 'Trendy Closet',
+    // Trades under the family name; Pamela is the owner the copy speaks as.
     'brand_full' => 'Trendy Closet by Leila Konsol',
-    'founder' => 'Leila Konsol',
+    'founder' => 'Pamela',
     // A middot, not a dash: product names already contain em-dashes
     // ("Wide Leg Jeans — Ecru"), and two dashes in one title reads as a typo.
     'separator' => ' · ',
@@ -33,11 +34,11 @@ return [
     |
     */
 
-    'tagline' => 'Curated fashion for the whole family',
+    'tagline' => 'Trendy fashion & denim for women',
 
     // Kept under 155 characters so search engines show it whole rather than
     // clipping it mid-sentence.
-    'description' => 'A curated fashion boutique by Leila Konsol — hand-picked dresses, knitwear, denim and outerwear, with free shipping over $150 and 30-day returns.',
+    'description' => 'A family-owned fashion boutique in Dekwaneh, Lebanon — trendy fashion wear and denim for women, with carefully selected new arrivals every week.',
 
     // Relative to public/. Replace with a 1200x630 social card when one exists.
     'image' => 'images/logo-512.png',

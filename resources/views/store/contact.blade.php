@@ -9,7 +9,7 @@
     <div class="bg-cream px-8 py-12 text-center md:px-16">
         <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">WE'D LOVE TO HEAR FROM YOU</div>
         <div class="mt-2.5 text-[34px] font-normal">Get in touch</div>
-        <div class="mt-2 text-[14.5px] font-light text-muted">Questions about an order, sizing, or a collab? We answer every message within 24 hours.</div>
+        <div class="mt-2 text-[14.5px] font-light text-muted">Questions about an order, sizing, or a collab? We answer every message {{ $contact['response_time'] }}.</div>
     </div>
 
     <div class="flex flex-col gap-14 px-8 py-14 md:px-16 lg:flex-row">
@@ -52,8 +52,8 @@
                 <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="text-[15px] font-light leading-[1.7] transition-colors hover:text-blush">{!! implode('<br>', array_map('e', $contact['address'])) !!}</a>
             </div>
             <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">INSTAGRAM</div><div class="text-[15px] font-light">@trendycloset.byleilakonsol</div></div>
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">HOURS</div><div class="text-[15px] font-light">{{ $contact['hours'] }}</div></div>
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">RESPONSE TIME</div><div class="text-[15px] font-light">Within 24 hours</div></div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">HOURS</div><div class="text-[15px] font-light leading-[1.8]">{!! implode('<br>', array_map('e', $contact['hours'])) !!}</div></div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">RESPONSE TIME</div><div class="text-[15px] font-light">{{ ucfirst($contact['response_time']) }}</div></div>
         </div>
     </div>
 @endsection

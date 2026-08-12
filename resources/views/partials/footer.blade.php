@@ -9,7 +9,7 @@
         <div class="mx-auto flex max-w-[1200px] flex-col items-center gap-6 text-center lg:flex-row lg:justify-between lg:text-left">
             <div>
                 <div class="text-[24px] font-normal">Join the Closet</div>
-                <div class="mt-1.5 text-[14px] font-light text-muted-2">10% off your first order, plus new drops from Leila's feed before anyone else.</div>
+                <div class="mt-1.5 text-[14px] font-light text-muted-2">10% off your first order, plus new drops from Pamela's feed before anyone else.</div>
             </div>
             {{-- One rounded field with the button living inside its right end,
                  rather than two squares butted together. --}}
@@ -33,7 +33,7 @@
             </a>
             <div class="text-[17px] font-medium">About Our Store</div>
             <p class="mt-4 max-w-[330px] text-[14.5px] font-light leading-[1.8] text-muted-2">
-                Trendy Closet started as a small Instagram page sharing outfits Leila loved. Every piece is
+                Trendy Closet started as a small Instagram page sharing outfits Pamela loved. Every piece is
                 hand-picked and styled by her before it ever ships — no trend-chasing, no filler.
             </p>
             <a href="{{ route('about') }}" class="tc-link mt-4 inline-block text-[13.5px]">Read our story</a>
@@ -78,7 +78,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-blush"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>
                     <span class="break-all">{{ config('seo.email') }}</span>
                 </a>
-                <div class="text-[13.5px]">{{ $contact['hours'] }}</div>
+                <div class="text-[13.5px] leading-[1.8]">{!! implode('<br>', array_map('e', $contact['hours'])) !!}</div>
             </div>
         </div>
     </div>

@@ -15,7 +15,7 @@ return [
 
     'whatsapp' => [
         'number' => env('WHATSAPP_NUMBER', '96176158735'),
-        'message' => env('WHATSAPP_MESSAGE', 'Hi Leila! I have a question about a piece on Trendy Closet.'),
+        'message' => env('WHATSAPP_MESSAGE', 'Hi Pamela! I have a question about a piece on Trendy Closet.'),
     ],
 
     // Every contact detail on the storefront, except the email address, which
@@ -27,7 +27,15 @@ return [
         'address' => ['Tal el Zaatar, Dekwaneh', 'Mount Lebanon, Lebanon'],
         'map_url' => 'https://maps.app.goo.gl/HgJqRHujguCD8Job7',
         'map_embed' => 'https://maps.google.com/maps?q='.rawurlencode('Trendy Closet, Tal el Zaatar, Dekwaneh, Lebanon').'&z=16&output=embed',
-        'hours' => 'Mon–Sat, 9am–6pm',
+
+        // One line per opening pattern — Monday is shorter than the rest.
+        'hours' => [
+            'Monday, 3pm–8pm',
+            'Tuesday–Saturday, 10:30am–8pm',
+            'Sunday, closed',
+        ],
+
+        'response_time' => 'within a few hours',
     ],
 
 ];

@@ -265,14 +265,6 @@ class Product extends Model
     }
 
     /**
-     * @param  Builder<Product>  $query
-     */
-    public function scopeOnDeal(Builder $query): void
-    {
-        $query->whereNotNull('sale_ends_at')->where('sale_ends_at', '>', now());
-    }
-
-    /**
      * Discounted products — the "Sale" edit.
      *
      * @param  Builder<Product>  $query

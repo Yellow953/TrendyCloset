@@ -33,7 +33,7 @@ class StoreController extends Controller
     private const PER_PAGE = 12;
 
     /** Display names for the `?edit=` cuts, used by the heading and the meta. */
-    private const EDIT_LABELS = ['new' => 'New In', 'sale' => 'Sale', 'featured' => "Leila's Picks"];
+    private const EDIT_LABELS = ['new' => 'New In', 'sale' => 'Sale', 'featured' => "Pamela's Picks"];
 
     public function __construct(
         private readonly Catalog $catalog,
@@ -99,7 +99,7 @@ class StoreController extends Controller
     {
         return [
             [
-                'quote' => "I ordered the wrap dress for a wedding and three people asked where it was from before dessert. The fit is exactly what Leila said it would be.",
+                'quote' => "I ordered the wrap dress for a wedding and three people asked where it was from before dessert. The fit is exactly what Pamela said it would be.",
                 'name' => 'Nour H.',
                 'meta' => 'Beirut · 4 orders',
                 'stars' => 5,
@@ -129,18 +129,6 @@ class StoreController extends Controller
             ->take(8)
             ->get();
 
-        $deals = Product::query()
-            ->active()
-            ->onDeal()
-            ->with(['images', 'variants'])
-            ->orderBy('sale_ends_at')
-            ->take(8)
-            ->get();
-
-        // The countdown tracks the deal that expires soonest.
-        $dealEndsAt = $deals->min('sale_ends_at');
-        $countdown = $this->countdown($dealEndsAt);
-
         // Top-level sections only: the circles are a way into the shop, not a
         // map of it. A parent's count already includes everything beneath it,
         // and the mega-menu is where subcategories belong.
@@ -163,38 +151,12 @@ class StoreController extends Controller
             'categories' => $categories,
             'counts' => $counts,
             'featured' => $featured,
-            'deals' => $deals,
-            'dealEndsAt' => $dealEndsAt,
-            'countdown' => $countdown,
             'storeRating' => round((float) Product::query()->active()->avg('rating'), 1),
             'catalogSize' => Product::query()->active()->count(),
             'heroSlides' => $this->heroSlides(),
             'testimonials' => $this->testimonials(),
             'active' => 'home',
         ]);
-    }
-
-    /**
-     * Server-rendered starting values for the Deal of the Week clock; the
-     * ticker in resources/js/app.js takes over from the ISO target date, so the
-     * numbers are correct even with JavaScript off.
-     *
-     * @return array<int, array{k: string, l: string, n: string}>
-     */
-    private function countdown(?\DateTimeInterface $endsAt): array
-    {
-        if (! $endsAt || $endsAt < now()) {
-            return [];
-        }
-
-        $diff = now()->diff($endsAt);
-
-        return [
-            ['k' => 'days', 'l' => 'DAYS', 'n' => $diff->days],
-            ['k' => 'hours', 'l' => 'HOURS', 'n' => $diff->h],
-            ['k' => 'minutes', 'l' => 'MINS', 'n' => $diff->i],
-            ['k' => 'seconds', 'l' => 'SECS', 'n' => $diff->s],
-        ];
     }
 
     /**
@@ -339,7 +301,7 @@ class StoreController extends Controller
         $brand = config('seo.brand');
 
         if ($total === 0) {
-            return "Browse {$heading} at {$brand} — curated by Leila Konsol, with free shipping over "
+            return "Browse {$heading} at {$brand} — curated by Pamela, with free shipping over "
                 .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
         }
 
@@ -351,7 +313,7 @@ class StoreController extends Controller
         $price = $from !== null ? ' from '.Product::money($from) : '';
 
         return "Shop {$total} ".Str::plural('piece', $total)." in {$heading} at {$brand}{$price}. "
-            .'Hand-picked by Leila Konsol, with free shipping over '
+            .'Hand-picked by Pamela, with free shipping over '
             .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
     }
 
@@ -500,7 +462,7 @@ class StoreController extends Controller
         $where = $category ? " in {$category}" : '';
 
         return "{$product->name}{$where} at ".config('seo.brand').", {$product->price_label}. "
-            .'Hand-picked by Leila Konsol, with free shipping over '
+            .'Hand-picked by Pamela, with free shipping over '
             .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
     }
 
@@ -605,26 +567,24 @@ class StoreController extends Controller
         $this->seo
             ->page(
                 'Our Story',
-                'Trendy Closet is the boutique Leila Konsol built out of styling friends — every piece '
-                .'hand-picked, tried on and photographed before it reaches the shop.'
+                'Trendy Closet is a family-owned boutique in Dekwaneh, Lebanon, founded by Pamela — '
+                .'fashion wear and denim for women, with new arrivals every week.'
             )
             ->type('article')
-            ->schema(Schema::webPage('Our Story', route('about'), 'The story behind Trendy Closet and its founder, Leila Konsol.'));
+            ->schema(Schema::webPage('Our Story', route('about'), 'The story behind Trendy Closet and its founder, Pamela.'));
 
         return view('store.about', [
             'hero' => $this->img('photo-1490481651871-ab68de25d43d', 'Priscilla Du Preez', 'priscilladupreez', 1400),
-            'portrait' => $this->img('photo-1544441893-675973e31985', 'Mnz', 'mnzoutfits', 800),
-            'catalogSize' => Product::query()->active()->count(),
-            'categoryCount' => $this->catalog->tree()->count(),
-            'storeRating' => round((float) Product::query()->active()->avg('rating'), 1),
-            // A small rail of real product so the page is not pure editorial.
-            'picks' => Product::query()
-                ->active()
-                ->featured()
-                ->with(['images', 'variants'])
-                ->orderByDesc('id')
-                ->take(4)
-                ->get(),
+            // The rail, not a stock model posing as Pamela.
+            'portrait' => $this->img('photo-1603400521630-9f2de124b33b', null, null, 800),
+            'reasons' => [
+                ['icon' => '✨', 'title' => 'New every week', 'body' => 'Fresh arrivals on the rail every single week.'],
+                ['icon' => '👖', 'title' => 'Fashion & denim', 'body' => 'The latest trends alongside denim that lasts.'],
+                ['icon' => '💕', 'title' => 'Carefully selected', 'body' => 'Every piece chosen by hand, never bulk-bought.'],
+                ['icon' => '👨‍👩‍👧', 'title' => 'Family-owned', 'body' => 'A boutique run by the family who built it.'],
+                ['icon' => '📍', 'title' => 'Dekwaneh, Lebanon', 'body' => 'Find us in Tal el Zaatar, with delivery across Lebanon.'],
+                ['icon' => '🛍️', 'title' => 'Personal service', 'body' => 'Message us and you reach the shop, not a call centre.'],
+            ],
             'active' => 'about',
         ]);
     }
@@ -635,7 +595,7 @@ class StoreController extends Controller
             ->page(
                 'Contact Us',
                 'Questions about sizing, an order or a return? Email '.config('seo.email')
-                .', message us on WhatsApp, or use the form — we reply within 24 hours.'
+                .', message us on WhatsApp, or use the form — we reply '.config('store.contact.response_time').'.'
             )
             ->schema(Schema::webPage('Contact Us', route('contact'), 'How to reach Trendy Closet.'));
 
@@ -658,7 +618,7 @@ class StoreController extends Controller
 
         app(SiteAnalytics::class)->record(SiteEventType::ContactFormSent);
 
-        return back()->with('status', 'Thanks — your message is with Leila. We reply within 24 hours.');
+        return back()->with('status', 'Thanks — your message is with Pamela. We reply '.config('store.contact.response_time').'.');
     }
 
     /**
@@ -758,8 +718,8 @@ class StoreController extends Controller
                 'intro' => 'Our pieces run true to size. Measure over your underwear, keeping the tape level and snug.',
                 'sections' => [
                     ['heading' => 'How to measure', 'body' => 'Bust: around the fullest part, arms down. Waist: around the narrowest part of your torso. Hips: around the fullest part, roughly 20 cm below the waist.'],
-                    ['heading' => 'Between sizes?', 'body' => 'Size up for knitwear and outerwear, and stay true to size for jersey and stretch denim. Leila is 172 cm and wears a S / waist 26.'],
-                    ['heading' => 'Still unsure', 'body' => 'DM @trendycloset.byleilakonsol or use the contact form with your measurements and the piece you are looking at — we answer sizing questions within 24 hours.'],
+                    ['heading' => 'Between sizes?', 'body' => 'Size up for knitwear and outerwear, and stay true to size for jersey and stretch denim. Pamela is 172 cm and wears a S / waist 26.'],
+                    ['heading' => 'Still unsure', 'body' => 'DM @trendycloset.byleilakonsol or use the contact form with your measurements and the piece you are looking at — we answer sizing questions within a few hours.'],
                 ],
             ],
             'privacy' => [

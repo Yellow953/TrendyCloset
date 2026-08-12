@@ -49,8 +49,9 @@ class ProductGallerySeeder extends Seeder
             'photo-1618354691373-d851c5c3a990',
         ],
         'shirts' => [
-            'photo-1596755094514-f87e34085b2c',
-            'photo-1487222477894-8943e31ef7b2',
+            'photo-1770294758906-c8762abb2c8b',
+            'photo-1611235116156-0cbda6649efb',
+            'photo-1610886886310-be2828d6afd5',
             'photo-1619086303291-0ef7699e4b31',
         ],
         'pants' => [
@@ -59,9 +60,25 @@ class ProductGallerySeeder extends Seeder
             'photo-1604176354204-9268737828e4',
         ],
         'shorts-skirts' => [
-            'photo-1620012253295-c15cc3e65df4',
+            'photo-1639818023520-ab4c21c5892b',
+            'photo-1591195853828-11db59a44f6b',
             'photo-1583496661160-fb5886a0aaaa',
             'photo-1495121605193-b116b5b9c5fe',
+        ],
+        'pyjamas' => [
+            'photo-1768696082915-bdc6774f94c7',
+            'photo-1654512462970-8191bc8742bd',
+            'photo-1605131545453-6044234368a6',
+        ],
+        'scarf' => [
+            'photo-1571498521264-5fcaa7f8edf4',
+            'photo-1457545195570-67f207084966',
+            'photo-1643312892626-80632ef6d7dc',
+        ],
+        'accessories' => [
+            'photo-1492707892479-7bc8d5a4ee93',
+            'photo-1549439602-43ebca2327af',
+            'photo-1575202332411-b01fe9ace7a8',
         ],
     ];
 

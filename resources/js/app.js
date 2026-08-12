@@ -128,46 +128,6 @@ function autoplayCarousel(root, track, step, end) {
     }, { threshold: 0.25 }).observe(root);
 }
 
-// Deal-of-the-week clock. The server renders the opening numbers from the
-// soonest sale_ends_at, so the block is correct without JS; this just keeps
-// ticking from the ISO target on [data-countdown].
-function initCountdowns() {
-    document.querySelectorAll('[data-countdown]').forEach((root) => {
-        const target = new Date(root.dataset.countdown).getTime();
-        if (Number.isNaN(target)) return;
-
-        const parts = {};
-        root.querySelectorAll('[data-countdown-part]').forEach((el) => {
-            parts[el.dataset.countdownPart] = el;
-        });
-
-        const pad = (n) => String(Math.max(n, 0)).padStart(2, '0');
-
-        // Only the digits that actually changed animate, so the seconds tick
-        // over on their own while the days sit still.
-        const set = (el, value) => {
-            if (!el || el.textContent === value) return;
-            el.textContent = value;
-            el.classList.remove('tc-tick');
-            void el.offsetWidth; // restart the animation
-            el.classList.add('tc-tick');
-        };
-
-        const tick = () => {
-            const left = Math.max(target - Date.now(), 0);
-            const seconds = Math.floor(left / 1000);
-            set(parts.days, pad(Math.floor(seconds / 86400)));
-            set(parts.hours, pad(Math.floor((seconds % 86400) / 3600)));
-            set(parts.minutes, pad(Math.floor((seconds % 3600) / 60)));
-            set(parts.seconds, pad(seconds % 60));
-            if (left === 0) clearInterval(timer);
-        };
-
-        const timer = setInterval(tick, 1000);
-        tick();
-    });
-}
-
 // Selects that submit their form on change (the listing sort control).
 // A <noscript> button covers the JS-off case.
 function initAutoSubmit() {
@@ -743,7 +703,6 @@ function init() {
     initShare();
     initQuantitySteppers();
     initClearables();
-    initCountdowns();
     initAutoSubmit();
     initStickyHeader();
     initFilterPanel();
