@@ -30,7 +30,7 @@
 <div class="ad-main flex min-h-screen flex-col">
     @include('partials.admin.topbar')
 
-    <main class="flex-1 px-5 py-7 md:px-8 md:py-9">
+    <main class="flex-1 px-4 py-2 md:px-6 md:py-4">
         <div class="mx-auto w-full max-w-[1400px]">
 
             {{-- Page heading. Pages fill `heading`; `actions` is the button rail. --}}
