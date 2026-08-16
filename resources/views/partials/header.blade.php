@@ -9,7 +9,7 @@
     {{-- Announcement bar --}}
     <div data-announcement class="bg-ink text-center text-[12px] font-light text-cream md:text-[13px]">
         <div class="px-5 py-2.5 md:px-10">
-            Free worldwide shipping on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }} —
+            Free delivery across {{ config('store.contact.country') }} on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }} —
             <a href="{{ route('listing') }}" class="font-medium underline underline-offset-2">Shop now</a>
         </div>
     </div>

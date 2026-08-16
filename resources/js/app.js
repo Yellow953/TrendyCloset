@@ -620,6 +620,7 @@ function initAsyncForms() {
             if (data.bagCount !== undefined) setCount('[data-bag-count]', data.bagCount);
             if (data.favoritesCount !== undefined) setCount('[data-fav-count]', data.favoritesCount);
             if (data.favorited !== undefined) applyFavorite(form, data.favorited);
+            if (data.tracking) report(data.tracking);
 
             // Forms living inside the drawer redraw it, so quantities, totals
             // and the free-shipping line all come back from the same render.
@@ -633,6 +634,27 @@ function initAsyncForms() {
             submitter?.classList.remove('is-busy');
         }
     });
+}
+
+// Report an event the server described in its JSON — an add to bag or a heart,
+// neither of which reloads the page. Both payloads are built server-side, so the
+// price each destination sees is the price the bag charged, not one read off the
+// DOM. Each half is independent: an ad blocker removing fbq must not cost us the
+// GA4 event, and neither may ever break the interaction that triggered it.
+function report(payload) {
+    if (!payload) return;
+
+    if (payload.meta && typeof window.fbq === 'function') {
+        try {
+            window.fbq('track', payload.meta.name, payload.meta.params || {});
+        } catch { /* ignored */ }
+    }
+
+    if (payload.ga4 && typeof window.gtag === 'function') {
+        try {
+            window.gtag('event', payload.ga4.name, payload.ga4.params || {});
+        } catch { /* ignored */ }
+    }
 }
 
 // Reflect the new favourite state on the button that was pressed — and, on the

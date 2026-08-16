@@ -39,12 +39,17 @@
                             @if($slide['eyebrow'])
                                 <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">{{ $slide['eyebrow'] }}</div>
                             @endif
-                            <h1 class="text-[38px] font-light leading-[1.05] tracking-[0.01em] sm:text-[48px] lg:text-[64px]">
+                            {{-- Only slide one is the page's <h1>. The rest carry
+                                 the same styling as a <p>: three rotating <h1>s
+                                 give a crawler three competing answers to what
+                                 this page is about, and a merchandising slot is
+                                 not what should be answering that question. --}}
+                            <{{ $loop->first ? 'h1' : 'p' }} class="text-[38px] font-light leading-[1.05] tracking-[0.01em] sm:text-[48px] lg:text-[64px]">
                                 {{ $slide['title'] }}
                                 @if($slide['accent'])
                                     <br><span class="font-serif font-medium italic text-blush">{{ $slide['accent'] }}</span>
                                 @endif
-                            </h1>
+                            </{{ $loop->first ? 'h1' : 'p' }}>
                             @if($slide['copy'])
                                 <p class="max-w-[420px] text-[15.5px] font-light leading-[1.65] text-muted-2">{{ $slide['copy'] }}</p>
                             @endif

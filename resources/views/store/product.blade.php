@@ -284,7 +284,7 @@
 
             <div data-tab-panel="shipping" class="hidden pt-8 text-center">
                 <p class="mx-auto max-w-[760px] text-[15.5px] font-light leading-[1.9] text-muted-3">
-                    Free delivery on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }}, otherwise {{ \App\Models\Product::money(\App\Support\Cart::STANDARD_SHIPPING) }} standard shipping (3–5 business days).
+                    Free delivery across {{ config('store.contact.country') }} on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }}, otherwise {{ \App\Models\Product::money(\App\Support\Cart::STANDARD_SHIPPING) }} (1–3 working days).
                     You have 30 days to return anything unworn with its tags attached — see our
                     <a href="{{ route('policies', 'returns') }}" class="tc-link">returns policy</a> for the details.
                 </p>

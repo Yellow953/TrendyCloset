@@ -8,7 +8,7 @@
 
     <div class="bg-cream px-8 py-12 text-center md:px-16">
         <div class="text-[12px] font-medium tracking-[0.32em] text-blush-soft">WE'D LOVE TO HEAR FROM YOU</div>
-        <div class="mt-2.5 text-[34px] font-normal">Get in touch</div>
+        <h1 class="mt-2.5 text-[34px] font-normal">Get in touch</h1>
         <div class="mt-2 text-[14.5px] font-light text-muted">Questions about an order, sizing, or a collab? We answer every message {{ $contact['response_time'] }}.</div>
     </div>
 

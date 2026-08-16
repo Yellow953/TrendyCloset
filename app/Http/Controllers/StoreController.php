@@ -2,21 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProductEventType;
+use App\Enums\SiteEventType;
 use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\HeroSlide;
 use App\Models\Product;
 use App\Models\ProductFavorite;
 use App\Models\ProductVariant;
-use App\Enums\SiteEventType;
 use App\Services\ProductAnalytics;
 use App\Services\SiteAnalytics;
 use App\Support\Cart;
 use App\Support\Catalog;
 use App\Support\Schema;
 use App\Support\Seo;
+use App\Support\Tracking;
 use App\Support\Visitor;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -38,6 +41,7 @@ class StoreController extends Controller
     public function __construct(
         private readonly Catalog $catalog,
         private readonly Seo $seo,
+        private readonly Tracking $tracking,
     ) {}
 
     /**
@@ -99,19 +103,19 @@ class StoreController extends Controller
     {
         return [
             [
-                'quote' => "I ordered the wrap dress for a wedding and three people asked where it was from before dessert. The fit is exactly what Pamela said it would be.",
+                'quote' => 'I ordered the wrap dress for a wedding and three people asked where it was from before dessert. The fit is exactly what Pamela said it would be.',
                 'name' => 'Nour H.',
                 'meta' => 'Beirut · 4 orders',
                 'stars' => 5,
             ],
             [
-                'quote' => "Sizing advice over DM, shipped the next morning, and the knit is genuinely the softest thing I own. This is how online shopping should feel.",
+                'quote' => 'Sizing advice over DM, shipped the next morning, and the knit is genuinely the softest thing I own. This is how online shopping should feel.',
                 'name' => 'Marie L.',
                 'meta' => 'Jounieh · 2 orders',
                 'stars' => 5,
             ],
             [
-                'quote' => "I keep coming back for the basics. Nothing has pilled or lost shape after a whole season of washing, which I cannot say for anything else in my closet.",
+                'quote' => 'I keep coming back for the basics. Nothing has pilled or lost shape after a whole season of washing, which I cannot say for anything else in my closet.',
                 'name' => 'Sara K.',
                 'meta' => 'Dubai · 6 orders',
                 'stars' => 4,
@@ -196,6 +200,8 @@ class StoreController extends Controller
                 'q' => mb_substr($term, 0, 120),
                 'results' => $scopeIds->count(),
             ]);
+
+            $this->tracking->searched($term, $scopeIds->count());
         }
 
         $size = $request->query('size');
@@ -253,7 +259,7 @@ class StoreController extends Controller
      * duplicates and none of them ranks. Pagination is different: each page
      * holds *different* products, so page 2 canonicalises to itself.
      *
-     * @param  \Illuminate\Pagination\LengthAwarePaginator<Product>  $products
+     * @param  LengthAwarePaginator<Product>  $products
      */
     private function listingSeo(?Category $category, ?string $edit, string $heading, $products, Request $request): void
     {
@@ -421,6 +427,7 @@ class StoreController extends Controller
             ->page($product->name, $this->productDescription($product))
             ->image($product->image_url)
             ->type('product')
+            ->product(Tracking::contentId($product), (float) $product->price, (bool) $product->in_stock)
             // No FAQPage here: the Q&A block was taken off the product page, and
             // structured data for answers a shopper cannot read is exactly the
             // kind of claim that earns a manual action.
@@ -428,6 +435,9 @@ class StoreController extends Controller
                 Schema::product($product),
                 Schema::breadcrumbs($this->productTrail($product, $breadcrumb)),
             );
+
+        // The retargeting event: everyone who saw this piece and did not buy it.
+        $this->tracking->productViewed($product);
 
         return view('store.product', [
             'product' => $product,
@@ -440,7 +450,7 @@ class StoreController extends Controller
             'favoritesCountForProduct' => $product->favorites()->count(),
             // Real urgency, from the analytics log — not an invented number.
             'recentAdds' => $product->events()
-                ->where('type', \App\Enums\ProductEventType::AddToCart)
+                ->where('type', ProductEventType::AddToCart)
                 ->where('created_at', '>=', now()->subDays(7))
                 ->count(),
             'breadcrumb' => $breadcrumb,
@@ -510,6 +520,9 @@ class StoreController extends Controller
                 'status' => $status,
                 'favorited' => $favorited,
                 'favoritesCount' => ProductFavorite::where('visitor_id', $visitor->id)->count(),
+                // Only the saving half is a signal — neither destination has a
+                // shape for unhearting.
+                'tracking' => $favorited ? Tracking::saved($product) : null,
             ]);
         }
 
@@ -692,13 +705,13 @@ class StoreController extends Controller
         return [
             'shipping' => [
                 'title' => 'Shipping & Delivery',
-                'intro' => "Where your order goes, how long it takes, and what it costs.",
+                'intro' => 'Where your order goes, how long it takes, and what it costs.',
                 'sections' => [
-                    ['heading' => 'Rates', 'body' => "Standard delivery is {$flat} and free on orders over {$free}. Express delivery is \$9.00 and is offered at checkout wherever our courier supports it."],
-                    ['heading' => 'Processing time', 'body' => 'Orders placed before 2pm on a working day are packed the same day. Orders ship Monday to Friday, excluding public holidays.'],
-                    ['heading' => 'Delivery windows', 'body' => 'Standard delivery arrives in 3–5 business days; express in 1–2. Remote addresses can add a day or two beyond the courier estimate.'],
-                    ['heading' => 'Tracking', 'body' => 'A tracking link is emailed the moment your parcel is collected. If it has not moved for 48 hours, write to us and we will chase the courier for you.'],
-                    ['heading' => 'Customs & duties', 'body' => 'International orders may attract import duties set by your own country. These are payable by the recipient and are not included in the price at checkout.'],
+                    ['heading' => 'Where we deliver', 'body' => 'We deliver anywhere in '.config('store.contact.country').'. You can also collect from the shop in '.implode(', ', config('store.contact.address')).' — just say so in the order notes.'],
+                    ['heading' => 'Rates', 'body' => "Delivery is {$flat}, and free on orders over {$free}. There is one delivery option, so the price you see at checkout is the price you pay."],
+                    ['heading' => 'Processing time', 'body' => 'Orders placed before 2pm on a working day are packed the same day. Orders go out Monday to Saturday, excluding public holidays.'],
+                    ['heading' => 'Delivery windows', 'body' => 'Most orders arrive within 1–3 working days across '.config('store.contact.country').'. Addresses far from Beirut can add a day.'],
+                    ['heading' => 'Staying updated', 'body' => 'We confirm every order on WhatsApp at '.config('store.contact.phone_display').' and message you again when it is on its way. If anything is delayed you hear it from us first.'],
                 ],
             ],
             'returns' => [
@@ -726,9 +739,10 @@ class StoreController extends Controller
                 'title' => 'Privacy Policy',
                 'intro' => 'What we collect, why we collect it, and what we never do with it.',
                 'sections' => [
-                    ['heading' => 'What we collect', 'body' => 'To fulfil an order we keep your name, email, delivery address and phone number. Payment card details are handled by our payment processor and never reach our servers.'],
+                    ['heading' => 'What we collect', 'body' => 'To fulfil an order we keep your name, phone number and delivery address, plus your email if you give us one. We take no card details on this website at all — payment is arranged directly with you when we confirm the order.'],
                     ['heading' => 'Browsing data', 'body' => 'We set a long-lived cookie so your bag and favourites survive between visits, and we count product views to see which pieces resonate. This is tied to a random identifier, not to your identity.'],
-                    ['heading' => 'Marketing', 'body' => 'We email you only if you asked us to. Every newsletter carries a one-click unsubscribe, and we never sell or rent your details to anyone.'],
+                    ['heading' => 'Advertising & measurement cookies', 'body' => 'We use the Meta pixel so our Facebook and Instagram ads reach people who are actually interested, and Google Analytics to see which pages and pieces people spend time on. Both are told which pages you viewed on this site. You can opt out in your Meta ad preferences, with the Google Analytics opt-out add-on, or by blocking third-party cookies in your browser.'],
+                    ['heading' => 'Marketing', 'body' => 'We message you only if you asked us to. Every newsletter carries a one-click unsubscribe, and we never sell or rent your details to anyone.'],
                     ['heading' => 'Your rights', 'body' => 'You can ask for a copy of everything we hold about you, ask us to correct it, or ask us to delete it. Write to '.config('seo.email').' and we will action it within 30 days.'],
                     ['heading' => 'Retention', 'body' => 'Order records are kept for as long as tax law requires. Everything else is deleted once it stops being useful to you as a customer.'],
                 ],
@@ -737,7 +751,7 @@ class StoreController extends Controller
                 'title' => 'Terms of Service',
                 'intro' => 'The agreement between you and Trendy Closet when you shop with us.',
                 'sections' => [
-                    ['heading' => 'Orders', 'body' => 'An order is an offer to buy. The contract forms when we email you to confirm dispatch — until then we may decline an order, for example if a piece has sold out.'],
+                    ['heading' => 'Orders', 'body' => 'An order is an offer to buy. The contract forms when we message you to confirm it — until then we may decline an order, for example if a piece has sold out.'],
                     ['heading' => 'Pricing', 'body' => 'Prices include VAT where applicable and are shown before you pay. If a piece is listed at an obviously incorrect price we will contact you before charging anything.'],
                     ['heading' => 'Product imagery', 'body' => 'We photograph pieces as accurately as we can, but screens differ. Colour variation between your screen and the garment is not itself a fault.'],
                     ['heading' => 'Discount codes', 'body' => 'One code per order unless stated otherwise. Codes carry no cash value and may be withdrawn at any time before an order is placed.'],

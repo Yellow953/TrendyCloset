@@ -8,6 +8,7 @@ use App\Models\ProductFavorite;
 use App\Support\Cart;
 use App\Support\Catalog;
 use App\Support\Seo;
+use App\Support\Tracking;
 use App\Support\Visitor;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Schema;
@@ -21,11 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // All three are per-request state: one bag, one set of catalogue
-        // queries, one page's metadata.
+        // All per-request state: one bag, one set of catalogue queries, one
+        // page's metadata, one page's analytics events.
         $this->app->scoped(Cart::class, fn ($app) => new Cart($app->make(Session::class)));
         $this->app->scoped(Catalog::class, fn () => new Catalog);
         $this->app->scoped(Seo::class, fn () => new Seo);
+        $this->app->scoped(Tracking::class, fn () => new Tracking);
     }
 
     /**
@@ -42,9 +44,11 @@ class AppServiceProvider extends ServiceProvider
         // pinned to InnoDB in config/database.php, which is the other half.
         Schema::defaultStringLength(191);
 
-        // partials/seo renders whatever the controller put on the scoped Seo
-        // instance; resolving it here keeps every action from passing it along.
+        // partials/seo and partials/tracking each render whatever the controller
+        // put on their scoped instance; resolving them here keeps every action
+        // from passing them along.
         View::composer('partials.seo', fn ($view) => $view->with('seo', $this->app->make(Seo::class)));
+        View::composer('partials.tracking', fn ($view) => $view->with('tracking', $this->app->make(Tracking::class)));
     }
 
     /**

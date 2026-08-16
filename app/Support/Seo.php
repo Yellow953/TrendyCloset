@@ -33,6 +33,9 @@ class Seo
     /** @var array<int, array<string, mixed>> JSON-LD nodes for the @graph. */
     private array $schema = [];
 
+    /** @var array<string, string> og `product:*` tags, set on a PDP only. */
+    private array $commerce = [];
+
     /**
      * Set the page title and description in one call — what most actions need.
      */
@@ -120,11 +123,40 @@ class Seo
         return $this;
     }
 
+    /**
+     * The Open Graph `product:*` tags for a product page.
+     *
+     * These are not decoration: they are what Meta's crawler reads when it
+     * builds a catalogue from the website rather than a feed, and what a
+     * dynamic-ads campaign matches its `content_ids` against. The retailer id
+     * must therefore agree with {@see Tracking::contentId()}.
+     */
+    public function product(string $retailerId, float $price, bool $inStock): static
+    {
+        $this->commerce = [
+            'product:retailer_item_id' => $retailerId,
+            'product:price:amount' => number_format($price, 2, '.', ''),
+            'product:price:currency' => config('seo.currency'),
+            'product:availability' => $inStock ? 'in stock' : 'out of stock',
+            'product:condition' => 'new',
+        ];
+
+        return $this;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Rendering — read by partials/seo.blade.php
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * @return array<string, string>
+     */
+    public function commerceTags(): array
+    {
+        return $this->commerce;
+    }
 
     /**
      * The full <title>: the page title with the brand appended, unless the page

@@ -16,6 +16,12 @@
 <meta property="og:image" content="{{ $seo->metaImage() }}">
 <meta property="og:image:alt" content="{{ $seo->metaTitle() }}">
 
+{{-- Product pages only: what Meta's crawler reads to build a catalogue from the
+     site, and what dynamic ads match their content_ids against. --}}
+@foreach($seo->commerceTags() as $property => $content)
+    <meta property="{{ $property }}" content="{{ $content }}">
+@endforeach
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $seo->metaTitle() }}">
 <meta name="twitter:description" content="{{ $seo->metaDescription() }}">

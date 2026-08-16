@@ -67,6 +67,15 @@ class Schema
                 'addressRegion' => 'Mount Lebanon',
                 'addressCountry' => 'LB',
             ],
+            // It is a real shop with a door, not only a website — the opening
+            // hours and the service area are what a local pack listing is built
+            // from, and what an assistant quotes when asked "are they open?".
+            'openingHoursSpecification' => self::openingHours(),
+            'areaServed' => [
+                '@type' => 'Country',
+                'name' => config('store.contact.country'),
+            ],
+            'currenciesAccepted' => config('seo.currency'),
             'hasMap' => config('store.contact.map_url'),
             'contactPoint' => [
                 '@type' => 'ContactPoint',
@@ -78,8 +87,72 @@ class Schema
     }
 
     /**
-     * The site. No `SearchAction` — the storefront has no search endpoint yet,
-     * and advertising one that 404s is worse than advertising none.
+     * The shop's opening hours, parsed out of the `store.contact.hours` lines so
+     * the schema and the contact page can never drift apart. A line the parser
+     * does not recognise (or a "closed" day) is simply left out.
+     *
+     * @return array<int, array<string, mixed>>|null
+     */
+    private static function openingHours(): ?array
+    {
+        $days = [
+            'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday',
+            'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday',
+            'sunday' => 'Sunday',
+        ];
+
+        $out = [];
+
+        foreach ((array) config('store.contact.hours', []) as $line) {
+            [$dayPart, $timePart] = array_pad(explode(',', $line, 2), 2, '');
+
+            // The /u matters: the hours are written with an en-dash, and without
+            // it the character class matches one byte of a three-byte character.
+            if (! preg_match('/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/iu', $timePart, $m)) {
+                continue;
+            }
+
+            // "Tuesday–Saturday" is a run; "Monday" is one day.
+            $names = preg_split('/\s*[–—-]\s*/u', trim($dayPart));
+            $from = $days[mb_strtolower($names[0] ?? '')] ?? null;
+            $to = $days[mb_strtolower($names[1] ?? '')] ?? null;
+
+            if (! $from) {
+                continue;
+            }
+
+            $keys = array_values($days);
+            $span = $to
+                ? array_slice($keys, array_search($from, $keys, true), array_search($to, $keys, true) - array_search($from, $keys, true) + 1)
+                : [$from];
+
+            $out[] = [
+                '@type' => 'OpeningHoursSpecification',
+                'dayOfWeek' => $span,
+                'opens' => self::clock($m[1], $m[2] ?? '', $m[3]),
+                'closes' => self::clock($m[4], $m[5] ?? '', $m[6]),
+            ];
+        }
+
+        return $out ?: null;
+    }
+
+    /** 12-hour clock parts to the ISO 24-hour time schema.org expects. */
+    private static function clock(string $hour, string $minute, string $meridiem): string
+    {
+        $hour = (int) $hour % 12;
+
+        if (mb_strtolower($meridiem) === 'pm') {
+            $hour += 12;
+        }
+
+        return sprintf('%02d:%02d', $hour, $minute === '' ? 0 : (int) $minute);
+    }
+
+    /**
+     * The site, including its search endpoint — `/shop?q=` is a real, shareable
+     * GET that works without JavaScript, which is the only kind of search worth
+     * advertising here.
      *
      * @return array<string, mixed>
      */
@@ -93,6 +166,14 @@ class Schema
             'description' => config('seo.description'),
             'publisher' => ['@id' => self::organizationId()],
             'inLanguage' => 'en',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => [
+                    '@type' => 'EntryPoint',
+                    'urlTemplate' => route('listing').'?q={search_term_string}',
+                ],
+                'query-input' => 'required name=search_term_string',
+            ],
         ];
     }
 
@@ -139,7 +220,9 @@ class Schema
             'description' => self::text($product->description) ?: $product->name.' from '.config('seo.brand').'.',
             'url' => $url,
             'image' => $images->isNotEmpty() ? $images->all() : null,
+            // Also the analytics product id — see Tracking::contentId().
             'sku' => 'TC-'.$product->id,
+            'productID' => 'TC-'.$product->id,
             'category' => $product->category?->name,
             'brand' => [
                 '@type' => 'Brand',
@@ -170,12 +253,14 @@ class Schema
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
             'itemCondition' => 'https://schema.org/NewCondition',
-            // A deal price is only good until the countdown runs out.
-            'priceValidUntil' => $product->sale_ends_at?->toDateString(),
+            // A deal price is only good until the countdown runs out; everything
+            // else needs *a* date or Merchant Center files a warning against the
+            // offer, so a year out stands in for "no announced end".
+            'priceValidUntil' => ($product->sale_ends_at ?? now()->addYear())->toDateString(),
             'seller' => ['@id' => self::organizationId()],
             'hasMerchantReturnPolicy' => [
                 '@type' => 'MerchantReturnPolicy',
-                'applicableCountry' => 'FR',
+                'applicableCountry' => 'LB',
                 'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
                 'merchantReturnDays' => 30,
                 'returnMethod' => 'https://schema.org/ReturnByMail',
@@ -189,11 +274,17 @@ class Schema
                     'value' => number_format(Cart::STANDARD_SHIPPING, 2, '.', ''),
                     'currency' => config('seo.currency'),
                 ],
+                // The shop delivers across Lebanon; saying so is what lets a
+                // shopper in Beirut see a delivery estimate in the result.
+                'shippingDestination' => [
+                    '@type' => 'DefinedRegion',
+                    'addressCountry' => 'LB',
+                ],
                 'deliveryTime' => [
                     '@type' => 'ShippingDeliveryTime',
-                    // Orders before 2pm pack same day; 3-5 business days in transit.
+                    // Orders before 2pm pack same day; 1-3 working days across Lebanon.
                     'handlingTime' => self::window(0, 1),
-                    'transitTime' => self::window(3, 5),
+                    'transitTime' => self::window(1, 3),
                 ],
             ],
         ]);

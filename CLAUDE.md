@@ -262,6 +262,18 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `Product`+`Offer`, `BreadcrumbList`, `CollectionPage`, `ItemList`, `FAQPage`, `WebPage`.
   **Do not add `aggregateRating` or `review`** — there is no reviews table, and fabricated rating
   counts are what earns a structured-data manual action. `Product->rating` is editorial, not reviews.
+  - The `OnlineStore` node's `openingHoursSpecification` is **parsed** out of
+    `store.contact.hours` by `Schema::openingHours()`, so the schema and the contact page can
+    never drift. It reads lines shaped like `Tuesday–Saturday, 10:30am–8pm`; a line it cannot
+    parse (`Sunday, closed`) is simply left out. The regex needs its `/u` — the hours are written
+    with an en-dash, and a byte-wise character class silently matches nothing.
+  - `WebSite` carries a `SearchAction` pointing at `/shop?q=` — a real, shareable GET that works
+    with JS off. Never advertise a search endpoint that does not answer.
+  - `Offer` is Lebanon-shaped: `applicableCountry`/`shippingDestination` are `LB` and transit is
+    1–3 days. `priceValidUntil` falls back to a year out when there is no sale end, because an
+    offer with no date files a Merchant Center warning.
+  - `sku`/`productID` are `TC-{id}` and **must stay identical to `Pixel::contentId()`** — that
+    string is the join key between the structured data, the pixel and any future catalogue feed.
 - **Canonicals.** Facet params (`size` `color` `min` `max` `sort`) canonicalise back to the clean
   category/edit URL *and* send `noindex, follow` — they are permutations of one product set.
   Pagination is the opposite: `?page=2` holds different products, so it self-canonicalises and stays
@@ -270,6 +282,14 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - `SeoController` serves `/robots.txt`, `/sitemap.xml` and `/llms.txt` as **routes**, all built from
   live data. `public/robots.txt` was deleted — a file in `public/` shadows the route, and a static
   file cannot name the sitemap at the current domain.
+  - The sitemap carries each product's gallery as `image:image` (namespace declared on `<urlset>`,
+    capped at 10 per URL) — photographs are most of what a fashion shop offers a search engine.
+  - Ad click ids (`?fbclid=`, `?gclid=`, `?utm_*`) are deliberately **not** blocked in robots.txt,
+    for the same reason the facets are not: the canonical already folds them back into the clean
+    URL, and Meta must be able to fetch a landing page to review the ad pointing at it.
+- **One `<h1>` per page.** The home hero renders its headline as `<h1>` on the first slide and as a
+  `<p>` (same classes) on the rest — three rotating `<h1>`s give a crawler three competing answers
+  to what the page is about, and a merchandising slot should not be answering that.
 - **Every absolute URL derives from `APP_URL`.** No domain is hard-coded anywhere; setting
   `APP_URL=https://…` in production .env is all that canonicals, OG tags and the sitemap need.
 - `config/seo.php` holds brand strings, the default description/image, currency and the `social`
@@ -281,8 +301,48 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   own `FAQPage`; both were removed together, and if the block ever comes back the schema comes back
   with it — not before.
 - Prices quoted in copy must come from `Cart::FREE_SHIPPING_THRESHOLD` / `Cart::STANDARD_SHIPPING`,
-  not be retyped. (The policies page's "express $9.00" already collides with standard shipping's
-  $9.00; that prose is stale, so the FAQ and llms.txt deliberately do not repeat the express figure.)
+  not be retyped, and the delivery country from `store.contact.country`.
+- **Delivery is Lebanon-only, one option, 1–3 working days.** The express tier, courier tracking
+  emails, customs-and-duties section and "free worldwide shipping" announcement bar were demo-era
+  fiction and have been removed from the policies, the product page, the header and `/llms.txt`.
+  Nothing on the site takes card details either — an order lands `pending` and the shop arranges
+  payment over WhatsApp, which is what the privacy policy and terms now say.
+  - **Returns copy still promises 30 days with refunds and free return postage** (policies, product
+    page, checkout badges, `MerchantReturnPolicy`, `/llms.txt`). The shop's real policy is a 2-day
+    exchange with no refund. This was raised and the owner chose to keep the copy on 2026-08-16 —
+    it is a known, deliberate divergence, not an oversight. Do not "fix" it unsolicited, and do not
+    quote it as fact in new copy without asking.
+
+**Marketing analytics (Meta pixel + GA4)** — `App\Support\Tracking` (scoped), shaped exactly like
+`Seo`: controllers describe what happened, `partials/tracking.blade.php` renders it, views never
+call `fbq()` or `gtag()`. This is **separate** from the first-party `SiteAnalytics`/`ProductAnalytics`
+tables, which stay the source of truth for the back office — these two are for ad platforms.
+- **One event, two destinations.** Controllers speak the shop's own vocabulary
+  (`productViewed`, `searched`, `checkoutStarted`, `purchased`) and never a vendor's event name.
+  `Tracking::META` / `Tracking::GA4` are the only place the mapping lives — a third destination
+  means one more translator, not a single controller edit. `TrackedEvent` is the neutral DTO.
+- **Each destination renders only when its own id is set** — `META_PIXEL_ID` and
+  `GA4_MEASUREMENT_ID` (`services.meta.pixel_id` / `services.google.ga4_id`). Neither set = no
+  scripts at all, so local and staging never report into a live property. Verified both ways.
+- Page-render events are queued on the scoped instance. `PageView` / `gtag('config')` are in the
+  base snippets, so a plain page view needs no controller call.
+- Events that happen **without a page load** — add to bag, favourite — cannot be queued. Those
+  controllers return `Tracking::addedToCart()` / `Tracking::saved()` under a `tracking` key
+  (`{meta: …, ga4: …}`) in their JSON and `report()` in `app.js` fires both halves independently —
+  an ad blocker removing `fbq` must not cost the GA4 event. The payload is built server-side, so the
+  value each platform sees is the price the bag charged, never one scraped off the DOM.
+- Product ids are `Tracking::contentId()` = `TC-{id}`, matching the `sku`/`productID` in the Product
+  schema and the `product:retailer_item_id` OG tag. Change one and change all three.
+- Product pages emit `product:*` Open Graph tags via `Seo::product()` — that is what Meta's crawler
+  reads to build a catalogue from the site, and what dynamic ads match against.
+- GA4 goes through **gtag.js directly, not a GTM container** — there is no container to administer
+  and the events are already described server-side. `purchase` carries `transaction_id` (the order
+  number, which is also Meta's `order_id`) so a refresh cannot double-count, plus `shipping`.
+- There is **no Conversions API and no server-side GA4**: nothing is sent from PHP, so there are no
+  `eventID`s to deduplicate and no test-event code to configure. Adding either means adding both
+  halves of the deduplication.
+- The privacy policy's "Advertising & measurement cookies" section exists because these do. If
+  either is removed, that copy changes with it.
 
 **Styling** — `resources/css/app.css` is the source of truth for design tokens:
 - Brand palette as `--color-*` tokens (e.g. `ink`, `blush`, `tan`, `cream`, `muted`, `jade`) →

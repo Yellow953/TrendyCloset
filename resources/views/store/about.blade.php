@@ -11,7 +11,9 @@
         <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-cream-2/85 via-cream-2/45 to-transparent"></div>
         <div class="pointer-events-none absolute inset-0 flex flex-col justify-center px-8 md:px-16">
             <div class="text-[12px] font-medium tracking-[0.28em] text-blush-soft">OUR STORY</div>
-            <div class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Your closet,<br><span class="font-serif font-medium italic text-blush">your style, your trend</span></div>
+            {{-- The page's <h1>: it was a <div>, which left About with no
+                 top-level heading at all. --}}
+            <h1 class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Your closet,<br><span class="font-serif font-medium italic text-blush">your style, your trend</span></h1>
         </div>
     </div>
 
@@ -22,7 +24,7 @@
                    class="h-full w-full object-cover" />
         </div>
         <div class="flex flex-1 flex-col gap-4">
-            <div class="text-[30px] font-normal">Hi, I'm Pamela</div>
+            <h2 class="text-[30px] font-normal">Hi, I'm Pamela</h2>
             <p class="text-[15px] font-light leading-[1.75] text-muted-3">At Trendy Closet, fashion is more than what you wear — it's a way to express who you are. We're a family-owned boutique in Dekwaneh, Lebanon, for women who love discovering fresh styles, quality pieces and effortless looks at affordable prices.</p>
             <p class="text-[15px] font-light leading-[1.75] text-muted-3">Your wardrobe should always feel exciting. That's why new arrivals land every week — the latest fashion wear and denim, carefully selected to keep your style fresh, trendy and uniquely yours.</p>
             <div class="mt-3 flex flex-wrap gap-3.5">

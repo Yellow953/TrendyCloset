@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SiteEventType;
 use App\Models\Order;
 use App\Models\ProductVariant;
-use App\Enums\SiteEventType;
 use App\Services\Checkout;
 use App\Services\ProductAnalytics;
 use App\Services\SiteAnalytics;
 use App\Support\Cart;
 use App\Support\Countries;
 use App\Support\Seo;
+use App\Support\Tracking;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use RuntimeException;
@@ -25,6 +26,7 @@ class CartController extends Controller
     public function __construct(
         private readonly Cart $cart,
         private readonly Seo $seo,
+        private readonly Tracking $tracking,
     ) {}
 
     public function index()
@@ -76,7 +78,9 @@ class CartController extends Controller
                 : back()->withErrors(['variant_id' => $message]);
         }
 
-        $this->cart->add($variant, (int) ($data['quantity'] ?? 1));
+        $quantity = (int) ($data['quantity'] ?? 1);
+
+        $this->cart->add($variant, $quantity);
         $analytics->recordAddToCart($variant->product);
 
         $status = $variant->product->name.' added to your bag.';
@@ -87,6 +91,9 @@ class CartController extends Controller
             return response()->json([
                 'status' => $status,
                 'bagCount' => $this->cart->count(),
+                // Fired by app.js: this add never reloads the page, so it can
+                // not ride along on a render the way a product view does.
+                'tracking' => Tracking::addedToCart($variant->product, $quantity, $quantity * (float) $variant->effective_price),
             ]);
         }
 
@@ -160,6 +167,11 @@ class CartController extends Controller
             'value' => (float) $this->cart->summary()['total'],
         ]);
 
+        $this->tracking->checkoutStarted(
+            $this->cart->lines(),
+            (float) $this->cart->summary()['total'],
+        );
+
         return view('store.checkout', [
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
@@ -232,11 +244,18 @@ class CartController extends Controller
      */
     public function confirmed(Request $request, string $number)
     {
-        $order = Order::with('items')->where('order_number', $number)->firstOrFail();
+        // `items.variant` is what the analytics product ids are built from.
+        $order = Order::with('items.variant')->where('order_number', $number)->firstOrFail();
 
         abort_unless($request->session()->get('tc_order') === $order->id, 404);
 
         $this->seo->page('Order '.$order->order_number)->noindex();
+
+        // The conversion. This page is session-gated and reachable only once per
+        // order, so a refresh cannot double-count it for a different shopper —
+        // the order number rides along (`order_id` / `transaction_id`) so both
+        // destinations drop the duplicate if the shopper does reload.
+        $this->tracking->purchased($order);
 
         return view('store.order-confirmed', [
             'order' => $order,

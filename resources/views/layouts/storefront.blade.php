@@ -25,6 +25,10 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Marketing analytics (Meta pixel, GA4). Both load async, so they cost the
+         critical path nothing, and each renders only when its own id is set. --}}
+    @include('partials.tracking')
+
     {{-- Pages push their LCP preload (and anything else they alone need) here. --}}
     @stack('head')
 
