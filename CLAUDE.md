@@ -244,6 +244,11 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - **Blade gotcha:** the inline `@php(...)` form has miscompiled here (emitting `<?php(...)` with no
   closing tag, which swallows the rest of the file). Prefer a `@php ... @endphp` block, and keep it
   **inside** `@section`.
+- **Never write a literal `<?` in a Blade file.** Production runs with `short_open_tag` **on** (local
+  does not), and Blade tokenises templates with `token_get_all()` — so a `<?xml` declaration puts
+  Blade's *own* tokenizer into PHP mode and everything after it is emitted uncompiled, then fatals
+  on require. `{!! '<?xml …' !!}` does not help; it is never compiled either. The sitemap's
+  declaration is therefore prepended in `SeoController::sitemap()`, where the file is already PHP.
 - **Galleries** — `ProductGallerySeeder` tops every product up to three images, drawing extras from
   a pool belonging to its root category. It is idempotent (skips products that already have three),
   so it can be re-run over an existing database: `php artisan db:seed --class=ProductGallerySeeder`.

@@ -117,9 +117,13 @@ class SeoController extends Controller
             $add(route('policies', $topic), null, 'yearly', '0.4');
         }
 
-        return response()
-            ->view('seo.sitemap', ['urls' => $urls])
-            ->header('Content-Type', 'application/xml; charset=UTF-8');
+        // The XML declaration is prepended here, not written in the Blade: with
+        // short_open_tag on, a literal "<?" puts Blade's own tokenizer into PHP
+        // mode and the rest of the template is never compiled.
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+            .view('seo.sitemap', ['urls' => $urls])->render();
+
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
     }
 
     /**
