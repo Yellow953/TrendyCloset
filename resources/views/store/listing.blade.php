@@ -8,17 +8,34 @@
     $clearUrl = fn (array $keys) => request()->fullUrlWithoutQuery([...$keys, 'page']);
     $activeFilters = collect(['q' => $filters['q'], 'size' => $filters['size'], 'color' => $filters['color']])->filter();
     $filterLabels = ['q' => 'Search', 'size' => 'Size', 'color' => 'Colour'];
+    // A category browses behind its own photograph; /shop and the edits have no
+    // image of their own and keep the plain cream band.
+    $banner = $category?->image_url;
 @endphp
 
+@if($banner)
+    @push('head')
+        <x-img-preload :src="$banner" sizes="100vw" />
+    @endpush
+@endif
+
 @section('content')
-    <div class="bg-cream px-5 py-9 text-center md:px-10">
-        <h1 data-reveal class="text-[32px] font-normal md:text-[38px]">{{ $heading }}</h1>
-        <div data-reveal class="mt-2 text-[13px] font-light text-muted">
-            <a href="{{ route('home') }}" class="hover:text-blush">Home</a>
-            @if($category?->parent)
-                / <a href="{{ route('listing', $category->parent) }}" class="hover:text-blush">{{ $category->parent->name }}</a>
-            @endif
-            / <span class="text-ink">{{ $heading }}</span>
+    <div class="relative overflow-hidden px-5 text-center md:px-10 {{ $banner ? 'py-16 md:py-24' : 'bg-cream py-9' }}">
+        @if($banner)
+            <x-img :src="$banner" alt="" eager sizes="100vw" class="absolute inset-0 h-full w-full object-cover" />
+            {{-- The photographs are the shop's own and vary in tone, so the copy
+                 sits on a scrim rather than on the picture. --}}
+            <div class="absolute inset-0 bg-ink/45"></div>
+        @endif
+        <div class="relative">
+            <h1 data-reveal class="text-[32px] font-normal md:text-[38px] {{ $banner ? 'text-white' : '' }}">{{ $heading }}</h1>
+            <div data-reveal class="mt-2 text-[13px] font-light {{ $banner ? 'text-white/75' : 'text-muted' }}">
+                <a href="{{ route('home') }}" class="{{ $banner ? 'hover:text-white' : 'hover:text-blush' }}">Home</a>
+                @if($category?->parent)
+                    / <a href="{{ route('listing', $category->parent) }}" class="{{ $banner ? 'hover:text-white' : 'hover:text-blush' }}">{{ $category->parent->name }}</a>
+                @endif
+                / <span class="{{ $banner ? 'text-white' : 'text-ink' }}">{{ $heading }}</span>
+            </div>
         </div>
     </div>
 

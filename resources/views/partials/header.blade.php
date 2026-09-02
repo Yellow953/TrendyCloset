@@ -7,7 +7,7 @@
      collapses on scroll (see .is-scrolled in app.css, driven by app.js). --}}
 <header data-header class="sticky top-0 z-40 bg-white transition-shadow">
     {{-- Announcement bar --}}
-    <div data-announcement class="bg-ink text-center text-[12px] font-light text-cream md:text-[13px]">
+    <div data-announcement class="bg-pink text-center text-[12px] font-light text-ink md:text-[13px]">
         <div class="px-5 py-2.5 md:px-10">
             Free delivery across {{ config('store.contact.country') }} on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }} —
             <a href="{{ route('listing') }}" class="font-medium underline underline-offset-2">Shop now</a>

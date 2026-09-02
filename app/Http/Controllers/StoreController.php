@@ -588,8 +588,9 @@ class StoreController extends Controller
 
         return view('store.about', [
             'hero' => $this->img('photo-1490481651871-ab68de25d43d', 'Priscilla Du Preez', 'priscilladupreez', 1400),
-            // The rail, not a stock model posing as Pamela.
-            'portrait' => $this->img('photo-1603400521630-9f2de124b33b', null, null, 800),
+            // The rail, not a stock model posing as Pamela. The shop's own
+            // photograph, so it is a local file rather than an img() descriptor.
+            'portrait' => ['img' => asset('images/about-rail.webp'), 'credit' => null, 'credit_href' => null],
             'reasons' => [
                 ['icon' => '✨', 'title' => 'New every week', 'body' => 'Fresh arrivals on the rail every single week.'],
                 ['icon' => '👖', 'title' => 'Fashion & denim', 'body' => 'The latest trends alongside denim that lasts.'],

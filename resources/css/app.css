@@ -24,16 +24,21 @@
     --font-serif: 'Cormorant Garamond', ui-serif, Georgia, 'Times New Roman', serif;
     --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 
-    /* Trendy Closet — blush brand palette.
-       `brand` is the exact blush sampled from the logo blob (public/images/logo.png);
-       every warm tone below is a lighter/darker step of that same hue. */
+    /* Trendy Closet — dusty rose palette, hue 4°.
+       `pink` is the chosen accent (#cca29f). It is light, so it carries *ink*
+       lettering and never white — 6.6:1 that way, 2.3:1 the other. `blush` is
+       that same hue and saturation stepped down until it is legible as text on
+       white: prices, links, active borders. The pale tints stay on the logo
+       blob's own hue (#e9d6cf) so the mark never sits on a band that
+       disagrees with it. */
+    --color-pink: #cca29f;
     --color-brand: #e9d6cf;
     --color-brand-deep: #d9bfb5;
     --color-ink: #2b2523;
     --color-ink-2: #2a2926;
     --color-ink-deep: #221d1b;
-    --color-blush: #a1705f;
-    --color-blush-soft: #8f6f61;
+    --color-blush: #93524d;
+    --color-blush-soft: #a45b56;
     --color-tan: #e9d6cf;
     --color-cream: #f6f1ee;
     --color-cream-2: #f0e7e1;
@@ -107,7 +112,7 @@
     }
     /* The blush call to action — the one button that asks for the sale. */
     .tc-btn-blush {
-        @apply inline-flex items-center justify-center rounded-field bg-blush px-8 py-4 text-sm font-medium tracking-[0.06em] text-white transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:bg-faint;
+        @apply inline-flex items-center justify-center rounded-field bg-pink px-8 py-4 text-sm font-medium tracking-[0.06em] text-ink transition-colors hover:bg-blush hover:text-white disabled:cursor-not-allowed disabled:bg-faint;
     }
     /* Size modifier — pair with any of the three above. */
     .tc-btn-sm {
@@ -139,11 +144,11 @@
         @apply inline-flex items-center justify-center rounded-chip border border-line-2 px-3 py-1.5 text-[13px] transition-colors hover:border-blush hover:text-blush;
     }
     .tc-chip-on {
-        @apply border-blush bg-blush text-white hover:border-blush hover:text-white;
+        @apply border-pink bg-pink text-ink hover:border-pink hover:text-ink;
     }
     /* Small filled pill: the sale flag over a photograph, a stock line. */
     .tc-badge {
-        @apply inline-flex w-fit items-center rounded-chip bg-blush px-2.5 py-1 text-[12px] font-medium text-white;
+        @apply inline-flex w-fit items-center rounded-chip bg-pink px-2.5 py-1 text-[12px] font-medium text-ink;
     }
 
     /* Quantity stepper. `overflow-hidden` is load-bearing — the middle input

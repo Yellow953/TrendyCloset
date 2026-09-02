@@ -14,13 +14,17 @@
             {{-- The page's <h1>: it was a <div>, which left About with no
                  top-level heading at all. --}}
             <h1 class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Your closet,<br><span class="font-serif font-medium italic text-blush">your style, your trend</span></h1>
+            {{-- Kept narrow: the scrim only carries copy on the left of the photograph. --}}
+            <p class="mt-4 max-w-[360px] text-[15px] font-light leading-[1.65] text-muted-2 md:max-w-[440px] md:text-[15.5px]">Hand picked by Pamela and styled before it ever ships.</p>
         </div>
     </div>
 
     {{-- Story --}}
     <div class="flex flex-col items-center gap-14 px-8 py-14 md:px-16 lg:flex-row">
-        <div class="h-[380px] w-full flex-1 overflow-hidden rounded-panel">
-            <x-img :src="$portrait['img']" alt="Inside the Trendy Closet boutique" sizes="(min-width: 1024px) 45vw, 100vw"
+        {{-- Upright frame: the photograph is a portrait 736x1312, and a wide
+             band would crop it to a strip of hangers. --}}
+        <div class="mx-auto aspect-[4/5] w-full max-w-[440px] flex-1 overflow-hidden rounded-panel lg:mx-0 lg:max-w-[480px]">
+            <x-img :src="$portrait['img']" alt="A rail of Trendy Closet pieces" sizes="(min-width: 1024px) 480px, (min-width: 640px) 440px, 100vw"
                    class="h-full w-full object-cover" />
         </div>
         <div class="flex flex-1 flex-col gap-4">

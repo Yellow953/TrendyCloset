@@ -169,7 +169,7 @@
                 @endif
 
                 @if($inStock)
-                    <div class="tc-badge bg-cream-3 px-3 py-1.5 text-[13.5px] text-jade">{{ $stockLeft }} in stock</div>
+                    <div class="tc-badge bg-cream-3 px-3 py-1.5 text-[13.5px] text-blush">{{ $stockLeft }} in stock</div>
                 @else
                     <div class="tc-badge bg-cream-2 px-3 py-1.5 text-[13.5px] text-blush">Out of stock</div>
                 @endif
