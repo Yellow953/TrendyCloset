@@ -7,17 +7,8 @@
 
     <title>@yield('title', 'Something went wrong') — Trendy Closet</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <link rel="icon" href="{{ asset('images/logo-64.png') }}" sizes="any">
 
-    {{-- Self-contained on purpose: an error page must render even when the asset
-         pipeline or database is unhappy, so it carries its own small stylesheet
-         rather than depending on the compiled bundle or any view composer. The
-         look matches the back office — Inter, a slate palette, a flat white card
-         on a soft canvas. --}}
     <style>
         :root {
             --ink: #0f172a;      /* slate-900 */

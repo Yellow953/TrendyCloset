@@ -8,9 +8,7 @@
 
     <title>@yield('title', 'Back office') — Trendy Closet</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{ Vite::fonts(['inter']) }}
 
     <link rel="icon" href="{{ asset('images/logo-64.png') }}" sizes="any">
 

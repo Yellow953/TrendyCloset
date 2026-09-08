@@ -37,6 +37,13 @@ export default defineConfig({
                     weights: [400, 500],
                     preload: false,
                 }),
+                // The back office. Its two layouts pulled Inter from
+                // fonts.googleapis.com with a render-blocking <link>, which is
+                // a blank sign-in page whenever that request stalls.
+                bunny('Inter', {
+                    weights: [400, 500, 600, 700],
+                    preload: [{ weight: 400 }, { weight: 500 }],
+                }),
             ],
         }),
         tailwindcss(),
