@@ -234,44 +234,9 @@
     pointer-events: auto;
 }
 
-/* ---------------------------------------------------------------------------
-   Sign-in (layouts/auth) — a half/half split: a pure-black brand plate on the
-   left matching the rail, form on plain white at the right. One quiet load
-   sequence: mark, form, then the way back out.
---------------------------------------------------------------------------- */
-/* No fill mode: every visible element on the sign-in page carries this, so an
-   animation that never runs must leave the form there rather than blank. The
-   stagger lives in the keyframes for the same reason — animation-delay would
-   need a backwards fill to hold, which is the invisible resting state again. */
-.ad-auth-rise {
-    animation: ad-auth-rise 0.55s cubic-bezier(0.22, 0.7, 0.3, 1);
-}
-.ad-auth-rise-2 {
-    animation: ad-auth-rise-2 0.62s cubic-bezier(0.22, 0.7, 0.3, 1);
-}
-.ad-auth-rise-3 {
-    animation: ad-auth-rise-3 0.7s cubic-bezier(0.22, 0.7, 0.3, 1);
-}
-@keyframes ad-auth-rise {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-}
-@keyframes ad-auth-rise-2 {
-    0%,
-    11% {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-}
-@keyframes ad-auth-rise-3 {
-    0%,
-    21% {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-}
+/* layouts/auth has no entrance animation on purpose: every visible element on
+   the sign-in page sat inside one, so anything that stopped it running — a
+   frozen tab, an extension pausing animations — left a blank screen. */
 
 /* The account menu in the top bar. A <details>, so it opens without JS; the
    panel lands with the same small rise the dialogs use. */
@@ -360,9 +325,6 @@
     }
     .ad-bar,
     .ad-bar-row,
-    .ad-auth-rise,
-    .ad-auth-rise-2,
-    .ad-auth-rise-3,
     .ad-modal-card,
     .ad-modal-backdrop,
     .ad-menu[open] > summary + *,
