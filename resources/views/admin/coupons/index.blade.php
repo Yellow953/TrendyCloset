@@ -5,7 +5,7 @@
 @section('subheading', 'Codes are matched case-insensitively at the bag and re-validated against the live subtotal on every read.')
 
 @section('actions')
-    <button type="button" data-modal-open="coupon-new" class="ad-btn-primary">＋ New code</button>
+    <button type="button" data-modal-open="coupon-new" class="bo-btn-primary">＋ New code</button>
 @endsection
 
 @section('content')
@@ -17,38 +17,38 @@
         ]);
     @endphp
 
-    <div class="ad-card">
+    <div class="bo-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
-                <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Code…" class="ad-input">
+                <label for="q" class="bo-label">Search</label>
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Code…" class="bo-input">
             </div>
             <div class="w-[160px]">
-                <label for="filter" class="ad-label">Show</label>
-                <select id="filter" name="filter" class="ad-input">
+                <label for="filter" class="bo-label">Show</label>
+                <select id="filter" name="filter" class="bo-input">
                     @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="ad-btn-primary">Filter</button>
+            <button type="submit" class="bo-btn-primary">Filter</button>
             @if(request()->hasAny(['q', 'filter']))
-                <a href="{{ route('admin.coupons.index') }}" class="ad-btn">Clear</a>
+                <a href="{{ route('admin.coupons.index') }}" class="bo-btn">Clear</a>
             @endif
         </form>
 
         @if($coupons->isEmpty() && $filters)
             <x-admin.no-results noun="codes" :filters="$filters" :reset="route('admin.coupons.index')">
-                <button type="button" data-modal-open="coupon-new" class="ad-btn-primary">＋ New code</button>
+                <button type="button" data-modal-open="coupon-new" class="bo-btn-primary">＋ New code</button>
             </x-admin.no-results>
         @elseif($coupons->isEmpty())
             <x-admin.empty icon="coupons" title="No codes yet"
                            body="Create a percentage off, a fixed amount, or a free-shipping code — with optional minimum spend, usage cap and expiry.">
-                <button type="button" data-modal-open="coupon-new" class="ad-btn-primary">＋ New code</button>
+                <button type="button" data-modal-open="coupon-new" class="bo-btn-primary">＋ New code</button>
             </x-admin.empty>
         @else
             <div class="overflow-x-auto">
-                <table class="ad-table">
+                <table class="bo-table">
                     <thead>
                         <tr>
                             <th>Code</th><th>Discount</th><th>Conditions</th><th>Window</th>
@@ -62,12 +62,12 @@
                                 $spent = $coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit;
                             @endphp
                             <tr>
-                                <td><span class="ad-figure font-semibold tracking-wide">{{ $coupon->code }}</span></td>
+                                <td><span class="bo-figure font-semibold tracking-wide">{{ $coupon->code }}</span></td>
                                 <td class="whitespace-nowrap">
                                     <span class="font-medium">
                                         {{ $coupon->type === 'percent' ? rtrim(rtrim(number_format($coupon->value, 2), '0'), '.').'%' : \App\Models\Product::money($coupon->value) }} off
                                     </span>
-                                    @if($coupon->free_shipping)<span class="ad-badge ad-badge-good ml-1.5">+ free ship</span>@endif
+                                    @if($coupon->free_shipping)<span class="bo-badge bo-badge-good ml-1.5">+ free ship</span>@endif
                                 </td>
                                 <td class="text-[12.5px] font-normal text-slate-600">
                                     {{ $coupon->min_subtotal ? 'Min '.\App\Models\Product::money($coupon->min_subtotal) : 'No minimum' }}
@@ -77,24 +77,24 @@
                                     {{ $coupon->starts_at?->format('j M') ?? 'Now' }} –
                                     <span class="{{ $expired ? 'text-rose-600' : '' }}">{{ $coupon->expires_at?->format('j M Y') ?? 'open' }}</span>
                                 </td>
-                                <td class="ad-figure text-right">
+                                <td class="bo-figure text-right">
                                     {{ $coupon->used_count }}@if($coupon->usage_limit)<span class="font-normal text-slate-400"> / {{ $coupon->usage_limit }}</span>@endif
                                 </td>
                                 <td>
                                     @if(! $coupon->is_active)
-                                        <span class="ad-badge ad-badge-neutral">Off</span>
+                                        <span class="bo-badge bo-badge-neutral">Off</span>
                                     @elseif($expired)
-                                        <span class="ad-badge ad-badge-bad">Expired</span>
+                                        <span class="bo-badge bo-badge-bad">Expired</span>
                                     @elseif($spent)
-                                        <span class="ad-badge ad-badge-warn">Used up</span>
+                                        <span class="bo-badge bo-badge-warn">Used up</span>
                                     @else
-                                        <span class="ad-badge ad-badge-good">Active</span>
+                                        <span class="bo-badge bo-badge-good">Active</span>
                                     @endif
                                 </td>
                                 <td class="text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <button type="button" data-modal-open="coupon-{{ $coupon->id }}" class="ad-btn ad-btn-sm">Edit</button>
-                                        <button type="button" data-modal-open="delete-coupon-{{ $coupon->id }}" class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600" title="Delete">✕</button>
+                                        <button type="button" data-modal-open="coupon-{{ $coupon->id }}" class="bo-btn bo-btn-sm">Edit</button>
+                                        <button type="button" data-modal-open="delete-coupon-{{ $coupon->id }}" class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600" title="Delete">✕</button>
                                     </div>
                                 </td>
                             </tr>

@@ -11,17 +11,17 @@
 @endsection
 
 @section('actions')
-    <a href="mailto:{{ $message->email }}?subject={{ rawurlencode('Re: '.($message->subject ?: 'your enquiry')) }}" class="ad-btn-primary">Reply by email</a>
+    <a href="mailto:{{ $message->email }}?subject={{ rawurlencode('Re: '.($message->subject ?: 'your enquiry')) }}" class="bo-btn-primary">Reply by email</a>
     <form method="POST" action="{{ route('admin.messages.unread', $message) }}">
         @csrf @method('PATCH')
-        <button type="submit" class="ad-btn">Mark unread</button>
+        <button type="submit" class="bo-btn">Mark unread</button>
     </form>
-    <button type="button" data-modal-open="delete-message" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
+    <button type="button" data-modal-open="delete-message" class="bo-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
 @endsection
 
 @section('content')
     <div class="mx-auto max-w-[760px]">
-        <div class="ad-card">
+        <div class="bo-card">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-5">
                 <div class="flex items-center gap-3">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[15px] font-medium text-slate-900">
@@ -32,16 +32,16 @@
                         <a href="mailto:{{ $message->email }}" class="text-[13px] font-normal text-slate-400 hover:text-slate-900">{{ $message->email }}</a>
                     </div>
                 </div>
-                <span class="ad-badge ad-badge-good">Read</span>
+                <span class="bo-badge bo-badge-good">Read</span>
             </div>
 
             <div class="px-6 py-6">
                 @if($message->subject)
-                    <div class="ad-eyebrow">Subject</div>
+                    <div class="bo-eyebrow">Subject</div>
                     <p class="mt-1 mb-5 text-[16px] font-medium">{{ $message->subject }}</p>
                 @endif
 
-                <div class="ad-eyebrow">Message</div>
+                <div class="bo-eyebrow">Message</div>
                 <p class="mt-2 text-[14.5px] leading-relaxed font-normal whitespace-pre-line text-slate-600">{{ $message->message }}</p>
             </div>
 

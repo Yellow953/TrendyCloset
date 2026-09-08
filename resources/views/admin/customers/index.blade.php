@@ -15,16 +15,16 @@
         ]);
     @endphp
 
-    <div class="ad-card">
+    <div class="bo-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
-                <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, phone or email…" class="ad-input">
+                <label for="q" class="bo-label">Search</label>
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, phone or email…" class="bo-input">
             </div>
 
             <div class="w-[170px]">
-                <label for="filter" class="ad-label">Show</label>
-                <select id="filter" name="filter" class="ad-input">
+                <label for="filter" class="bo-label">Show</label>
+                <select id="filter" name="filter" class="bo-input">
                     @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
@@ -32,16 +32,16 @@
             </div>
 
             <div class="w-[150px]">
-                <label for="sort" class="ad-label">Sort by</label>
-                <select id="sort" name="sort" class="ad-input">
+                <label for="sort" class="bo-label">Sort by</label>
+                <select id="sort" name="sort" class="bo-input">
                     <option value="" @selected(request('sort') !== 'value')>Newest</option>
                     <option value="value" @selected(request('sort') === 'value')>Lifetime value</option>
                 </select>
             </div>
 
-            <button type="submit" class="ad-btn-primary">Filter</button>
+            <button type="submit" class="bo-btn-primary">Filter</button>
             @if(request()->hasAny(['q', 'filter', 'sort']))
-                <a href="{{ route('admin.customers.index') }}" class="ad-btn">Clear</a>
+                <a href="{{ route('admin.customers.index') }}" class="bo-btn">Clear</a>
             @endif
         </form>
 
@@ -50,11 +50,11 @@
         @elseif($customers->isEmpty())
             <x-admin.empty icon="customers" title="No customers yet"
                            body="A record is created the first time someone checks out with a given phone number — there is nothing to add by hand. Take an order and the buyer appears here.">
-                <a href="{{ route('admin.orders.index') }}" class="ad-btn">Go to orders</a>
+                <a href="{{ route('admin.orders.index') }}" class="bo-btn">Go to orders</a>
             </x-admin.empty>
         @else
             <div class="overflow-x-auto">
-                <table class="ad-table">
+                <table class="bo-table">
                     <thead>
                         <tr>
                             <th>Customer</th>
@@ -77,19 +77,19 @@
                                         <span class="max-w-[180px] truncate font-medium group-hover:text-slate-900">{{ $customer->name ?: '—' }}</span>
                                     </a>
                                 </td>
-                                <td class="ad-figure max-w-[220px] truncate font-normal text-slate-600">{{ $customer->phone }}</td>
-                                <td class="ad-figure text-right">{{ $customer->orders_count }}</td>
-                                <td class="ad-figure text-right font-medium">{{ \App\Models\Product::money($customer->lifetime_value ?? 0) }}</td>
+                                <td class="bo-figure max-w-[220px] truncate font-normal text-slate-600">{{ $customer->phone }}</td>
+                                <td class="bo-figure text-right">{{ $customer->orders_count }}</td>
+                                <td class="bo-figure text-right font-medium">{{ \App\Models\Product::money($customer->lifetime_value ?? 0) }}</td>
                                 <td class="font-normal whitespace-nowrap text-slate-400">
                                     {{ $customer->last_order_at ? \Illuminate\Support\Carbon::parse($customer->last_order_at)->diffForHumans(short: true) : 'Never' }}
                                 </td>
                                 <td>
-                                    <span class="ad-badge {{ $customer->marketing_opt_in ? 'ad-badge-good' : 'ad-badge-neutral' }}">
+                                    <span class="bo-badge {{ $customer->marketing_opt_in ? 'bo-badge-good' : 'bo-badge-neutral' }}">
                                         {{ $customer->marketing_opt_in ? 'Subscribed' : 'No' }}
                                     </span>
                                 </td>
                                 <td class="text-right">
-                                    <a href="{{ route('admin.customers.show', $customer) }}" class="ad-btn ad-btn-sm">Open</a>
+                                    <a href="{{ route('admin.customers.show', $customer) }}" class="bo-btn bo-btn-sm">Open</a>
                                 </td>
                             </tr>
                         @endforeach

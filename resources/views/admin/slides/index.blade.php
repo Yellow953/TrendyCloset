@@ -5,20 +5,20 @@
 @section('subheading', 'The rotating hero at the top of the home page. Slides play in position order; hidden slides are skipped.')
 
 @section('actions')
-    <a href="{{ route('home') }}" target="_blank" rel="noopener" class="ad-btn">View home ↗</a>
-    <a href="{{ route('admin.slides.create') }}" class="ad-btn-primary">＋ New slide</a>
+    <a href="{{ route('home') }}" target="_blank" rel="noopener" class="bo-btn">View home ↗</a>
+    <a href="{{ route('admin.slides.create') }}" class="bo-btn-primary">＋ New slide</a>
 @endsection
 
 @section('content')
-    <div class="ad-card">
+    <div class="bo-card">
         @if($slides->isEmpty())
             <x-admin.empty icon="slides" title="No slides yet"
                            body="With no slides the home page falls back to the three it shipped with. Add one to take it over.">
-                <a href="{{ route('admin.slides.create') }}" class="ad-btn-primary">＋ New slide</a>
+                <a href="{{ route('admin.slides.create') }}" class="bo-btn-primary">＋ New slide</a>
             </x-admin.empty>
         @else
             <div class="overflow-x-auto">
-                <table class="ad-table">
+                <table class="bo-table">
                     <thead>
                         <tr>
                             <th>Slide</th>
@@ -54,12 +54,12 @@
                                     <span class="mt-0.5 block max-w-[240px] truncate text-[11.5px] font-normal text-slate-400">{{ $slide->cta_url ?: '/shop' }}</span>
                                 </td>
 
-                                <td class="ad-figure text-right font-normal text-slate-400">{{ $slide->position }}</td>
+                                <td class="bo-figure text-right font-normal text-slate-400">{{ $slide->position }}</td>
 
                                 <td>
                                     <form method="POST" action="{{ route('admin.slides.toggle', $slide) }}">
                                         @csrf @method('PATCH')
-                                        <button type="submit" class="ad-badge {{ $slide->is_active ? 'ad-badge-good' : 'ad-badge-neutral' }}"
+                                        <button type="submit" class="bo-badge {{ $slide->is_active ? 'bo-badge-good' : 'bo-badge-neutral' }}"
                                                 title="{{ $slide->is_active ? 'Hide this slide' : 'Show this slide' }}">
                                             {{ $slide->is_active ? 'Live' : 'Hidden' }}
                                         </button>
@@ -68,9 +68,9 @@
 
                                 <td>
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('admin.slides.edit', $slide) }}" class="ad-btn ad-btn-sm">Edit</a>
+                                        <a href="{{ route('admin.slides.edit', $slide) }}" class="bo-btn bo-btn-sm">Edit</a>
                                         <button type="button" data-modal-open="delete-slide-{{ $slide->id }}"
-                                                class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
+                                                class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
                                     </div>
                                 </td>
                             </tr>

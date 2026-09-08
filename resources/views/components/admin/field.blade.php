@@ -17,12 +17,12 @@
 @php
     $current = old($name, $value);
     $invalid = $errors->has($name);
-    $classes = 'ad-input'.($invalid ? ' border-rose-600 focus:border-rose-600 focus:ring-rose-600/12' : '').($prefix ? ' pl-7' : '');
+    $classes = 'bo-input'.($invalid ? ' border-rose-600 focus:border-rose-600 focus:ring-rose-600/12' : '').($prefix ? ' pl-7' : '');
 @endphp
 
 <div {{ $attributes->only('class') }}>
     @if($label)
-        <label for="{{ $name }}" class="ad-label">
+        <label for="{{ $name }}" class="bo-label">
             {{ $label }}
             @unless($required)<span class="font-normal text-slate-400">· optional</span>@endunless
         </label>
@@ -53,8 +53,8 @@
     </div>
 
     @error($name)
-        <p class="ad-error">{{ $message }}</p>
+        <p class="bo-error">{{ $message }}</p>
     @else
-        @if($hint)<p class="ad-hint">{{ $hint }}</p>@endif
+        @if($hint)<p class="bo-hint">{{ $hint }}</p>@endif
     @enderror
 </div>

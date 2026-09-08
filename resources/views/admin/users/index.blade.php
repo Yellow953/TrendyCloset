@@ -5,13 +5,13 @@
 @section('subheading', 'Who may sign in to the back office. Accounts are created here — the storefront has no registration, and customers are not users.')
 
 @section('actions')
-    <button type="button" data-modal-open="user-new" class="ad-btn-primary">＋ Add staff</button>
+    <button type="button" data-modal-open="user-new" class="bo-btn-primary">＋ Add staff</button>
 @endsection
 
 @section('content')
-    <div class="ad-card">
+    <div class="bo-card">
         <div class="overflow-x-auto">
-            <table class="ad-table">
+            <table class="bo-table">
                 <thead>
                     <tr><th>Name</th><th>Email</th><th>Role</th><th>Added</th><th class="text-right"></th></tr>
                 </thead>
@@ -25,22 +25,22 @@
                                     </span>
                                     <span class="font-medium">{{ $user->name }}</span>
                                     @if($user->is(auth()->user()))
-                                        <span class="ad-badge ad-badge-neutral">You</span>
+                                        <span class="bo-badge bo-badge-neutral">You</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="font-normal text-slate-600">{{ $user->email }}</td>
                             <td>
-                                <span class="ad-badge {{ $user->isAdmin() ? 'border-slate-900/35 bg-slate-900/10 text-slate-900' : 'ad-badge-neutral' }}">
+                                <span class="bo-badge {{ $user->isAdmin() ? 'border-slate-900/35 bg-slate-900/10 text-slate-900' : 'bo-badge-neutral' }}">
                                     {{ $user->role->label() }}
                                 </span>
                             </td>
                             <td class="font-normal whitespace-nowrap text-slate-400">{{ $user->created_at->format('j M Y') }}</td>
                             <td class="text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <button type="button" data-modal-open="user-{{ $user->id }}" class="ad-btn ad-btn-sm">Edit</button>
+                                    <button type="button" data-modal-open="user-{{ $user->id }}" class="bo-btn bo-btn-sm">Edit</button>
                                     @unless($user->is(auth()->user()))
-                                        <button type="button" data-modal-open="delete-user-{{ $user->id }}" class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600" title="Remove">✕</button>
+                                        <button type="button" data-modal-open="delete-user-{{ $user->id }}" class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600" title="Remove">✕</button>
                                     @endunless
                                 </div>
                             </td>

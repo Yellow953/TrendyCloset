@@ -11,10 +11,10 @@
 @endsection
 
 @section('actions')
-    <a href="https://wa.me/{{ ltrim($customer->phone ?? '', '+') }}" target="_blank" rel="noopener" class="ad-btn">WhatsApp</a>
-    @if($customer->email)<a href="mailto:{{ $customer->email }}" class="ad-btn">Email</a>@endif
-    <button type="button" data-modal-open="edit-customer" class="ad-btn-primary">Edit details</button>
-    <button type="button" data-modal-open="delete-customer" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
+    <a href="https://wa.me/{{ ltrim($customer->phone ?? '', '+') }}" target="_blank" rel="noopener" class="bo-btn">WhatsApp</a>
+    @if($customer->email)<a href="mailto:{{ $customer->email }}" class="bo-btn">Email</a>@endif
+    <button type="button" data-modal-open="edit-customer" class="bo-btn-primary">Edit details</button>
+    <button type="button" data-modal-open="delete-customer" class="bo-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
 @endsection
 
 @section('content')
@@ -31,9 +31,9 @@
             ['Average basket', \App\Models\Product::money($revenue->count() ? $lifetime / $revenue->count() : 0), 'Across counted orders'],
             ['Last order', $customer->orders->first()?->created_at->diffForHumans(short: true) ?? 'Never', $customer->orders->first()?->created_at->format('j M Y') ?? 'No orders placed'],
         ] as [$label, $value, $hint])
-            <div class="ad-card p-5">
-                <div class="ad-eyebrow">{{ $label }}</div>
-                <div class="ad-figure mt-2 text-[22px] leading-none font-medium">{{ $value }}</div>
+            <div class="bo-card p-5">
+                <div class="bo-eyebrow">{{ $label }}</div>
+                <div class="bo-figure mt-2 text-[22px] leading-none font-medium">{{ $value }}</div>
                 <p class="mt-2 text-[11.5px] leading-relaxed font-normal text-slate-400">{{ $hint }}</p>
             </div>
         @endforeach
@@ -42,26 +42,26 @@
     <div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
 
         {{-- Order history --}}
-        <div class="ad-card">
-            <div class="ad-card-head"><div class="ad-card-title">Order history</div></div>
+        <div class="bo-card">
+            <div class="bo-card-head"><div class="bo-card-title">Order history</div></div>
 
             @if($customer->orders->isEmpty())
                 <x-admin.empty icon="orders" title="No orders yet"
                                body="This record exists because the number was entered at checkout or added here by hand." />
             @else
                 <div class="overflow-x-auto">
-                    <table class="ad-table">
+                    <table class="bo-table">
                         <thead>
                             <tr><th>Order</th><th>Placed</th><th class="text-right">Items</th><th>Status</th><th class="text-right">Total</th></tr>
                         </thead>
                         <tbody>
                             @foreach($customer->orders as $order)
                                 <tr>
-                                    <td><a href="{{ route('admin.orders.show', $order) }}" class="ad-figure font-medium hover:text-slate-900">{{ $order->order_number }}</a></td>
+                                    <td><a href="{{ route('admin.orders.show', $order) }}" class="bo-figure font-medium hover:text-slate-900">{{ $order->order_number }}</a></td>
                                     <td class="font-normal whitespace-nowrap text-slate-600">{{ $order->created_at->format('j M Y') }}</td>
-                                    <td class="ad-figure text-right font-normal text-slate-600">{{ $order->items_count }}</td>
+                                    <td class="bo-figure text-right font-normal text-slate-600">{{ $order->items_count }}</td>
                                     <td><x-admin.status :status="$order->status" /></td>
-                                    <td class="ad-figure text-right font-medium">{{ \App\Models\Product::money($order->grand_total) }}</td>
+                                    <td class="bo-figure text-right font-medium">{{ \App\Models\Product::money($order->grand_total) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -72,8 +72,8 @@
 
         {{-- Details + notes --}}
         <div class="flex flex-col gap-5">
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Details</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Details</div></div>
                 <div class="flex flex-col gap-3.5 px-5 py-5 text-[13px]">
                     <div class="flex justify-between gap-3">
                         <span class="font-normal text-slate-400">Phone</span>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="flex items-center justify-between gap-3">
                         <span class="font-normal text-slate-400">Email list</span>
-                        <span class="ad-badge {{ $customer->marketing_opt_in ? 'ad-badge-good' : 'ad-badge-neutral' }}">
+                        <span class="bo-badge {{ $customer->marketing_opt_in ? 'bo-badge-good' : 'bo-badge-neutral' }}">
                             {{ $customer->marketing_opt_in ? 'Subscribed' : 'Not subscribed' }}
                         </span>
                     </div>
@@ -100,8 +100,8 @@
                 </div>
             </div>
 
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Notes</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Notes</div></div>
                 <div class="px-5 py-5">
                     @if($customer->notes)
                         <p class="text-[13px] leading-relaxed font-normal whitespace-pre-line text-slate-600">{{ $customer->notes }}</p>
@@ -110,7 +110,7 @@
                             Nothing noted. Sizing, preferences, a conversation worth remembering — it goes here.
                         </p>
                     @endif
-                    <button type="button" data-modal-open="edit-customer" class="ad-btn ad-btn-sm mt-4">Edit notes</button>
+                    <button type="button" data-modal-open="edit-customer" class="bo-btn bo-btn-sm mt-4">Edit notes</button>
                 </div>
             </div>
         </div>
@@ -133,8 +133,8 @@
             </div>
 
             <div class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50 px-6 py-4">
-                <button type="button" data-modal-close class="ad-btn">Cancel</button>
-                <button type="submit" class="ad-btn-primary">Save customer</button>
+                <button type="button" data-modal-close class="bo-btn">Cancel</button>
+                <button type="submit" class="bo-btn-primary">Save customer</button>
             </div>
         </form>
     </x-admin.modal>

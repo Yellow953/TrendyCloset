@@ -14,18 +14,18 @@
 
     {{-- Apply the saved collapsed state before first paint, so a collapsed rail
          never flashes open on load. --}}
-    <script>try{if(localStorage.getItem('ad-collapsed')==='1')document.documentElement.classList.add('ad-collapsed')}catch(e){}</script>
+    <script>try{if(localStorage.getItem('bo-collapsed')==='1')document.documentElement.classList.add('bo-collapsed')}catch(e){}</script>
 
     @vite(['resources/css/admin.css', 'resources/js/admin.js'])
 </head>
-<body class="ad-root min-h-screen bg-slate-100 text-slate-800 antialiased">
+<body class="bo-root min-h-screen bg-slate-100 text-slate-800 antialiased">
 
 @include('partials.admin.sidebar')
 
 {{-- Scrim, for when the sidebar is a slide-in panel below `lg` --}}
 <div data-admin-scrim class="fixed inset-0 z-30 bg-black/45 lg:hidden"></div>
 
-<div class="ad-main flex min-h-screen flex-col">
+<div class="bo-main flex min-h-screen flex-col">
     @include('partials.admin.topbar')
 
     <main class="flex-1 px-4 py-2 md:px-6 md:py-4">

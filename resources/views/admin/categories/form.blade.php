@@ -14,11 +14,11 @@
 
 @section('actions')
     @if($editing)
-        <a href="{{ route('listing', $category) }}" target="_blank" rel="noopener" class="ad-btn">View on shop ↗</a>
-        <button type="button" data-modal-open="delete-category" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
+        <a href="{{ route('listing', $category) }}" target="_blank" rel="noopener" class="bo-btn">View on shop ↗</a>
+        <button type="button" data-modal-open="delete-category" class="bo-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
     @endif
-    <a href="{{ route('admin.categories.index') }}" class="ad-btn">Cancel</a>
-    <button type="submit" form="category-form" class="ad-btn-primary">{{ $editing ? 'Save changes' : 'Create category' }}</button>
+    <a href="{{ route('admin.categories.index') }}" class="bo-btn">Cancel</a>
+    <button type="submit" form="category-form" class="bo-btn-primary">{{ $editing ? 'Save changes' : 'Create category' }}</button>
 @endsection
 
 @section('content')
@@ -30,8 +30,8 @@
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
 
             <div class="flex flex-col gap-5">
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Details</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Details</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="name" label="Name" :value="$category->name" required placeholder="Dresses" />
 
@@ -45,9 +45,9 @@
                 </div>
 
                 @if($editing && $category->products()->exists())
-                    <div class="ad-card">
-                        <div class="ad-card-head">
-                            <div class="ad-card-title">Filed here</div>
+                    <div class="bo-card">
+                        <div class="bo-card-head">
+                            <div class="bo-card-title">Filed here</div>
                             <a href="{{ route('admin.products.index', ['category' => $category->id]) }}" class="text-[12px] font-medium text-slate-900 hover:underline">
                                 All {{ $category->products()->count() }}
                             </a>
@@ -59,7 +59,7 @@
                                         @if($p->image_url)<img src="{{ $p->image_url }}" alt="" class="h-full w-full object-cover">@endif
                                     </div>
                                     <span class="flex-1 truncate text-[13px]">{{ $p->name }}</span>
-                                    <span class="ad-figure text-[12.5px] font-medium">{{ $p->price_label }}</span>
+                                    <span class="bo-figure text-[12.5px] font-medium">{{ $p->price_label }}</span>
                                 </a>
                             @endforeach
                         </div>
@@ -68,8 +68,8 @@
             </div>
 
             <div class="flex flex-col gap-5">
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Placement</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Placement</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="parent_id" label="Parent" :options="$parents" :value="$category->parent_id"
                                        hint="Leave blank for a top-level section. A category cannot be parented to itself or to anything beneath it." />
@@ -82,8 +82,8 @@
                     </div>
                 </div>
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Image</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Image</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         @if($category->image_url)
                             <div class="aspect-[4/3] overflow-hidden rounded-lg border border-slate-100 bg-slate-100">
@@ -99,7 +99,7 @@
                         </label>
 
                         <div id="category-preview" class="flex flex-wrap gap-2"></div>
-                        @error('image')<p class="ad-error">{{ $message }}</p>@enderror
+                        @error('image')<p class="bo-error">{{ $message }}</p>@enderror
 
                         <x-admin.field name="image_credit" label="Photo credit" :value="$category->image_credit"
                                        placeholder="Jane Doe / Unsplash" />

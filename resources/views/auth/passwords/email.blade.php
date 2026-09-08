@@ -18,7 +18,7 @@
             'placeholder' => 'you@trendycloset.com',
         ])
 
-        <button type="submit" class="ad-btn-primary mt-2 w-full py-3">Send reset link</button>
+        <button type="submit" class="bo-btn-primary mt-2 w-full py-3">Send reset link</button>
     </form>
 
     <p class="mt-8 border-t border-slate-200 pt-6 text-[12.5px] font-normal text-slate-400">

@@ -38,7 +38,7 @@
     </div>
 
     <div class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50 px-6 py-4">
-        <button type="button" data-modal-close class="ad-btn">Cancel</button>
-        <button type="submit" class="ad-btn-primary">{{ $submit }}</button>
+        <button type="button" data-modal-close class="bo-btn">Cancel</button>
+        <button type="submit" class="bo-btn-primary">{{ $submit }}</button>
     </div>
 </form>

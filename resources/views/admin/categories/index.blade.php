@@ -5,7 +5,7 @@
 @section('subheading', 'The tree behind the shop nav, the mega-menu and the listing sidebar. Products are filed on leaves; browsing a parent widens to everything beneath it.')
 
 @section('actions')
-    <a href="{{ route('admin.categories.create') }}" class="ad-btn-primary">＋ New category</a>
+    <a href="{{ route('admin.categories.create') }}" class="bo-btn-primary">＋ New category</a>
 @endsection
 
 @section('content')
@@ -17,15 +17,15 @@
         };
     @endphp
 
-    <div class="ad-card">
+    <div class="bo-card">
         @if($roots->isEmpty())
             <x-admin.empty icon="categories" title="No categories yet"
                            body="The shop nav is built from this tree, so start with a top-level section such as “Winter” or “Dresses”.">
-                <a href="{{ route('admin.categories.create') }}" class="ad-btn-primary">＋ New category</a>
+                <a href="{{ route('admin.categories.create') }}" class="bo-btn-primary">＋ New category</a>
             </x-admin.empty>
         @else
             <div class="overflow-x-auto">
-                <table class="ad-table">
+                <table class="bo-table">
                     <thead>
                         <tr>
                             <th>Category</th>

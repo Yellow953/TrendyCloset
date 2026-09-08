@@ -18,12 +18,12 @@
             <div class="group relative flex flex-1 flex-col items-center justify-end self-stretch">
                 <div class="pointer-events-none absolute bottom-full z-10 mb-2 hidden whitespace-nowrap rounded-md bg-slate-800 px-2.5 py-1.5 text-[11px] text-white group-hover:block">
                     {{ $point['label'] }} ·
-                    <span class="ad-figure">
+                    <span class="bo-figure">
                         {{ $money ? \App\Models\Product::money($point['value']) : number_format($point['value']) }}
                     </span>
                 </div>
 
-                <div class="ad-bar w-full rounded-t-[3px] transition-colors {{ $point['value'] > 0 ? 'bg-slate-900 group-hover:bg-slate-800' : 'bg-slate-100' }}"
+                <div class="bo-bar w-full rounded-t-[3px] transition-colors {{ $point['value'] > 0 ? 'bg-slate-900 group-hover:bg-slate-800' : 'bg-slate-100' }}"
                      style="height: {{ $point['value'] > 0 ? max(round(($point['value'] / $peak) * 100), 4) : 2 }}%; animation-delay: {{ $i * 35 }}ms"></div>
             </div>
         @endforeach

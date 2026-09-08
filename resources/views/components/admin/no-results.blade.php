@@ -13,7 +13,7 @@
         <x-slot:aside>
             <div class="flex flex-wrap justify-center gap-2">
                 @foreach($filters as $filter)
-                    <a href="{{ $filter['url'] }}" class="ad-chip group"
+                    <a href="{{ $filter['url'] }}" class="bo-chip group"
                        aria-label="Remove filter {{ $filter['label'] }}: {{ $filter['value'] }}">
                         <span class="font-normal text-slate-400">{{ $filter['label'] }}</span>
                         <span class="max-w-[22ch] truncate">{{ $filter['value'] }}</span>
@@ -25,7 +25,7 @@
     @endif
 
     @if($reset)
-        <a href="{{ $reset }}" class="ad-btn">Clear all filters</a>
+        <a href="{{ $reset }}" class="bo-btn">Clear all filters</a>
     @endif
 
     {{ $slot }}

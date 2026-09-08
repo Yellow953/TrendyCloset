@@ -12,7 +12,7 @@
 @endphp
 
 <div>
-    <label for="{{ $name }}" class="ad-label">{{ $label }}</label>
+    <label for="{{ $name }}" class="bo-label">{{ $label }}</label>
 
     <input id="{{ $name }}"
            name="{{ $name }}"
@@ -22,9 +22,9 @@
            @if ($autocomplete) autocomplete="{{ $autocomplete }}" @endif
            @if ($autofocus) autofocus @endif
            required
-           class="ad-input @error($name) border-rose-400 focus:border-rose-400 focus:ring-rose-100 @enderror">
+           class="bo-input @error($name) border-rose-400 focus:border-rose-400 focus:ring-rose-100 @enderror">
 
     @error($name)
-        <p class="ad-error">{{ $message }}</p>
+        <p class="bo-error">{{ $message }}</p>
     @enderror
 </div>

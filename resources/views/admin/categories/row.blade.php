@@ -21,23 +21,23 @@
     </td>
 
     <td class="text-right">
-        <span class="ad-figure font-normal text-slate-600">{{ $category->products->count() }}</span>
+        <span class="bo-figure font-normal text-slate-600">{{ $category->products->count() }}</span>
     </td>
 
-    <td class="ad-figure text-right font-normal text-slate-400">{{ $category->position }}</td>
+    <td class="bo-figure text-right font-normal text-slate-400">{{ $category->position }}</td>
 
     <td>
-        <span class="ad-badge {{ $category->is_active ? 'ad-badge-good' : 'ad-badge-neutral' }}">
+        <span class="bo-badge {{ $category->is_active ? 'bo-badge-good' : 'bo-badge-neutral' }}">
             {{ $category->is_active ? 'Live' : 'Hidden' }}
         </span>
     </td>
 
     <td>
         <div class="flex items-center justify-end gap-1.5">
-            <a href="{{ route('listing', $category) }}" target="_blank" rel="noopener" class="ad-btn ad-btn-sm" title="View on the shop">↗</a>
-            <a href="{{ route('admin.categories.edit', $category) }}" class="ad-btn ad-btn-sm">Edit</a>
+            <a href="{{ route('listing', $category) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-sm" title="View on the shop">↗</a>
+            <a href="{{ route('admin.categories.edit', $category) }}" class="bo-btn bo-btn-sm">Edit</a>
             <button type="button" data-modal-open="delete-category-{{ $category->id }}"
-                    class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
+                    class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
         </div>
     </td>
 </tr>

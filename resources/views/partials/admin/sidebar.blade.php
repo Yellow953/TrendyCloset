@@ -43,18 +43,18 @@
 @endphp
 
 <aside data-admin-nav
-       class="ad-sidebar fixed inset-y-0 left-0 z-40 flex flex-col bg-black lg:translate-x-0">
+       class="bo-sidebar fixed inset-y-0 left-0 z-40 flex flex-col bg-black lg:translate-x-0">
 
     {{-- Product name — plain, unbranded --}}
-    <div class="ad-sidebar-head flex items-center justify-between px-6 py-[22px]">
+    <div class="bo-sidebar-head flex items-center justify-between px-6 py-[22px]">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
             <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[15px] font-bold text-black">T</span>
-            <span class="ad-hide-collapsed text-[15px] font-semibold tracking-[-0.01em] whitespace-nowrap text-white">Trendy Closet</span>
+            <span class="bo-hide-collapsed text-[15px] font-semibold tracking-[-0.01em] whitespace-nowrap text-white">Trendy Closet</span>
         </a>
 
         {{-- Collapse the rail (desktop) / close the panel (mobile) --}}
         <button type="button" data-admin-nav-collapse
-                class="ad-hide-collapsed -mr-1 hidden h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/10 hover:text-white lg:flex"
+                class="bo-hide-collapsed -mr-1 hidden h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/10 hover:text-white lg:flex"
                 aria-label="Collapse navigation">
             <x-admin.icon name="sidebar" />
         </button>
@@ -67,7 +67,7 @@
 
     {{-- Expand handle — the only control visible while collapsed --}}
     <button type="button" data-admin-nav-expand
-            class="ad-show-collapsed mx-auto mb-1 hidden h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+            class="bo-show-collapsed mx-auto mb-1 hidden h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Expand navigation">
         <x-admin.icon name="sidebar" />
     </button>
@@ -77,27 +77,27 @@
             @continue(($section['admin'] ?? false) && ! auth()->user()->isAdmin())
 
             @if($section['label'])
-                <div class="ad-hide-collapsed mt-6 mb-2 px-3 text-[10.5px] font-semibold tracking-[0.08em] whitespace-nowrap text-slate-500 uppercase">
+                <div class="bo-hide-collapsed mt-6 mb-2 px-3 text-[10.5px] font-semibold tracking-[0.08em] whitespace-nowrap text-slate-500 uppercase">
                     {{ $section['label'] }}
                 </div>
             @else
-                <div class="ad-hide-collapsed mt-1"></div>
+                <div class="bo-hide-collapsed mt-1"></div>
             @endif
 
             <div class="flex flex-col gap-1">
                 @foreach($section['links'] as $link)
                     <a href="{{ route($link['route']) }}" title="{{ $link['label'] }}"
-                       class="ad-nav-link {{ $active === $link['key'] ? 'is-active' : '' }}">
-                        <span class="ad-nav-icon">
+                       class="bo-nav-link {{ $active === $link['key'] ? 'is-active' : '' }}">
+                        <span class="bo-nav-icon">
                             <x-admin.icon :name="$link['icon']" />
                             {{-- Collapsed rail keeps a dot so unread work is still visible --}}
                             @if(($link['count'] ?? 0) > 0)
-                                <span class="ad-show-collapsed absolute -top-0.5 -right-0.5 hidden h-2 w-2 rounded-full bg-white ring-2 ring-black"></span>
+                                <span class="bo-show-collapsed absolute -top-0.5 -right-0.5 hidden h-2 w-2 rounded-full bg-white ring-2 ring-black"></span>
                             @endif
                         </span>
-                        <span class="ad-hide-collapsed flex-1 whitespace-nowrap">{{ $link['label'] }}</span>
+                        <span class="bo-hide-collapsed flex-1 whitespace-nowrap">{{ $link['label'] }}</span>
                         @if(($link['count'] ?? 0) > 0)
-                            <span class="ad-hide-collapsed ad-figure rounded-md {{ $active === $link['key'] ? 'bg-white/20' : 'bg-slate-800' }} px-1.5 py-0.5 text-[10.5px] font-semibold text-white">{{ $link['count'] }}</span>
+                            <span class="bo-hide-collapsed bo-figure rounded-md {{ $active === $link['key'] ? 'bg-white/20' : 'bg-slate-800' }} px-1.5 py-0.5 text-[10.5px] font-semibold text-white">{{ $link['count'] }}</span>
                         @endif
                     </a>
                 @endforeach

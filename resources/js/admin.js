@@ -26,9 +26,9 @@ function initAdminNav() {
     // Desktop collapse: an icon-only rail, remembered across visits. The saved
     // state is already applied in <head> before paint; this only toggles it.
     const setCollapsed = (collapsed) => {
-        document.documentElement.classList.toggle('ad-collapsed', collapsed);
+        document.documentElement.classList.toggle('bo-collapsed', collapsed);
         try {
-            localStorage.setItem('ad-collapsed', collapsed ? '1' : '0');
+            localStorage.setItem('bo-collapsed', collapsed ? '1' : '0');
         } catch (e) {
             /* private mode — the rail just won't be remembered */
         }

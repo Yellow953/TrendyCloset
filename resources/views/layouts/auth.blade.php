@@ -16,7 +16,7 @@
          same `.ad-*` primitives and opens straight into it. --}}
     @vite(['resources/css/admin.css', 'resources/js/admin.js'])
 </head>
-<body class="ad-root min-h-screen bg-slate-100 text-slate-800 antialiased">
+<body class="bo-root min-h-screen bg-slate-100 text-slate-800 antialiased">
 <div class="flex min-h-screen">
 
     {{-- Brand plate — pure black, matching the back-office rail. Decorative, so
@@ -56,12 +56,12 @@
             </a>
 
             <div>
-                <div class="ad-eyebrow">Back office</div>
+                <div class="bo-eyebrow">Back office</div>
                 <h1 class="mt-2.5 text-[28px] leading-tight font-bold tracking-[-0.02em] text-slate-900">@yield('heading')</h1>
                 <p class="mt-2.5 max-w-[40ch] text-[13.5px] leading-relaxed font-normal text-slate-500">@yield('subheading')</p>
 
                 @if (session('status'))
-                    <div class="ad-card mt-6 flex items-start gap-3 border-l-2 border-l-emerald-500 px-4 py-3">
+                    <div class="bo-card mt-6 flex items-start gap-3 border-l-2 border-l-emerald-500 px-4 py-3">
                         <span class="mt-0.5 text-[13px] text-emerald-600">✓</span>
                         <p class="text-[13px] leading-relaxed font-normal text-slate-600">{{ session('status') }}</p>
                     </div>

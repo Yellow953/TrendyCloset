@@ -12,10 +12,10 @@
 
 @section('actions')
     <x-admin.status :status="$order->status" />
-    <button type="button" data-modal-open="status" class="ad-btn-primary">Change status</button>
-    <a href="https://wa.me/{{ ltrim(\App\Models\Customer::normalizePhone($order->ship_phone), '+') }}?text={{ rawurlencode('Hi '.$order->ship_name.', about your Trendy Closet order '.$order->order_number.'…') }}" target="_blank" rel="noopener" class="ad-btn">WhatsApp customer</a>
+    <button type="button" data-modal-open="status" class="bo-btn-primary">Change status</button>
+    <a href="https://wa.me/{{ ltrim(\App\Models\Customer::normalizePhone($order->ship_phone), '+') }}?text={{ rawurlencode('Hi '.$order->ship_name.', about your Trendy Closet order '.$order->order_number.'…') }}" target="_blank" rel="noopener" class="bo-btn">WhatsApp customer</a>
     @if($order->email)
-        <a href="mailto:{{ $order->email }}?subject={{ rawurlencode('Your Trendy Closet order '.$order->order_number) }}" class="ad-btn">Email customer</a>
+        <a href="mailto:{{ $order->email }}?subject={{ rawurlencode('Your Trendy Closet order '.$order->order_number) }}" class="bo-btn">Email customer</a>
     @endif
 @endsection
 
@@ -24,19 +24,19 @@
 
         {{-- Lines ---------------------------------------------------------- --}}
         <div class="flex flex-col gap-5">
-            <div class="ad-card">
-                <div class="ad-card-head">
+            <div class="bo-card">
+                <div class="bo-card-head">
                     <div>
-                        <div class="ad-card-title">{{ $order->items->count() }} {{ Str::plural('line', $order->items->count()) }}</div>
+                        <div class="bo-card-title">{{ $order->items->count() }} {{ Str::plural('line', $order->items->count()) }}</div>
                         <p class="mt-0.5 text-[12px] font-normal text-slate-400">
                             Every line is a snapshot of the piece as it was bought — editing the catalogue never rewrites it.
                         </p>
                     </div>
-                    <span class="ad-badge ad-badge-neutral"><span class="ad-figure">{{ $order->quantity }}</span> garments</span>
+                    <span class="bo-badge bo-badge-neutral"><span class="bo-figure">{{ $order->quantity }}</span> garments</span>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="ad-table">
+                    <table class="bo-table">
                         <thead>
                             <tr><th>Piece</th><th>SKU</th><th class="text-right">Unit</th><th class="text-right">Qty</th><th class="text-right">Total</th></tr>
                         </thead>
@@ -56,10 +56,10 @@
                                             {{ collect([$item->variant_size ? 'Size '.$item->variant_size : null, $item->variant_color])->filter()->implode(' · ') ?: 'One size' }}
                                         </div>
                                     </td>
-                                    <td class="ad-figure text-[12px] font-normal text-slate-400">{{ $item->sku ?: '—' }}</td>
-                                    <td class="ad-figure text-right font-normal text-slate-600">{{ \App\Models\Product::money($item->unit_price) }}</td>
-                                    <td class="ad-figure text-right">{{ $item->quantity }}</td>
-                                    <td class="ad-figure text-right font-medium">{{ \App\Models\Product::money($item->line_total) }}</td>
+                                    <td class="bo-figure text-[12px] font-normal text-slate-400">{{ $item->sku ?: '—' }}</td>
+                                    <td class="bo-figure text-right font-normal text-slate-600">{{ \App\Models\Product::money($item->unit_price) }}</td>
+                                    <td class="bo-figure text-right">{{ $item->quantity }}</td>
+                                    <td class="bo-figure text-right font-medium">{{ \App\Models\Product::money($item->line_total) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -69,37 +69,37 @@
                 <div class="border-t border-slate-100 px-5 py-4">
                     <div class="ml-auto w-full max-w-[300px]">
                         <div class="flex justify-between py-1 text-[13px] font-normal text-slate-600">
-                            <span>Subtotal</span><span class="ad-figure">{{ \App\Models\Product::money($order->subtotal) }}</span>
+                            <span>Subtotal</span><span class="bo-figure">{{ \App\Models\Product::money($order->subtotal) }}</span>
                         </div>
                         @if((float) $order->discount_total > 0)
                             <div class="flex justify-between py-1 text-[13px] font-normal text-slate-600">
-                                <span>Discount @if($order->coupon)<span class="ad-figure text-slate-900">{{ $order->coupon->code }}</span>@endif</span>
-                                <span class="ad-figure text-slate-900">−{{ \App\Models\Product::money($order->discount_total) }}</span>
+                                <span>Discount @if($order->coupon)<span class="bo-figure text-slate-900">{{ $order->coupon->code }}</span>@endif</span>
+                                <span class="bo-figure text-slate-900">−{{ \App\Models\Product::money($order->discount_total) }}</span>
                             </div>
                         @endif
                         <div class="flex justify-between py-1 text-[13px] font-normal text-slate-600">
                             <span>Shipping</span>
-                            <span class="ad-figure {{ (float) $order->shipping_total > 0 ? '' : 'text-emerald-600' }}">
+                            <span class="bo-figure {{ (float) $order->shipping_total > 0 ? '' : 'text-emerald-600' }}">
                                 {{ (float) $order->shipping_total > 0 ? \App\Models\Product::money($order->shipping_total) : 'Free' }}
                             </span>
                         </div>
                         <div class="mt-2 flex justify-between border-t border-slate-100 pt-2.5 text-[16px] font-semibold">
-                            <span>Total</span><span class="ad-figure">{{ \App\Models\Product::money($order->grand_total) }}</span>
+                            <span>Total</span><span class="bo-figure">{{ \App\Models\Product::money($order->grand_total) }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Internal notes --}}
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Notes</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Notes</div></div>
                 <form method="POST" action="{{ route('admin.orders.notes', $order) }}" class="px-5 py-5">
                     @csrf @method('PATCH')
-                    <textarea name="notes" rows="4" class="ad-input resize-y"
+                    <textarea name="notes" rows="4" class="bo-input resize-y"
                               placeholder="Anything worth remembering about this order — what the customer asked for, what you promised…">{{ old('notes', $order->notes) }}</textarea>
-                    <p class="ad-hint">Whatever the shopper wrote at checkout starts here. Back-office only — the customer never sees this.</p>
+                    <p class="bo-hint">Whatever the shopper wrote at checkout starts here. Back-office only — the customer never sees this.</p>
                     <div class="mt-3 flex justify-end">
-                        <button type="submit" class="ad-btn-primary">Save notes</button>
+                        <button type="submit" class="bo-btn-primary">Save notes</button>
                     </div>
                 </form>
             </div>
@@ -107,8 +107,8 @@
 
         {{-- Sidebar -------------------------------------------------------- --}}
         <div class="flex flex-col gap-5">
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Customer</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Customer</div></div>
                 <div class="px-5 py-5">
                     @if($order->customer)
                         <a href="{{ route('admin.customers.show', $order->customer) }}" class="flex items-center gap-3 group">
@@ -123,12 +123,12 @@
 
                         <div class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
                             <div>
-                                <div class="ad-eyebrow">Orders</div>
-                                <div class="ad-figure mt-1 text-[17px] font-medium">{{ $order->customer->orders()->count() }}</div>
+                                <div class="bo-eyebrow">Orders</div>
+                                <div class="bo-figure mt-1 text-[17px] font-medium">{{ $order->customer->orders()->count() }}</div>
                             </div>
                             <div>
-                                <div class="ad-eyebrow">Lifetime</div>
-                                <div class="ad-figure mt-1 text-[17px] font-medium">{{ \App\Models\Product::money($order->customer->lifetimeValue()) }}</div>
+                                <div class="bo-eyebrow">Lifetime</div>
+                                <div class="bo-figure mt-1 text-[17px] font-medium">{{ \App\Models\Product::money($order->customer->lifetimeValue()) }}</div>
                             </div>
                         </div>
                     @else
@@ -140,8 +140,8 @@
                 </div>
             </div>
 
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Ship to</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Ship to</div></div>
                 <div class="px-5 py-5">
                     <address class="text-[13.5px] leading-relaxed font-normal text-slate-600 not-italic">
                         @foreach($order->addressLines() as $line)
@@ -164,8 +164,8 @@
                 </div>
             </div>
 
-            <div class="ad-card">
-                <div class="ad-card-head"><div class="ad-card-title">Timeline</div></div>
+            <div class="bo-card">
+                <div class="bo-card-head"><div class="bo-card-title">Timeline</div></div>
                 <div class="flex flex-col gap-3.5 px-5 py-5 text-[13px]">
                     <div class="flex justify-between gap-3">
                         <span class="font-normal text-slate-400">Placed</span>
@@ -200,15 +200,15 @@
                     @endforeach
                 </div>
 
-                <p class="ad-hint">
+                <p class="bo-hint">
                     Moving an order to Cancelled or Refunded puts its garments back on the rail;
                     moving it back off takes them again.
                 </p>
             </div>
 
             <div class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50 px-6 py-4">
-                <button type="button" data-modal-close class="ad-btn">Cancel</button>
-                <button type="submit" class="ad-btn-primary">Update status</button>
+                <button type="button" data-modal-close class="bo-btn">Cancel</button>
+                <button type="submit" class="bo-btn-primary">Update status</button>
             </div>
         </form>
     </x-admin.modal>

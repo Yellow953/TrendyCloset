@@ -14,11 +14,11 @@
 
 @section('actions')
     @if($editing)
-        <a href="{{ route('product', $product) }}" target="_blank" rel="noopener" class="ad-btn">View on shop ↗</a>
-        <button type="button" data-modal-open="delete-product" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
+        <a href="{{ route('product', $product) }}" target="_blank" rel="noopener" class="bo-btn">View on shop ↗</a>
+        <button type="button" data-modal-open="delete-product" class="bo-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
     @endif
-    <a href="{{ route('admin.products.index') }}" class="ad-btn">Cancel</a>
-    <button type="submit" form="product-form" class="ad-btn-primary">{{ $editing ? 'Save changes' : 'Create product' }}</button>
+    <a href="{{ route('admin.products.index') }}" class="bo-btn">Cancel</a>
+    <button type="submit" form="product-form" class="bo-btn-primary">{{ $editing ? 'Save changes' : 'Create product' }}</button>
 @endsection
 
 @section('content')
@@ -32,8 +32,8 @@
             {{-- ------------------------------------------------ main column --}}
             <div class="flex flex-col gap-5">
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">The piece</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">The piece</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="name" label="Name" :value="$product->name" required
                                        placeholder="Linen Wrap Dress" />
@@ -55,17 +55,17 @@
                     'price_override' => $v->price_override, 'stock' => $v->stock, 'is_active' => $v->is_active,
                 ])->all() : []); @endphp
 
-                <div class="ad-card" data-repeater data-repeater-next="{{ count($variants) + 50 }}">
-                    <div class="ad-card-head">
+                <div class="bo-card" data-repeater data-repeater-next="{{ count($variants) + 50 }}">
+                    <div class="bo-card-head">
                         <div>
-                            <div class="ad-card-title">Sizes &amp; colours</div>
+                            <div class="bo-card-title">Sizes &amp; colours</div>
                             <p class="mt-0.5 text-[12px] font-normal text-slate-400">Stock lives here, not on the product. A piece with no rows cannot be added to a bag.</p>
                         </div>
-                        <button type="button" data-repeater-add class="ad-btn ad-btn-sm">＋ Add row</button>
+                        <button type="button" data-repeater-add class="bo-btn bo-btn-sm">＋ Add row</button>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="ad-table">
+                        <table class="bo-table">
                             <thead>
                                 <tr>
                                     <th class="w-[110px]">Size</th>
@@ -82,7 +82,7 @@
                                     <tr data-repeater-row>
                                         <td class="px-5 py-2.5">
                                             <input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant['id'] ?? '' }}">
-                                            <select name="variants[{{ $i }}][size]" class="ad-input-sm">
+                                            <select name="variants[{{ $i }}][size]" class="bo-input-sm">
                                                 <option value=""></option>
                                                 @foreach(\App\Models\ProductVariant::SIZES as $size)
                                                     <option value="{{ $size }}" @selected(($variant['size'] ?? '') === $size)>{{ $size }}</option>
@@ -90,22 +90,22 @@
                                             </select>
                                         </td>
                                         <td class="px-5 py-2.5">
-                                            <select name="variants[{{ $i }}][color]" class="ad-input-sm">
+                                            <select name="variants[{{ $i }}][color]" class="bo-input-sm">
                                                 <option value=""></option>
                                                 @foreach(\App\Support\Swatch::names() as $color)
                                                     <option value="{{ $color }}" @selected(($variant['color'] ?? '') === $color)>{{ $color }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][sku]" value="{{ $variant['sku'] ?? '' }}" placeholder="TC-001-M" class="ad-input-sm"></td>
-                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][price_override]" value="{{ $variant['price_override'] ?? '' }}" type="number" step="0.01" min="0" placeholder="—" class="ad-input-sm"></td>
-                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][stock]" value="{{ $variant['stock'] ?? 0 }}" type="number" min="0" class="ad-input-sm"></td>
+                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][sku]" value="{{ $variant['sku'] ?? '' }}" placeholder="TC-001-M" class="bo-input-sm"></td>
+                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][price_override]" value="{{ $variant['price_override'] ?? '' }}" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
+                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][stock]" value="{{ $variant['stock'] ?? 0 }}" type="number" min="0" class="bo-input-sm"></td>
                                         <td class="px-5 py-2.5">
                                             <input type="hidden" name="variants[{{ $i }}][is_active]" value="0">
                                             <input type="checkbox" name="variants[{{ $i }}][is_active]" value="1" @checked($variant['is_active'] ?? true) class="h-4 w-4 accent-slate-900">
                                         </td>
                                         <td class="px-5 py-2.5 text-right">
-                                            <button type="button" data-repeater-remove class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600" title="Remove row">✕</button>
+                                            <button type="button" data-repeater-remove class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600" title="Remove row">✕</button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -124,7 +124,7 @@
                         <tr data-repeater-row>
                             <td class="px-5 py-2.5">
                                 <input type="hidden" name="variants[__INDEX__][id]" value="">
-                                <select name="variants[__INDEX__][size]" class="ad-input-sm">
+                                <select name="variants[__INDEX__][size]" class="bo-input-sm">
                                     <option value=""></option>
                                     @foreach(\App\Models\ProductVariant::SIZES as $size)
                                         <option value="{{ $size }}">{{ $size }}</option>
@@ -132,22 +132,22 @@
                                 </select>
                             </td>
                             <td class="px-5 py-2.5">
-                                <select name="variants[__INDEX__][color]" class="ad-input-sm">
+                                <select name="variants[__INDEX__][color]" class="bo-input-sm">
                                     <option value=""></option>
                                     @foreach(\App\Support\Swatch::names() as $color)
                                         <option value="{{ $color }}">{{ $color }}</option>
                                     @endforeach
                                 </select>
                             </td>
-                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][sku]" placeholder="TC-001-M" class="ad-input-sm"></td>
-                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][price_override]" type="number" step="0.01" min="0" placeholder="—" class="ad-input-sm"></td>
-                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][stock]" type="number" min="0" value="0" class="ad-input-sm"></td>
+                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][sku]" placeholder="TC-001-M" class="bo-input-sm"></td>
+                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][price_override]" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
+                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][stock]" type="number" min="0" value="0" class="bo-input-sm"></td>
                             <td class="px-5 py-2.5">
                                 <input type="hidden" name="variants[__INDEX__][is_active]" value="0">
                                 <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked class="h-4 w-4 accent-slate-900">
                             </td>
                             <td class="px-5 py-2.5 text-right">
-                                <button type="button" data-repeater-remove class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600" title="Remove row">✕</button>
+                                <button type="button" data-repeater-remove class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600" title="Remove row">✕</button>
                             </td>
                         </tr>
                     </template>
@@ -157,8 +157,8 @@
             {{-- ----------------------------------------------------- sidebar --}}
             <div class="flex flex-col gap-5">
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Visibility</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Visibility</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.toggle name="is_active" label="Live on the shop" :checked="$product->is_active ?? true"
                                         hint="Draft pieces are hidden from every listing, search result and sitemap." />
@@ -167,8 +167,8 @@
                     </div>
                 </div>
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Pricing</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Pricing</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="price" label="Price" type="number" step="0.01" prefix="$"
                                        :value="$product->price" required placeholder="0.00" />
@@ -183,8 +183,8 @@
                     </div>
                 </div>
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Organise</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Organise</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="category_id" label="Category" :options="$categories" required
                                        :value="$product->category_id"
@@ -207,14 +207,14 @@
          nest) — the picker input instead points back at #product-form via its
          `form` attribute, so a chosen file still submits with the rest of the
          piece on Save. Everything sits in one horizontally-scrolling row. --}}
-    <div class="ad-card mt-5">
-        <div class="ad-card-head">
+    <div class="bo-card mt-5">
+        <div class="bo-card-head">
             <div>
-                <div class="ad-card-title">Images</div>
+                <div class="bo-card-title">Images</div>
                 <p class="mt-0.5 text-[12px] font-normal text-slate-400">The primary image is what every product card and search result leads with.</p>
             </div>
             @if($editing)
-                <span class="ad-badge ad-badge-neutral">{{ $product->images->count() }} {{ Str::plural('image', $product->images->count()) }}</span>
+                <span class="bo-badge bo-badge-neutral">{{ $product->images->count() }} {{ Str::plural('image', $product->images->count()) }}</span>
             @endif
         </div>
 
@@ -262,9 +262,9 @@
         <div id="photo-preview" class="{{ ($editing && $product->images->isNotEmpty()) ? 'border-t border-slate-100' : '' }} flex flex-wrap gap-2 px-5 {{ ($editing && $product->images->isNotEmpty()) ? 'py-4' : 'pb-5' }}"></div>
 
         <div class="px-5 pb-5">
-            @error('photos.*')<p class="ad-error">{{ $message }}</p>@enderror
+            @error('photos.*')<p class="bo-error">{{ $message }}</p>@enderror
 
-            <p class="ad-hint">
+            <p class="bo-hint">
                 @if($editing)
                     Newly chosen files are added to the row above when you save. The first image on a product with none becomes its primary one.
                 @else

@@ -14,11 +14,11 @@
      mis-click is a real risk. Opened by [data-modal-open="<id>"]. --}}
 @php
     $ring = $tone === 'danger' ? 'bg-rose-50 text-rose-500 ring-rose-100' : 'bg-amber-50 text-amber-500 ring-amber-100';
-    $cta = $tone === 'danger' ? 'ad-btn-danger' : 'ad-btn-primary';
+    $cta = $tone === 'danger' ? 'bo-btn-danger' : 'bo-btn-primary';
 @endphp
 
 <x-admin.modal :id="$id" width="max-w-[400px]">
-    <form method="POST" action="{{ $action }}" class="ad-confirm px-6 pt-8 pb-6 text-center">
+    <form method="POST" action="{{ $action }}" class="bo-confirm px-6 pt-8 pb-6 text-center">
         @csrf
         @method($method)
 
@@ -32,7 +32,7 @@
         {{ $slot }}
 
         <div class="mt-6 flex justify-center gap-2.5">
-            <button type="button" data-modal-close class="ad-btn min-w-[110px]">Cancel</button>
+            <button type="button" data-modal-close class="bo-btn min-w-[110px]">Cancel</button>
             <button type="submit" class="{{ $cta }} min-w-[110px]">{{ $confirm }}</button>
         </div>
     </form>

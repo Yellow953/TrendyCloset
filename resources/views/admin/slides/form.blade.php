@@ -14,10 +14,10 @@
 
 @section('actions')
     @if($editing)
-        <button type="button" data-modal-open="delete-slide" class="ad-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
+        <button type="button" data-modal-open="delete-slide" class="bo-btn text-rose-600 hover:border-rose-600 hover:text-rose-600">Delete</button>
     @endif
-    <a href="{{ route('admin.slides.index') }}" class="ad-btn">Cancel</a>
-    <button type="submit" form="slide-form" class="ad-btn-primary">{{ $editing ? 'Save changes' : 'Create slide' }}</button>
+    <a href="{{ route('admin.slides.index') }}" class="bo-btn">Cancel</a>
+    <button type="submit" form="slide-form" class="bo-btn-primary">{{ $editing ? 'Save changes' : 'Create slide' }}</button>
 @endsection
 
 @section('content')
@@ -29,8 +29,8 @@
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
 
             <div class="flex flex-col gap-5">
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Copy</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Copy</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="eyebrow" label="Eyebrow" :value="$slide->eyebrow"
                                        placeholder="THE SALE IS LIVE"
@@ -51,8 +51,8 @@
                     </div>
                 </div>
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Button</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Button</div></div>
                     <div class="grid grid-cols-1 gap-4 px-5 py-5 sm:grid-cols-2">
                         <x-admin.field name="cta_label" label="Button text" :value="$slide->cta_label"
                                        placeholder="Shop Sale" />
@@ -65,8 +65,8 @@
             </div>
 
             <div class="flex flex-col gap-5">
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Placement</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Placement</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="position" label="Position" type="number" :value="$slide->position ?? 0" min="0"
                                        hint="Lower numbers play first." />
@@ -76,8 +76,8 @@
                     </div>
                 </div>
 
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Photograph</div></div>
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Photograph</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         @if($slide->image_url)
                             <div class="aspect-[7/6] overflow-hidden rounded-lg border border-slate-100 bg-slate-100">
@@ -93,7 +93,7 @@
                         </label>
 
                         <div id="slide-preview" class="flex flex-wrap gap-2"></div>
-                        @error('image')<p class="ad-error">{{ $message }}</p>@enderror
+                        @error('image')<p class="bo-error">{{ $message }}</p>@enderror
 
                         <x-admin.field name="image_credit" label="Photo credit" :value="$slide->image_credit"
                                        placeholder="Jane Doe / Unsplash" />

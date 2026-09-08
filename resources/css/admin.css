@@ -58,11 +58,11 @@
     }
 }
 
-.ad-root {
+.bo-root {
     font-family: var(--font-admin);
     -webkit-font-smoothing: antialiased;
 }
-.ad-root :is(h1, h2, h3) {
+.bo-root :is(h1, h2, h3) {
     font-family: var(--font-admin);
     letter-spacing: -0.01em;
 }
@@ -74,103 +74,103 @@
 
 @layer components {
     /* --- Surfaces ------------------------------------------------------- */
-    .ad-card {
+    .bo-card {
         @apply rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,.04)];
     }
-    .ad-card-head {
+    .bo-card-head {
         @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4;
     }
-    .ad-card-title {
+    .bo-card-title {
         @apply text-[14px] font-semibold tracking-[-0.01em] text-slate-800;
     }
-    .ad-eyebrow {
+    .bo-eyebrow {
         @apply text-[11px] font-semibold tracking-[0.06em] text-slate-400 uppercase;
     }
     /* Figures stay in Inter but tabular, so columns of numbers line up */
-    .ad-figure {
+    .bo-figure {
         font-variant-numeric: tabular-nums;
     }
 
     /* --- Navigation ----------------------------------------------------- */
-    .ad-nav-link {
+    .bo-nav-link {
         @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white;
     }
-    .ad-nav-link.is-active {
+    .bo-nav-link.is-active {
         @apply bg-white/[0.10] text-white;
     }
-    .ad-nav-icon {
+    .bo-nav-icon {
         @apply relative flex h-[18px] w-[18px] shrink-0 items-center justify-center;
     }
-    .ad-nav-icon svg {
+    .bo-nav-icon svg {
         @apply h-[18px] w-[18px];
     }
 
     /* --- Controls ------------------------------------------------------- */
-    .ad-label {
+    .bo-label {
         @apply mb-1.5 block text-[12.5px] font-medium text-slate-600;
     }
-    .ad-input {
+    .bo-input {
         @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[13.5px] font-normal text-slate-800 placeholder:text-slate-400 outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-200/70;
     }
-    .ad-input-sm {
+    .bo-input-sm {
         @apply w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[13px] font-normal text-slate-800 placeholder:text-slate-400 outline-none transition-colors focus:border-slate-400;
     }
-    .ad-hint {
+    .bo-hint {
         @apply mt-1.5 text-[12px] leading-relaxed font-normal text-slate-400;
     }
-    .ad-error {
+    .bo-error {
         @apply mt-1.5 text-[12px] font-medium text-rose-600;
     }
 
     /* --- Buttons -------------------------------------------------------- */
-    .ad-btn {
+    .bo-btn {
         @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-45;
     }
-    .ad-btn-primary {
+    .bo-btn-primary {
         @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-45;
     }
-    .ad-btn-danger {
+    .bo-btn-danger {
         @apply inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-600 hover:text-white;
     }
-    .ad-btn-sm {
+    .bo-btn-sm {
         @apply px-2.5 py-1.5 text-[12px];
     }
 
     /* --- Tables --------------------------------------------------------- */
-    .ad-table {
+    .bo-table {
         @apply w-full border-collapse text-left text-[13.5px];
     }
-    .ad-table thead th {
+    .bo-table thead th {
         @apply border-b border-slate-100 bg-slate-50/70 px-5 py-3 text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap text-slate-400 uppercase;
     }
-    .ad-table tbody td {
+    .bo-table tbody td {
         @apply border-b border-slate-100 px-5 py-3.5 align-middle font-normal text-slate-700;
     }
-    .ad-table tbody tr:last-child td {
+    .bo-table tbody tr:last-child td {
         @apply border-b-0;
     }
-    .ad-table tbody tr {
+    .bo-table tbody tr {
         @apply transition-colors hover:bg-slate-50/70;
     }
 
     /* --- Pills ---------------------------------------------------------- */
-    .ad-badge {
+    .bo-badge {
         @apply inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap;
     }
-    .ad-badge-neutral {
+    .bo-badge-neutral {
         @apply border-slate-200 bg-slate-50 text-slate-500;
     }
-    .ad-badge-good {
+    .bo-badge-good {
         @apply border-emerald-200 bg-emerald-50 text-emerald-600;
     }
-    .ad-badge-warn {
+    .bo-badge-warn {
         @apply border-amber-200 bg-amber-50 text-amber-600;
     }
-    .ad-badge-bad {
+    .bo-badge-bad {
         @apply border-rose-200 bg-rose-50 text-rose-600;
     }
     /* A filter currently in force, on the no-results state. Clicking drops it. */
-    .ad-chip {
+    .bo-chip {
         @apply inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1.5 pr-2.5 pl-3 text-[12.5px] font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900;
     }
 }
@@ -178,44 +178,44 @@
 /* ---------------------------------------------------------------------------
    The sidebar is a fixed rail on desktop and a slide-in panel below `lg`. On
    desktop it also collapses to an icon-only rail: the width and the content's
-   left padding both key off `.ad-collapsed` on <html>, and admin.js persists
-   the choice. `.ad-hide-collapsed` / `.ad-show-collapsed` swap what is visible.
+   left padding both key off `.bo-collapsed` on <html>, and admin.js persists
+   the choice. `.bo-hide-collapsed` / `.bo-show-collapsed` swap what is visible.
 --------------------------------------------------------------------------- */
-.ad-sidebar {
+.bo-sidebar {
     width: 260px;
     transition:
         transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
         width 0.2s ease;
 }
 @media (min-width: 1024px) {
-    .ad-main {
+    .bo-main {
         padding-left: 260px;
         transition: padding-left 0.2s ease;
     }
-    .ad-collapsed .ad-sidebar {
+    .bo-collapsed .bo-sidebar {
         width: 74px;
     }
-    .ad-collapsed .ad-main {
+    .bo-collapsed .bo-main {
         padding-left: 74px;
     }
     /* Collapsed rail: hide labels, centre every icon, reveal the expand handle */
-    .ad-collapsed .ad-hide-collapsed {
+    .bo-collapsed .bo-hide-collapsed {
         display: none;
     }
-    .ad-collapsed .ad-show-collapsed {
+    .bo-collapsed .bo-show-collapsed {
         display: flex;
     }
-    .ad-collapsed .ad-sidebar-head {
+    .bo-collapsed .bo-sidebar-head {
         justify-content: center;
         padding-inline: 0;
     }
-    .ad-collapsed .ad-nav-link {
+    .bo-collapsed .bo-nav-link {
         justify-content: center;
         padding-inline: 0;
     }
 }
 /* The dot marker and expand handle only exist in the collapsed state */
-.ad-show-collapsed {
+.bo-show-collapsed {
     display: none;
 }
 
@@ -246,17 +246,17 @@
 
 /* The account menu in the top bar. A <details>, so it opens without JS; the
    panel lands with the same small rise the dialogs use. */
-.ad-menu > summary {
+.bo-menu > summary {
     list-style: none;
     cursor: pointer;
 }
-.ad-menu > summary::-webkit-details-marker {
+.bo-menu > summary::-webkit-details-marker {
     display: none;
 }
-.ad-menu[open] > summary + * {
-    animation: ad-menu-rise 0.16s ease both;
+.bo-menu[open] > summary + * {
+    animation: bo-menu-rise 0.16s ease both;
 }
-@keyframes ad-menu-rise {
+@keyframes bo-menu-rise {
     from {
         opacity: 0;
         transform: translateY(-4px);
@@ -266,18 +266,18 @@
 /* Modal entrance — a SweetAlert-style pop for the card, a fade for the
    backdrop. They replay every time the dialog goes from display:none to shown,
    so opening always animates. */
-.ad-modal-backdrop {
-    animation: ad-fade 0.2s ease both;
+.bo-modal-backdrop {
+    animation: bo-fade 0.2s ease both;
 }
-.ad-modal-card {
-    animation: ad-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+.bo-modal-card {
+    animation: bo-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-@keyframes ad-fade {
+@keyframes bo-fade {
     from {
         opacity: 0;
     }
 }
-@keyframes ad-pop {
+@keyframes bo-pop {
     from {
         opacity: 0;
         transform: scale(0.9) translateY(8px);
@@ -285,10 +285,10 @@
 }
 
 /* The warning glyph on a delete prompt gives a small nudge as it lands. */
-.ad-confirm > span:first-child {
-    animation: ad-pulse 0.4s ease-out 0.12s both;
+.bo-confirm > span:first-child {
+    animation: bo-pulse 0.4s ease-out 0.12s both;
 }
-@keyframes ad-pulse {
+@keyframes bo-pulse {
     0% {
         transform: scale(0.6);
         opacity: 0;
@@ -303,22 +303,22 @@
 }
 
 /* Bar charts — bars grow from the baseline on load. */
-.ad-bar {
+.bo-bar {
     transform-origin: bottom;
-    animation: ad-bar-rise 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+    animation: bo-bar-rise 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
 }
-@keyframes ad-bar-rise {
+@keyframes bo-bar-rise {
     from {
         transform: scaleY(0);
     }
 }
 
 /* A horizontal bar fills from its left edge — the same arrival, turned. */
-.ad-bar-row {
+.bo-bar-row {
     transform-origin: left;
-    animation: ad-bar-grow 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+    animation: bo-bar-grow 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
 }
-@keyframes ad-bar-grow {
+@keyframes bo-bar-grow {
     from {
         transform: scaleX(0);
     }
@@ -329,12 +329,12 @@
     [data-admin-scrim] {
         transition: none;
     }
-    .ad-bar,
-    .ad-bar-row,
-    .ad-modal-card,
-    .ad-modal-backdrop,
-    .ad-menu[open] > summary + *,
-    .ad-confirm > span:first-child {
+    .bo-bar,
+    .bo-bar-row,
+    .bo-modal-card,
+    .bo-modal-backdrop,
+    .bo-menu[open] > summary + *,
+    .bo-confirm > span:first-child {
         animation: none;
     }
 }

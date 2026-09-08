@@ -54,7 +54,7 @@
             <div class="flex items-baseline gap-2">
                 <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background: {{ $line['color'] }}"></span>
                 <span class="text-[12.5px] font-normal text-slate-500">{{ $line['label'] }}</span>
-                <span class="ad-figure text-[15px] font-semibold text-slate-900">{{ number_format($line['total']) }}</span>
+                <span class="bo-figure text-[15px] font-semibold text-slate-900">{{ number_format($line['total']) }}</span>
             </div>
         @endforeach
 
@@ -70,7 +70,7 @@
         <div class="flex shrink-0 flex-col justify-between text-right text-[10px] font-normal text-slate-400"
              style="height: {{ $height }}px">
             @foreach($ticks as $tick)
-                <span class="ad-figure leading-none">{{ number_format($tick) }}</span>
+                <span class="bo-figure leading-none">{{ number_format($tick) }}</span>
             @endforeach
         </div>
 
@@ -115,7 +115,7 @@
                                 <div class="flex items-center gap-2">
                                     <span class="inline-block h-2 w-2 shrink-0 rounded-full" style="background: {{ $line['color'] }}"></span>
                                     <span class="text-slate-300">{{ $line['label'] }}</span>
-                                    <span class="ad-figure ml-auto font-semibold">{{ number_format($line['values'][$i] ?? 0) }}</span>
+                                    <span class="bo-figure ml-auto font-semibold">{{ number_format($line['values'][$i] ?? 0) }}</span>
                                 </div>
                             @endforeach
                         </div>

@@ -13,23 +13,23 @@
         ]);
     @endphp
 
-    <div class="ad-card">
+    <div class="bo-card">
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
-                <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, email, subject or body…" class="ad-input">
+                <label for="q" class="bo-label">Search</label>
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, email, subject or body…" class="bo-input">
             </div>
             <div class="w-[150px]">
-                <label for="filter" class="ad-label">Show</label>
-                <select id="filter" name="filter" class="ad-input">
+                <label for="filter" class="bo-label">Show</label>
+                <select id="filter" name="filter" class="bo-input">
                     @foreach($showOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('filter') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="ad-btn-primary">Filter</button>
+            <button type="submit" class="bo-btn-primary">Filter</button>
             @if(request()->hasAny(['q', 'filter']))
-                <a href="{{ route('admin.messages.index') }}" class="ad-btn">Clear</a>
+                <a href="{{ route('admin.messages.index') }}" class="bo-btn">Clear</a>
             @endif
         </form>
 
@@ -37,14 +37,14 @@
             {{-- An empty unread list is the goal, not a failed search. --}}
             <x-admin.empty icon="check" title="Inbox clear"
                            body="Nothing is waiting on a reply. Everything sent through the contact form has been read.">
-                <a href="{{ route('admin.messages.index') }}" class="ad-btn">Show all messages</a>
+                <a href="{{ route('admin.messages.index') }}" class="bo-btn">Show all messages</a>
             </x-admin.empty>
         @elseif($messages->isEmpty() && $filters)
             <x-admin.no-results noun="messages" :filters="$filters" :reset="route('admin.messages.index')" />
         @elseif($messages->isEmpty())
             <x-admin.empty icon="messages" title="No messages yet"
                            body="Everything sent through the storefront contact form lands here, newest first — there is nothing to set up.">
-                <a href="{{ route('contact') }}" target="_blank" rel="noopener" class="ad-btn">View the contact page ↗</a>
+                <a href="{{ route('contact') }}" target="_blank" rel="noopener" class="bo-btn">View the contact page ↗</a>
             </x-admin.empty>
         @else
             <div class="flex flex-col divide-y divide-slate-100">

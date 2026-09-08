@@ -5,7 +5,7 @@
 @section('subheading', number_format($products->total()).' '.Str::plural('piece', $products->total()).' in the catalogue')
 
 @section('actions')
-    <a href="{{ route('admin.products.create') }}" class="ad-btn-primary">＋ New product</a>
+    <a href="{{ route('admin.products.create') }}" class="bo-btn-primary">＋ New product</a>
 @endsection
 
 @section('content')
@@ -20,18 +20,18 @@
         ]);
     @endphp
 
-    <div class="ad-card">
+    <div class="bo-card">
         {{-- Filters. A plain GET form, so every view of this list is a URL you
              can bookmark or send to someone. --}}
         <form method="GET" class="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
             <div class="min-w-[200px] flex-1">
-                <label for="q" class="ad-label">Search</label>
-                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, description, colour…" class="ad-input">
+                <label for="q" class="bo-label">Search</label>
+                <input id="q" name="q" value="{{ request('q') }}" placeholder="Name, description, colour…" class="bo-input">
             </div>
 
             <div class="w-[190px]">
-                <label for="category" class="ad-label">Category</label>
-                <select id="category" name="category" class="ad-input">
+                <label for="category" class="bo-label">Category</label>
+                <select id="category" name="category" class="bo-input">
                     <option value="">All categories</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" @selected(request('category') == $category->id)>{{ $category->name }}</option>
@@ -40,17 +40,17 @@
             </div>
 
             <div class="w-[150px]">
-                <label for="status" class="ad-label">Status</label>
-                <select id="status" name="status" class="ad-input">
+                <label for="status" class="bo-label">Status</label>
+                <select id="status" name="status" class="bo-input">
                     @foreach($statusOptions as $value => $label)
                         <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <button type="submit" class="ad-btn-primary">Filter</button>
+            <button type="submit" class="bo-btn-primary">Filter</button>
             @if(request()->hasAny(['q', 'category', 'status']))
-                <a href="{{ route('admin.products.index') }}" class="ad-btn">Clear</a>
+                <a href="{{ route('admin.products.index') }}" class="bo-btn">Clear</a>
             @endif
         </form>
 
@@ -59,14 +59,14 @@
         @elseif($products->isEmpty())
             <x-admin.empty icon="products" title="The catalogue is empty"
                            body="Nothing is filed yet, so the shop has no rails to browse. A piece needs a name, a price and at least one size before it can go live.">
-                <a href="{{ route('admin.products.create') }}" class="ad-btn-primary">＋ New product</a>
+                <a href="{{ route('admin.products.create') }}" class="bo-btn-primary">＋ New product</a>
                 @if($categories->isEmpty())
-                    <a href="{{ route('admin.categories.create') }}" class="ad-btn">Start with a category</a>
+                    <a href="{{ route('admin.categories.create') }}" class="bo-btn">Start with a category</a>
                 @endif
             </x-admin.empty>
         @else
             <div class="overflow-x-auto">
-                <table class="ad-table">
+                <table class="bo-table">
                     <thead>
                         <tr>
                             <th>Piece</th>
@@ -102,16 +102,16 @@
                                 <td class="font-normal whitespace-nowrap text-slate-600">{{ $product->category?->name ?? '—' }}</td>
 
                                 <td class="text-right whitespace-nowrap">
-                                    <span class="ad-figure font-medium">{{ $product->price_label }}</span>
+                                    <span class="bo-figure font-medium">{{ $product->price_label }}</span>
                                     @if($product->compare_label)
-                                        <span class="ad-figure mt-0.5 block text-[11.5px] font-normal text-slate-400 line-through">{{ $product->compare_label }}</span>
+                                        <span class="bo-figure mt-0.5 block text-[11.5px] font-normal text-slate-400 line-through">{{ $product->compare_label }}</span>
                                     @endif
                                 </td>
 
                                 <td class="text-right">
                                     @php $stock = (int) $product->stock_total; @endphp
-                                    <span class="ad-badge {{ $stock === 0 ? 'ad-badge-bad' : ($stock <= 5 ? 'ad-badge-warn' : 'ad-badge-neutral') }}">
-                                        <span class="ad-figure">{{ $stock }}</span>
+                                    <span class="bo-badge {{ $stock === 0 ? 'bo-badge-bad' : ($stock <= 5 ? 'bo-badge-warn' : 'bo-badge-neutral') }}">
+                                        <span class="bo-figure">{{ $stock }}</span>
                                     </span>
                                 </td>
 
@@ -120,7 +120,7 @@
                                         <form method="POST" action="{{ route('admin.products.toggle', $product) }}">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="field" value="is_active">
-                                            <button type="submit" class="ad-badge {{ $product->is_active ? 'ad-badge-good' : 'ad-badge-neutral' }} transition-opacity hover:opacity-70"
+                                            <button type="submit" class="bo-badge {{ $product->is_active ? 'bo-badge-good' : 'bo-badge-neutral' }} transition-opacity hover:opacity-70"
                                                     title="{{ $product->is_active ? 'Hide from the shop' : 'Publish to the shop' }}">
                                                 {{ $product->is_active ? 'Live' : 'Draft' }}
                                             </button>
@@ -129,7 +129,7 @@
                                         <form method="POST" action="{{ route('admin.products.toggle', $product) }}">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="field" value="is_featured">
-                                            <button type="submit" class="ad-badge {{ $product->is_featured ? 'border-slate-900/35 bg-slate-900/10 text-slate-900' : 'ad-badge-neutral opacity-55' }} transition-opacity hover:opacity-100"
+                                            <button type="submit" class="bo-badge {{ $product->is_featured ? 'border-slate-900/35 bg-slate-900/10 text-slate-900' : 'bo-badge-neutral opacity-55' }} transition-opacity hover:opacity-100"
                                                     title="{{ $product->is_featured ? 'Remove from the featured rail' : 'Feature on the home page' }}">★</button>
                                         </form>
                                     </div>
@@ -137,9 +137,9 @@
 
                                 <td>
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('product', $product) }}" target="_blank" rel="noopener" class="ad-btn ad-btn-sm" title="View on the shop">↗</a>
-                                        <a href="{{ route('admin.products.edit', $product) }}" class="ad-btn ad-btn-sm">Edit</a>
-                                        <button type="button" data-modal-open="delete-product-{{ $product->id }}" class="ad-btn ad-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
+                                        <a href="{{ route('product', $product) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-sm" title="View on the shop">↗</a>
+                                        <a href="{{ route('admin.products.edit', $product) }}" class="bo-btn bo-btn-sm">Edit</a>
+                                        <button type="button" data-modal-open="delete-product-{{ $product->id }}" class="bo-btn bo-btn-sm text-rose-600 hover:border-rose-600 hover:text-rose-600" title="Delete">✕</button>
                                     </div>
                                 </td>
                             </tr>

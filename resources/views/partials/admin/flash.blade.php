@@ -2,14 +2,14 @@
      to see every field that failed, not just the first — you are editing a
      form, not being nudged. --}}
 @if(session('status'))
-    <div class="ad-card mb-5 flex items-start gap-3 border-l-2 border-l-jade px-5 py-3.5">
+    <div class="bo-card mb-5 flex items-start gap-3 border-l-2 border-l-jade px-5 py-3.5">
         <span class="mt-0.5 text-[13px] text-emerald-600">✓</span>
         <p class="text-[13.5px] font-normal text-slate-600">{{ session('status') }}</p>
     </div>
 @endif
 
 @if($errors->any())
-    <div class="ad-card mb-5 border-l-2 border-l-rose px-5 py-3.5">
+    <div class="bo-card mb-5 border-l-2 border-l-rose px-5 py-3.5">
         <div class="flex items-start gap-3">
             <span class="mt-0.5 text-[13px] text-rose-600">!</span>
             <div>
