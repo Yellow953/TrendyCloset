@@ -153,23 +153,34 @@
 
                 @if($variants->isNotEmpty())
                     <div>
-                        <div class="mb-2.5 flex items-center justify-between">
-                            <span class="text-[15px] font-medium">Size</span>
-                            <a href="{{ route('policies', 'size-guide') }}" class="text-[13.5px] font-light text-muted-2 underline underline-offset-2 hover:text-blush">Size chart</a>
-                        </div>
+                        {{-- A colour-only piece carries no size dimension — the
+                             radios below still have to exist (they're what carries
+                             variant_id and what the colour swatches filter by),
+                             but there is nothing to show a "Size" heading or chip
+                             row for. --}}
+                        @if($sizes->isNotEmpty())
+                            <div class="mb-2.5 flex items-center justify-between">
+                                <span class="text-[15px] font-medium">Size</span>
+                                <a href="{{ route('policies', 'size-guide') }}" class="text-[13.5px] font-light text-muted-2 underline underline-offset-2 hover:text-blush">Size chart</a>
+                            </div>
+                        @endif
                         <div class="flex flex-wrap gap-2.5">
                             @foreach($variants as $v)
-                                <label data-color="{{ $v->color }}" class="{{ $v->in_stock ? 'cursor-pointer' : 'cursor-not-allowed' }}">
+                                <label data-color="{{ $v->color }}" class="{{ $sizes->isEmpty() ? 'sr-only' : ($v->in_stock ? 'cursor-pointer' : 'cursor-not-allowed') }}">
                                     <input type="radio" name="variant_id" value="{{ $v->id }}" class="peer sr-only"
                                         @checked($firstAvailable?->is($v))
                                         @disabled(! $v->in_stock)>
-                                    <span class="tc-chip min-w-[64px] px-4 py-3 text-[14.5px] peer-checked:border-blush peer-checked:text-blush {{ $v->in_stock ? '' : 'text-faint line-through hover:border-line-2 hover:text-faint' }}">{{ $v->size }}</span>
+                                    @if($sizes->isNotEmpty())
+                                        <span class="tc-chip min-w-[64px] px-4 py-3 text-[14.5px] peer-checked:border-blush peer-checked:text-blush {{ $v->in_stock ? '' : 'text-faint line-through hover:border-line-2 hover:text-faint' }}">{{ $v->size }}</span>
+                                    @endif
                                 </label>
                             @endforeach
                         </div>
-                        <button type="button" data-clear-target="variant_id" class="mt-2.5 flex items-center gap-1.5 text-[13.5px] font-light text-muted-2 transition-colors hover:text-blush">
-                            <span class="text-[15px] leading-none">×</span> Clear
-                        </button>
+                        @if($sizes->isNotEmpty())
+                            <button type="button" data-clear-target="variant_id" class="mt-2.5 flex items-center gap-1.5 text-[13.5px] font-light text-muted-2 transition-colors hover:text-blush">
+                                <span class="text-[15px] leading-none">×</span> Clear
+                            </button>
+                        @endif
                     </div>
                 @endif
 
@@ -231,15 +242,17 @@
 
                 <form method="POST" action="{{ route('cart.add') }}" data-async class="flex items-center gap-2.5">
                     @csrf
-                    @if($variants->isNotEmpty())
+                    @if($variants->count() > 1)
                         <select name="variant_id" data-sticky-size aria-label="Size"
                                 class="tc-input tc-input-sm hidden w-auto bg-white text-[14px] sm:block">
                             @foreach($variants as $v)
                                 <option value="{{ $v->id }}" @disabled(! $v->in_stock) @selected($firstAvailable?->is($v))>
-                                    {{ $colors->count() > 1 ? $v->label : $v->size }}{{ $v->in_stock ? '' : ' — sold out' }}
+                                    {{ $sizes->isNotEmpty() ? ($colors->count() > 1 ? $v->label : $v->size) : $v->color }}{{ $v->in_stock ? '' : ' — sold out' }}
                                 </option>
                             @endforeach
                         </select>
+                    @elseif($variants->isNotEmpty())
+                        <input type="hidden" name="variant_id" value="{{ $variants->first()->id }}">
                     @endif
                     <input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity"
                            class="tc-input tc-input-sm hidden w-16 px-0 text-center text-[14px] font-medium [appearance:textfield] md:block [&::-webkit-inner-spin-button]:appearance-none">

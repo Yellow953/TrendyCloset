@@ -15,29 +15,26 @@ class Swatch
 
     /** @var array<string, string> lowercased colour name => hex */
     private const COLORS = [
+        'beige' => '#e3d5bf',
         'black' => '#2b2523',
-        'blush' => '#d9b3a7',
+        'blue' => '#3b5c8f',
+        'brown' => '#6b4423',
+        'burgundy' => '#6d2439',
         'camel' => '#c19a6b',
-        'champagne' => '#e7d3b8',
-        'charcoal' => '#4a4744',
-        'crimson' => '#8b2332',
-        'ecru' => '#efe6d7',
-        'forest' => '#3f5a44',
-        'gold' => '#c9a24b',
+        'coffee' => '#4b3621',
+        'dark blue' => '#1c2f4d',
+        'dark grey' => '#55524e',
         'grey' => '#9d9994',
-        'indigo' => '#38496b',
         'khaki' => '#a89a72',
-        'light wash' => '#b9cbdd',
-        'oat' => '#ded2be',
+        'light blue' => '#a9c6e0',
+        'light grey' => '#c7c4c0',
+        'mint green' => '#a8d5ba',
+        'navy' => '#1f2a44',
         'olive' => '#75774a',
-        'powder blue' => '#c7dbe6',
-        'rust' => '#a8552f',
-        'sage' => '#8a9a8e',
-        'sand' => '#d9c7ab',
-        'sky' => '#aacbdc',
-        'terracotta' => '#c06a4c',
-        'vintage blue' => '#7b95b5',
+        'pink' => '#e8b4c0',
+        'red' => '#b32134',
         'white' => '#ffffff',
+        'yellow' => '#e0b93c',
     ];
 
     public static function hex(?string $color): string
@@ -50,7 +47,7 @@ class Swatch
      */
     public static function needsOutline(?string $color): bool
     {
-        return in_array(Str::lower(trim((string) $color)), ['white', 'ecru', 'champagne'], true);
+        return in_array(Str::lower(trim((string) $color)), ['white'], true);
     }
 
     /**

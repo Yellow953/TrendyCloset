@@ -26,10 +26,15 @@ class ProductVariant extends Model
     private const LETTER_SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 
     /**
-     * Every size the admin size select offers: the letter run, common denim
-     * waist sizes, and "One Size" for pieces sized as a single piece.
+     * Every size the admin size select offers: the letter run, "One Size" for
+     * pieces sized as a single piece, the denim/trouser waist run, and the
+     * numeric run used for the rest.
      */
-    public const SIZES = [...self::LETTER_SIZES, 'One Size', '24', '26', '28', '30', '32', '34', '36', '38', '40'];
+    public const SIZES = [
+        ...self::LETTER_SIZES, 'One Size',
+        '25', '26', '27', '28', '29', '30', '31',
+        '32', '34', '36', '38', '40', '42', '44', '46', '48',
+    ];
 
     protected function casts(): array
     {

@@ -64,6 +64,17 @@
                         <button type="button" data-repeater-add class="bo-btn bo-btn-sm">＋ Add row</button>
                     </div>
 
+                    {{-- Shared by every row's colour field below (both the
+                         rendered rows and the __INDEX__ template) — a
+                         datalist suggests the swatches Swatch.php can paint,
+                         but the field stays free text so a one-off colour
+                         can still be typed in and saved as-is. --}}
+                    <datalist id="swatch-colors">
+                        @foreach(\App\Support\Swatch::names() as $color)
+                            <option value="{{ $color }}">
+                        @endforeach
+                    </datalist>
+
                     <div class="overflow-x-auto">
                         <table class="bo-table">
                             <thead>
@@ -90,12 +101,8 @@
                                             </select>
                                         </td>
                                         <td class="px-5 py-2.5">
-                                            <select name="variants[{{ $i }}][color]" class="bo-input-sm">
-                                                <option value=""></option>
-                                                @foreach(\App\Support\Swatch::names() as $color)
-                                                    <option value="{{ $color }}" @selected(($variant['color'] ?? '') === $color)>{{ $color }}</option>
-                                                @endforeach
-                                            </select>
+                                            <input name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}"
+                                                   list="swatch-colors" placeholder="Colour" class="bo-input-sm">
                                         </td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][sku]" value="{{ $variant['sku'] ?? '' }}" placeholder="TC-001-M" class="bo-input-sm"></td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][price_override]" value="{{ $variant['price_override'] ?? '' }}" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
@@ -115,7 +122,7 @@
 
                     <div data-repeater-empty class="{{ count($variants) ? 'hidden' : '' }}">
                         <x-admin.empty icon="ruler" title="No sizes yet"
-                                       body="Add a row for each size and colour you stock. Leave the size blank for one-size pieces." />
+                                       body="Add a row for each size/colour combination you stock. Leave size blank for a colour-only piece, or colour blank for a size-only one." />
                     </div>
 
                     {{-- The row the Add button clones. `__INDEX__` is swapped for
@@ -132,12 +139,7 @@
                                 </select>
                             </td>
                             <td class="px-5 py-2.5">
-                                <select name="variants[__INDEX__][color]" class="bo-input-sm">
-                                    <option value=""></option>
-                                    @foreach(\App\Support\Swatch::names() as $color)
-                                        <option value="{{ $color }}">{{ $color }}</option>
-                                    @endforeach
-                                </select>
+                                <input name="variants[__INDEX__][color]" list="swatch-colors" placeholder="Colour" class="bo-input-sm">
                             </td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][sku]" placeholder="TC-001-M" class="bo-input-sm"></td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][price_override]" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
