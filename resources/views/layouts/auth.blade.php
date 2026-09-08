@@ -22,9 +22,8 @@
     {{-- Brand plate — pure black, matching the back-office rail. Decorative, so
          it only appears when there is room for it. --}}
     <aside class="relative hidden w-[46%] shrink-0 flex-col justify-between overflow-hidden bg-black px-14 py-14 lg:flex">
-        {{-- faint dotted texture --}}
-        <div class="pointer-events-none absolute inset-0 opacity-[0.06]"
-             style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 22px 22px;"></div>
+        <div class="pointer-events-none absolute inset-0"
+             style="background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px); background-size: 22px 22px;"></div>
 
         <div class="relative flex items-center gap-2.5">
             <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[16px] font-bold text-black">T</span>

@@ -1,6 +1,6 @@
 {{-- Sticky top bar: the nav toggle on small screens, a jump-to search across
      the catalogue, and the way back out to the shop. --}}
-<header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+<header class="sticky top-0 z-20 border-b border-slate-200 bg-white">
     <div class="mx-auto flex w-full max-w-[1400px] items-center gap-4 px-5 py-3 md:px-8">
 
         <button type="button" data-admin-nav-open

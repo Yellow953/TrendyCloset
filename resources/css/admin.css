@@ -43,6 +43,12 @@
 }
 
 @layer base {
+    /* The back office is light-only. Declaring it stops Chrome's auto dark mode
+       from force-darkening these pages, which it does with a compositor-level
+       filter — the GPU path that was handing this machine a blank white page. */
+    :root {
+        color-scheme: light;
+    }
     body {
         font-family: var(--font-admin);
     }

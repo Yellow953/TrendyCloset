@@ -6,20 +6,12 @@
     'autoopen' => false,
 ])
 
-{{-- A back-office dialog.
-
-     Opened by any [data-modal-open="<id>"] on the page and closed by ESC, the
-     backdrop, or [data-modal-close] — see `initModals()` in app.js. Kept in the
-     DOM rather than fetched, so the form inside is a plain server-rendered form
-     that posts and redirects like every other one here. --}}
-{{-- `autoopen` re-opens a dialog whose form came back with validation errors,
-     so nobody has to hunt for the modal they were just in. --}}
 <div data-modal="{{ $id }}" @if($autoopen) data-modal-autoopen @endif
      class="fixed inset-0 z-50 hidden items-center justify-center p-4"
      role="dialog" aria-modal="true"
      @if($title) aria-labelledby="{{ $id }}-title" @endif>
 
-    <div data-modal-backdrop class="ad-modal-backdrop absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"></div>
+    <div data-modal-backdrop class="ad-modal-backdrop absolute inset-0 bg-slate-900/50"></div>
 
     <div {{ $attributes->merge(['class' => 'ad-modal-card relative w-full '.$width.' overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_rgba(15,23,42,.28)]']) }}>
         @if($title)
