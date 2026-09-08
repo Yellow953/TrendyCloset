@@ -58,7 +58,7 @@
                 <span class="text-[15px] font-semibold tracking-[-0.01em] text-slate-900">Trendy Closet</span>
             </a>
 
-            <div class="ad-auth-rise [animation-delay:70ms]">
+            <div class="ad-auth-rise-2">
                 <div class="ad-eyebrow">Back office</div>
                 <h1 class="mt-2.5 text-[28px] leading-tight font-bold tracking-[-0.02em] text-slate-900">@yield('heading')</h1>
                 <p class="mt-2.5 max-w-[40ch] text-[13.5px] leading-relaxed font-normal text-slate-500">@yield('subheading')</p>
@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <p class="ad-auth-rise mt-9 text-[12.5px] font-normal text-slate-400 [animation-delay:150ms]">
+            <p class="ad-auth-rise-3 mt-9 text-[12.5px] font-normal text-slate-400">
                 <a href="{{ route('home') }}" class="transition-colors hover:text-slate-700">← Back to the storefront</a>
             </p>
         </div>
