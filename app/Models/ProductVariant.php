@@ -22,6 +22,15 @@ class ProductVariant extends Model
         'is_active',
     ];
 
+    /** The letter run, in the order a rail reads. */
+    private const LETTER_SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+
+    /**
+     * Every size the admin size select offers: the letter run, common denim
+     * waist sizes, and "One Size" for pieces sized as a single piece.
+     */
+    public const SIZES = [...self::LETTER_SIZES, 'One Size', '24', '26', '28', '30', '32', '34', '36', '38', '40'];
+
     protected function casts(): array
     {
         return [
@@ -73,7 +82,7 @@ class ProductVariant extends Model
      */
     public static function sortSizes(Collection $sizes): Collection
     {
-        $order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+        $order = self::LETTER_SIZES;
 
         return $sizes
             ->sortBy(function (string $size) use ($order) {

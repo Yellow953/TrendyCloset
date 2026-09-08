@@ -20,15 +20,21 @@ class Swatch
         'camel' => '#c19a6b',
         'champagne' => '#e7d3b8',
         'charcoal' => '#4a4744',
+        'crimson' => '#8b2332',
         'ecru' => '#efe6d7',
+        'forest' => '#3f5a44',
+        'gold' => '#c9a24b',
         'grey' => '#9d9994',
         'indigo' => '#38496b',
         'khaki' => '#a89a72',
         'light wash' => '#b9cbdd',
         'oat' => '#ded2be',
+        'olive' => '#75774a',
+        'powder blue' => '#c7dbe6',
         'rust' => '#a8552f',
         'sage' => '#8a9a8e',
         'sand' => '#d9c7ab',
+        'sky' => '#aacbdc',
         'terracotta' => '#c06a4c',
         'vintage blue' => '#7b95b5',
         'white' => '#ffffff',
@@ -45,5 +51,17 @@ class Swatch
     public static function needsOutline(?string $color): bool
     {
         return in_array(Str::lower(trim((string) $color)), ['white', 'ecru', 'champagne'], true);
+    }
+
+    /**
+     * Every colour name this class can paint, Title Cased — the admin colour
+     * select offers exactly this list, so nothing typed there ever falls back
+     * to the neutral chip.
+     *
+     * @return array<int, string>
+     */
+    public static function names(): array
+    {
+        return collect(array_keys(self::COLORS))->map(fn ($c) => Str::title($c))->sort()->values()->all();
     }
 }

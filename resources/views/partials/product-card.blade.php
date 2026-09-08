@@ -28,6 +28,15 @@
     $sizes = $p->relationLoaded('variants') && $colors->count() < 2 ? $p->size_run : collect();
     $extraColors = max($colors->count() - 5, 0);
     $extraSizes = max($sizes->count() - 5, 0);
+
+    // Each chip/swatch below is its own quick-add: clicking a size or colour
+    // posts that exact variant straight to the bag, no PDP visit needed.
+    $sizeVariants = $sizes->take(5)->mapWithKeys(
+        fn ($size) => [$size => $p->sellable_variants->first(fn ($v) => $v->size === $size)]
+    );
+    $colorVariants = $colors->take(5)->mapWithKeys(
+        fn ($color) => [$color => $p->sellable_variants->first(fn ($v) => $v->color === $color)]
+    );
 @endphp
 <div class="group relative">
     <div class="tc-card-media tc-media relative {{ $h }}">
@@ -89,7 +98,15 @@
                 <x-swatch :color="$colors->first()" class="mr-0.5" />
             @endif
             @foreach($sizes->take(5) as $size)
-                <span class="tc-chip border-line px-1.5 py-0.5 text-[11px] font-light leading-none tracking-[0.06em] text-muted-2">{{ $size }}</span>
+                @php($sizeVariant = $sizeVariants[$size])
+                <form method="POST" action="{{ route('cart.add') }}" data-async>
+                    @csrf
+                    <input type="hidden" name="variant_id" value="{{ $sizeVariant?->id }}">
+                    <button type="submit" @disabled(! $sizeVariant)
+                            class="tc-chip border-line px-1.5 py-0.5 text-[11px] font-light leading-none tracking-[0.06em] text-muted-2 transition-colors hover:border-ink hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                            title="Add {{ $p->name }} — {{ $size }} to bag"
+                            aria-label="Add {{ $p->name }}, size {{ $size }}, to bag">{{ $size }}</button>
+                </form>
             @endforeach
             @if($extraSizes)
                 <span class="text-[12px] font-light text-muted">+{{ $extraSizes }}</span>
@@ -98,7 +115,17 @@
     @elseif($colors->isNotEmpty())
         <div class="mt-2 flex items-center gap-1.5" aria-label="Colours: {{ $colors->implode(', ') }}">
             @foreach($colors->take(5) as $color)
-                <x-swatch :color="$color" />
+                @php($colorVariant = $colorVariants[$color])
+                <form method="POST" action="{{ route('cart.add') }}" data-async>
+                    @csrf
+                    <input type="hidden" name="variant_id" value="{{ $colorVariant?->id }}">
+                    <button type="submit" @disabled(! $colorVariant)
+                            class="rounded-full transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
+                            title="Add {{ $p->name }} — {{ $color }} to bag"
+                            aria-label="Add {{ $p->name }}, colour {{ $color }}, to bag">
+                        <x-swatch :color="$color" />
+                    </button>
+                </form>
             @endforeach
             @if($extraColors)
                 <span class="text-[12px] font-light text-muted">+{{ $extraColors }}</span>

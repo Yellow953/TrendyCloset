@@ -128,11 +128,16 @@
             @endif
 
             @if($colors->isNotEmpty())
+                @php($currentColor = $firstAvailable?->color ?? $colors->first())
                 <div>
-                    <div class="mb-2.5 text-[15px] font-medium">Colour <span class="font-light text-muted">— {{ $colors->implode(', ') }}</span></div>
-                    <div class="flex gap-2.5">
+                    <div class="mb-2.5 text-[15px] font-medium">Colour <span data-color-label class="font-light text-muted">— {{ $currentColor }}</span></div>
+                    <div data-color-picker class="flex gap-2.5">
                         @foreach($colors as $c)
-                            <span title="{{ $c }}" class="h-[28px] w-[28px] rounded-full outline-2 outline-offset-2 outline-blush {{ \App\Support\Swatch::needsOutline($c) ? 'border border-line-2' : '' }}" style="background-color: {{ \App\Support\Swatch::hex($c) }}"></span>
+                            <label class="cursor-pointer" title="{{ $c }}">
+                                <input type="radio" name="color_choice" value="{{ $c }}" class="peer sr-only" @checked($currentColor === $c)>
+                                <span class="block h-[28px] w-[28px] rounded-full ring-1 ring-inset {{ \App\Support\Swatch::needsOutline($c) ? 'ring-line-2' : 'ring-black/10' }} transition-shadow peer-checked:ring-2 peer-checked:ring-blush peer-checked:ring-offset-2"
+                                      style="background-color: {{ \App\Support\Swatch::hex($c) }}"></span>
+                            </label>
                         @endforeach
                     </div>
                 </div>
@@ -154,7 +159,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2.5">
                             @foreach($variants as $v)
-                                <label class="{{ $v->in_stock ? 'cursor-pointer' : 'cursor-not-allowed' }}">
+                                <label data-color="{{ $v->color }}" class="{{ $v->in_stock ? 'cursor-pointer' : 'cursor-not-allowed' }}">
                                     <input type="radio" name="variant_id" value="{{ $v->id }}" class="peer sr-only"
                                         @checked($firstAvailable?->is($v))
                                         @disabled(! $v->in_stock)>
@@ -231,7 +236,7 @@
                                 class="tc-input tc-input-sm hidden w-auto bg-white text-[14px] sm:block">
                             @foreach($variants as $v)
                                 <option value="{{ $v->id }}" @disabled(! $v->in_stock) @selected($firstAvailable?->is($v))>
-                                    {{ $v->size }}{{ $v->in_stock ? '' : ' — sold out' }}
+                                    {{ $colors->count() > 1 ? $v->label : $v->size }}{{ $v->in_stock ? '' : ' — sold out' }}
                                 </option>
                             @endforeach
                         </select>
