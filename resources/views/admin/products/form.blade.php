@@ -82,9 +82,21 @@
                                     <tr data-repeater-row>
                                         <td class="px-5 py-2.5">
                                             <input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant['id'] ?? '' }}">
-                                            <input name="variants[{{ $i }}][size]" value="{{ $variant['size'] ?? '' }}" placeholder="M" class="ad-input-sm">
+                                            <select name="variants[{{ $i }}][size]" class="ad-input-sm">
+                                                <option value=""></option>
+                                                @foreach(\App\Models\ProductVariant::SIZES as $size)
+                                                    <option value="{{ $size }}" @selected(($variant['size'] ?? '') === $size)>{{ $size }}</option>
+                                                @endforeach
+                                            </select>
                                         </td>
-                                        <td class="px-5 py-2.5"><input name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}" placeholder="Oat" class="ad-input-sm"></td>
+                                        <td class="px-5 py-2.5">
+                                            <select name="variants[{{ $i }}][color]" class="ad-input-sm">
+                                                <option value=""></option>
+                                                @foreach(\App\Support\Swatch::names() as $color)
+                                                    <option value="{{ $color }}" @selected(($variant['color'] ?? '') === $color)>{{ $color }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][sku]" value="{{ $variant['sku'] ?? '' }}" placeholder="TC-001-M" class="ad-input-sm"></td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][price_override]" value="{{ $variant['price_override'] ?? '' }}" type="number" step="0.01" min="0" placeholder="—" class="ad-input-sm"></td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][stock]" value="{{ $variant['stock'] ?? 0 }}" type="number" min="0" class="ad-input-sm"></td>
@@ -112,9 +124,21 @@
                         <tr data-repeater-row>
                             <td class="px-5 py-2.5">
                                 <input type="hidden" name="variants[__INDEX__][id]" value="">
-                                <input name="variants[__INDEX__][size]" placeholder="M" class="ad-input-sm">
+                                <select name="variants[__INDEX__][size]" class="ad-input-sm">
+                                    <option value=""></option>
+                                    @foreach(\App\Models\ProductVariant::SIZES as $size)
+                                        <option value="{{ $size }}">{{ $size }}</option>
+                                    @endforeach
+                                </select>
                             </td>
-                            <td class="px-5 py-2.5"><input name="variants[__INDEX__][color]" placeholder="Oat" class="ad-input-sm"></td>
+                            <td class="px-5 py-2.5">
+                                <select name="variants[__INDEX__][color]" class="ad-input-sm">
+                                    <option value=""></option>
+                                    @foreach(\App\Support\Swatch::names() as $color)
+                                        <option value="{{ $color }}">{{ $color }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][sku]" placeholder="TC-001-M" class="ad-input-sm"></td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][price_override]" type="number" step="0.01" min="0" placeholder="—" class="ad-input-sm"></td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][stock]" type="number" min="0" value="0" class="ad-input-sm"></td>
@@ -174,56 +198,39 @@
                                        hint="Shown as stars. Editorial, not customer reviews — which is why no rating schema is emitted." />
                     </div>
                 </div>
-
-                <div class="ad-card">
-                    <div class="ad-card-head"><div class="ad-card-title">Add photographs</div></div>
-                    <div class="px-5 py-5">
-                        <label class="flex cursor-pointer flex-col items-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-7 text-center transition-colors hover:border-slate-900">
-                            <span class="text-[20px] text-slate-400" aria-hidden="true">⬆</span>
-                            <span class="mt-2 text-[13px] font-medium">Choose images</span>
-                            <span class="mt-1 text-[11.5px] font-normal text-slate-400">JPG, PNG, WebP or AVIF · up to 5 MB each</span>
-                            <input type="file" name="photos[]" accept="image/*" multiple class="hidden" data-upload="#photo-preview">
-                        </label>
-
-                        <div id="photo-preview" class="mt-3 flex flex-wrap gap-2"></div>
-
-                        @error('photos.*')<p class="ad-error">{{ $message }}</p>@enderror
-
-                        <p class="ad-hint">
-                            @if($editing)
-                                They are added to the gallery below when you save. The first image on a product with no photographs becomes its primary one.
-                            @else
-                                Uploads are attached once the product is created.
-                            @endif
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
     </form>
 
-    {{-- Gallery. Outside the main form on purpose: each image action is its own
-         small form, and forms cannot nest. --}}
-    @if($editing)
-        <div class="ad-card mt-5">
-            <div class="ad-card-head">
-                <div>
-                    <div class="ad-card-title">Gallery</div>
-                    <p class="mt-0.5 text-[12px] font-normal text-slate-400">The primary image is what every product card and search result leads with.</p>
-                </div>
-                <span class="ad-badge ad-badge-neutral">{{ $product->images->count() }} {{ Str::plural('image', $product->images->count()) }}</span>
+    {{-- Images: its own full-width section, kept outside the main form because
+         each existing photo's actions are their own small form (forms cannot
+         nest) — the picker input instead points back at #product-form via its
+         `form` attribute, so a chosen file still submits with the rest of the
+         piece on Save. Everything sits in one horizontally-scrolling row. --}}
+    <div class="ad-card mt-5">
+        <div class="ad-card-head">
+            <div>
+                <div class="ad-card-title">Images</div>
+                <p class="mt-0.5 text-[12px] font-normal text-slate-400">The primary image is what every product card and search result leads with.</p>
             </div>
+            @if($editing)
+                <span class="ad-badge ad-badge-neutral">{{ $product->images->count() }} {{ Str::plural('image', $product->images->count()) }}</span>
+            @endif
+        </div>
 
-            @if($product->images->isEmpty())
-                <x-admin.empty icon="image" title="No photographs yet"
-                               body="Upload some from the panel above — a piece with no imagery renders as an empty frame on the shop." />
-            @else
-                <div class="grid grid-cols-2 gap-4 px-5 py-5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-                    @foreach($product->images as $image)
-                        <div class="group relative">
-                            <div class="aspect-[4/5] overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
-                                <img src="{{ $image->url }}" alt="" class="h-full w-full object-cover">
-                            </div>
+        <div class="flex gap-4 overflow-x-auto px-5 py-5">
+            <label class="flex aspect-[4/5] w-[140px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 text-center transition-colors hover:border-slate-900">
+                <span class="text-[18px] text-slate-400" aria-hidden="true">⬆</span>
+                <span class="mt-2 text-[12.5px] font-medium">Choose images</span>
+                <span class="mt-1 text-[11px] font-normal text-slate-400">JPG, PNG, WebP or AVIF · up to 5 MB each</span>
+                <input form="product-form" type="file" name="photos[]" accept="image/*" multiple class="hidden" data-upload="#photo-preview">
+            </label>
+
+            @if($editing)
+                @foreach($product->images as $image)
+                    <div class="w-[140px] shrink-0">
+                        <div class="relative aspect-[4/5] overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
+                            <img src="{{ $image->url }}" alt="" class="h-full w-full object-cover">
 
                             @if($image->is_primary)
                                 <span class="absolute top-2 left-2 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium text-white">Primary</span>
@@ -232,26 +239,40 @@
                             @unless($image->disk_path)
                                 <span class="absolute top-2 right-2 rounded-full bg-slate-800/75 px-2 py-0.5 text-[10px] font-normal text-white" title="A remote URL — deleting the row leaves the file alone">Linked</span>
                             @endunless
-
-                            <div class="mt-2 flex items-center justify-between gap-1.5">
-                                @unless($image->is_primary)
-                                    <form method="POST" action="{{ route('admin.products.images.primary', [$product, $image]) }}">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="text-[11.5px] font-medium text-slate-900 hover:underline">Make primary</button>
-                                    </form>
-                                @else
-                                    <span class="text-[11.5px] font-normal text-slate-400">Leads the gallery</span>
-                                @endunless
-
-                                <button type="button" data-modal-open="delete-image-{{ $image->id }}"
-                                        class="text-[11.5px] font-medium text-rose-600 hover:underline">Remove</button>
-                            </div>
                         </div>
-                    @endforeach
-                </div>
+
+                        <div class="mt-2 flex items-center justify-between gap-1.5">
+                            @unless($image->is_primary)
+                                <form method="POST" action="{{ route('admin.products.images.primary', [$product, $image]) }}">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="text-[11.5px] font-medium text-slate-900 hover:underline">Make primary</button>
+                                </form>
+                            @else
+                                <span class="text-[11.5px] font-normal text-slate-400">Leads the gallery</span>
+                            @endunless
+
+                            <button type="button" data-modal-open="delete-image-{{ $image->id }}"
+                                    class="text-[11.5px] font-medium text-rose-600 hover:underline">Remove</button>
+                        </div>
+                    </div>
+                @endforeach
             @endif
         </div>
-    @endif
+
+        <div id="photo-preview" class="{{ ($editing && $product->images->isNotEmpty()) ? 'border-t border-slate-100' : '' }} flex flex-wrap gap-2 px-5 {{ ($editing && $product->images->isNotEmpty()) ? 'py-4' : 'pb-5' }}"></div>
+
+        <div class="px-5 pb-5">
+            @error('photos.*')<p class="ad-error">{{ $message }}</p>@enderror
+
+            <p class="ad-hint">
+                @if($editing)
+                    Newly chosen files are added to the row above when you save. The first image on a product with none becomes its primary one.
+                @else
+                    Uploads are attached once the product is created.
+                @endif
+            </p>
+        </div>
+    </div>
 @endsection
 
 @section('modals')

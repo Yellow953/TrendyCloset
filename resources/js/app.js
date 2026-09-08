@@ -354,7 +354,7 @@ function initShare() {
                 await navigator.clipboard.writeText(url);
                 toast('Link copied');
             } catch (err) {
-                if (err?.name !== 'AbortError') toast('Could not share that just now.');
+                if (err?.name !== 'AbortError') toast('Could not share that just now.', 'error');
             }
         });
     });
@@ -386,6 +386,49 @@ function initClearables() {
                 .forEach((input) => { input.checked = false; });
         });
     });
+}
+
+// Product page colour swatches. A variant is a size *and* a colour together,
+// so picking a colour narrows the size chips to the ones that actually exist
+// in it, and hands the selection to the first one that does.
+function initColorFilter() {
+    const picker = document.querySelector('[data-color-picker]');
+    const form = document.querySelector('[data-buy-form]');
+    if (!picker || !form) return;
+
+    const colorRadios = [...picker.querySelectorAll('input[type="radio"]')];
+    const sizeLabels = [...form.querySelectorAll('label[data-color]')];
+    const label = document.querySelector('[data-color-label]');
+    const submits = [...form.querySelectorAll('button[type="submit"]')];
+
+    const apply = (color) => {
+        sizeLabels.forEach((el) => { el.hidden = el.dataset.color !== color; });
+
+        const visible = sizeLabels.filter((el) => !el.hidden);
+        const stillChecked = visible.some((el) => el.querySelector('input').checked);
+
+        if (!stillChecked) {
+            sizeLabels.forEach((el) => { el.querySelector('input').checked = false; });
+            const next = visible.find((el) => !el.querySelector('input').disabled) ?? visible[0];
+            if (next) {
+                const input = next.querySelector('input');
+                input.checked = true;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Nothing sellable in this colour — don't let the buttons submit an
+        // empty selection.
+        const hasSellable = visible.some((el) => !el.querySelector('input').disabled);
+        submits.forEach((btn) => { btn.disabled = !hasSellable; });
+
+        if (label) label.textContent = `— ${color}`;
+    };
+
+    colorRadios.forEach((radio) => radio.addEventListener('change', () => apply(radio.value)));
+
+    const checked = colorRadios.find((r) => r.checked);
+    if (checked) apply(checked.value);
 }
 
 // Tab strips (product details). The first panel is rendered visible, so with
@@ -469,7 +512,12 @@ function initSearch() {
 
 // Toast, bottom-centre. Replaces the flash banner for anything posted over
 // fetch — there is no page load to render a banner on.
-function toast(message) {
+const TOAST_ICONS = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7.5v5.5M12 16.8h.01"/></svg>',
+};
+
+function toast(message, kind = 'success') {
     if (!message) return;
 
     let host = document.querySelector('[data-toasts]');
@@ -481,16 +529,24 @@ function toast(message) {
     }
 
     const note = document.createElement('div');
-    note.className = 'tc-toast';
+    note.className = `tc-toast tc-toast-${kind}`;
     note.setAttribute('role', 'status');
-    note.textContent = message;
+
+    const icon = document.createElement('span');
+    icon.className = 'tc-toast-icon';
+    icon.innerHTML = TOAST_ICONS[kind] || TOAST_ICONS.success;
+
+    const text = document.createElement('span');
+    text.textContent = message;
+
+    note.append(icon, text);
     host.appendChild(note);
 
     requestAnimationFrame(() => note.classList.add('is-in'));
     setTimeout(() => {
         note.classList.remove('is-in');
         note.addEventListener('transitionend', () => note.remove(), { once: true });
-    }, 3200);
+    }, 3600);
 }
 
 // The shared slide-over (bag / favourites). The trigger carries the fragment
@@ -613,7 +669,7 @@ function initAsyncForms() {
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                toast(data.message || 'Sorry — that did not work. Please try again.');
+                toast(data.message || 'Sorry — that did not work. Please try again.', 'error');
                 return;
             }
 
@@ -624,11 +680,19 @@ function initAsyncForms() {
 
             // Forms living inside the drawer redraw it, so quantities, totals
             // and the free-shipping line all come back from the same render.
-            if (form.hasAttribute('data-drawer-refresh')) await drawer.load();
-
-            toast(data.status);
+            if (form.hasAttribute('data-drawer-refresh')) {
+                await drawer.load();
+            } else if (data.bagCount !== undefined) {
+                // An add from outside the drawer (a card, the PDP) pops the bag
+                // open instead of a toast — seeing the piece land in the bag is
+                // a much harder confirmation to miss than a line of text.
+                const bagTrigger = document.querySelector('[data-bag-count]')?.closest('[data-drawer-open]');
+                bagTrigger ? drawer.open(bagTrigger.dataset.drawerOpen) : toast(data.status);
+            } else {
+                toast(data.status);
+            }
         } catch {
-            toast('Sorry — that did not work. Please try again.');
+            toast('Sorry — that did not work. Please try again.', 'error');
         } finally {
             buttons.forEach((b) => { b.disabled = false; });
             submitter?.classList.remove('is-busy');
@@ -725,6 +789,7 @@ function init() {
     initShare();
     initQuantitySteppers();
     initClearables();
+    initColorFilter();
     initAutoSubmit();
     initStickyHeader();
     initFilterPanel();
