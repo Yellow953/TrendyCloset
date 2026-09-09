@@ -55,7 +55,8 @@
                     'price_override' => $v->price_override, 'stock' => $v->stock, 'is_active' => $v->is_active,
                 ])->all() : []); @endphp
 
-                <div class="bo-card" data-repeater data-repeater-next="{{ count($variants) + 50 }}">
+                <div class="bo-card" data-repeater data-repeater-next="{{ count($variants) + 50 }}"
+                     data-swatch-map='@json(\App\Support\Swatch::map())'>
                     <div class="bo-card-head">
                         <div>
                             <div class="bo-card-title">Sizes &amp; colours</div>
@@ -80,7 +81,7 @@
                             <thead>
                                 <tr>
                                     <th class="w-[110px]">Size</th>
-                                    <th class="w-[140px]">Colour</th>
+                                    <th class="w-[170px]">Colour</th>
                                     <th class="w-[130px]">SKU</th>
                                     <th class="w-[110px]">Price override</th>
                                     <th class="w-[90px]">Stock</th>
@@ -101,8 +102,11 @@
                                             </select>
                                         </td>
                                         <td class="px-5 py-2.5">
-                                            <input name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}"
-                                                   list="swatch-colors" placeholder="Colour" class="bo-input-sm">
+                                            <div class="flex items-center gap-1.5">
+                                                <input name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}"
+                                                       list="swatch-colors" placeholder="Colour" class="bo-input-sm min-w-0 flex-1">
+                                                <button type="button" data-color-pick class="bo-btn bo-btn-sm" title="Pick colour from a photo" aria-label="Pick colour from a photo">🎨</button>
+                                            </div>
                                         </td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][sku]" value="{{ $variant['sku'] ?? '' }}" placeholder="TC-001-M" class="bo-input-sm"></td>
                                         <td class="px-5 py-2.5"><input name="variants[{{ $i }}][price_override]" value="{{ $variant['price_override'] ?? '' }}" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
@@ -139,7 +143,10 @@
                                 </select>
                             </td>
                             <td class="px-5 py-2.5">
-                                <input name="variants[__INDEX__][color]" list="swatch-colors" placeholder="Colour" class="bo-input-sm">
+                                <div class="flex items-center gap-1.5">
+                                    <input name="variants[__INDEX__][color]" list="swatch-colors" placeholder="Colour" class="bo-input-sm min-w-0 flex-1">
+                                    <button type="button" data-color-pick class="bo-btn bo-btn-sm" title="Pick colour from a photo" aria-label="Pick colour from a photo">🎨</button>
+                                </div>
                             </td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][sku]" placeholder="TC-001-M" class="bo-input-sm"></td>
                             <td class="px-5 py-2.5"><input name="variants[__INDEX__][price_override]" type="number" step="0.01" min="0" placeholder="—" class="bo-input-sm"></td>
@@ -170,22 +177,6 @@
                 </div>
 
                 <div class="bo-card">
-                    <div class="bo-card-head"><div class="bo-card-title">Pricing</div></div>
-                    <div class="flex flex-col gap-4 px-5 py-5">
-                        <x-admin.field name="price" label="Price" type="number" step="0.01" prefix="$"
-                                       :value="$product->price" required placeholder="0.00" />
-
-                        <x-admin.field name="compare_at_price" label="Compare-at price" type="number" step="0.01" prefix="$"
-                                       :value="$product->compare_at_price" placeholder="0.00"
-                                       hint="The struck-through “was” price. Set it above the price and the piece joins the Sale edit with a derived percentage badge." />
-
-                        <x-admin.field name="sale_ends_at" label="Deal ends" type="datetime-local"
-                                       :value="$product->sale_ends_at?->format('Y-m-d\TH:i')"
-                                       hint="Only pieces with a future date appear in Deal of the Week, with a live countdown." />
-                    </div>
-                </div>
-
-                <div class="bo-card">
                     <div class="bo-card-head"><div class="bo-card-title">Organise</div></div>
                     <div class="flex flex-col gap-4 px-5 py-5">
                         <x-admin.field name="category_id" label="Category" :options="$categories" required
@@ -198,6 +189,22 @@
                         <x-admin.field name="rating" label="Editorial rating" type="number" :value="$product->rating"
                                        min="1" max="5"
                                        hint="Shown as stars. Editorial, not customer reviews — which is why no rating schema is emitted." />
+                    </div>
+                </div>
+
+                <div class="bo-card">
+                    <div class="bo-card-head"><div class="bo-card-title">Pricing</div></div>
+                    <div class="flex flex-col gap-4 px-5 py-5">
+                        <x-admin.field name="price" label="Price" type="number" step="0.01" prefix="$"
+                                       :value="$product->price" required placeholder="0.00" />
+
+                        <x-admin.field name="compare_at_price" label="Compare-at price" type="number" step="0.01" prefix="$"
+                                       :value="$product->compare_at_price" placeholder="0.00"
+                                       hint="The struck-through “was” price. Set it above the price and the piece joins the Sale edit with a derived percentage badge." />
+
+                        <x-admin.field name="sale_ends_at" label="Deal ends" type="datetime-local"
+                                       :value="$product->sale_ends_at?->format('Y-m-d\TH:i')"
+                                       hint="Only pieces with a future date appear in Deal of the Week, with a live countdown." />
                     </div>
                 </div>
             </div>
@@ -221,7 +228,7 @@
         </div>
 
         <div class="flex gap-4 overflow-x-auto px-5 py-5">
-            <label class="flex aspect-[4/5] w-[140px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 text-center transition-colors hover:border-slate-900">
+            <label class="flex aspect-[5/5] w-[200px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 text-center transition-colors hover:border-slate-900">
                 <span class="text-[18px] text-slate-400" aria-hidden="true">⬆</span>
                 <span class="mt-2 text-[12.5px] font-medium">Choose images</span>
                 <span class="mt-1 text-[11px] font-normal text-slate-400">JPG, PNG, WebP or AVIF · up to 5 MB each</span>
@@ -230,9 +237,9 @@
 
             @if($editing)
                 @foreach($product->images as $image)
-                    <div class="w-[140px] shrink-0">
-                        <div class="relative aspect-[4/5] overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
-                            <img src="{{ $image->url }}" alt="" class="h-full w-full object-cover">
+                    <div class="w-[200px] shrink-0">
+                        <div class="relative aspect-[5/5] overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
+                            <img src="{{ $image->url }}" alt="" data-pickable-image class="h-full w-full object-cover transition-shadow">
 
                             @if($image->is_primary)
                                 <span class="absolute top-2 left-2 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium text-white">Primary</span>
@@ -274,6 +281,15 @@
                 @endif
             </p>
         </div>
+    </div>
+
+    {{-- Shown only while a "Pick colour" button has armed the eyedropper (see
+         initColorPicker() in admin.js). Sampling reads pixels straight off the
+         <img> tags above (both saved photos and fresh upload previews), so
+         nothing leaves the page and normal scrolling stays available the
+         whole time — unlike the browser's own screen-wide EyeDropper. --}}
+    <div data-picking-hint class="fixed inset-x-0 bottom-5 z-40 mx-auto hidden w-fit items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-[12.5px] font-medium text-white shadow-lg">
+        Click a photo below to sample its colour <span class="text-slate-400">·</span> Esc to cancel
     </div>
 @endsection
 

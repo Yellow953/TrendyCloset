@@ -34,7 +34,7 @@
         {{-- Gallery: thumbnail rail + zoomable main image --}}
         <div data-gallery data-reveal="left" class="flex w-full flex-col-reverse gap-4 sm:flex-row lg:w-[54%] lg:flex-none">
             @if($gallery->count() > 1)
-                <div class="flex flex-row gap-3 sm:flex-col">
+                <div class="no-scrollbar flex flex-row gap-3 overflow-x-auto sm:flex-col sm:overflow-visible">
                     @foreach($gallery as $g)
                         {{-- data-srcset travels with data-full so the main image
                              keeps its responsive ladder after a swap — setting
@@ -179,7 +179,7 @@
                                         @checked($firstAvailable?->is($v))
                                         @disabled(! $v->in_stock)>
                                     @if($sizes->isNotEmpty())
-                                        <span class="tc-chip min-w-[64px] px-4 py-3 text-[14.5px] peer-checked:border-blush peer-checked:text-blush {{ $v->in_stock ? '' : 'text-faint line-through hover:border-line-2 hover:text-faint' }}">{{ $v->size }}</span>
+                                        <span class="tc-chip min-w-[64px] px-4 py-3 text-[14.5px] peer-checked:border-pink peer-checked:bg-pink peer-checked:text-ink {{ $v->in_stock ? '' : 'text-faint line-through hover:border-line-2 hover:text-faint' }}">{{ $v->size }}</span>
                                     @endif
                                 </label>
                             @endforeach

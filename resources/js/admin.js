@@ -144,6 +144,152 @@ function initRepeater() {
     });
 }
 
+// A colour field's eyedropper button. Deliberately NOT the browser's own
+// EyeDropper API: that samples the whole screen and locks the page — the
+// person can't scroll down to the photo they want before it captures a
+// click. Instead this arms the field, and any product photo already on the
+// page (saved images or a fresh upload preview) becomes a click target;
+// clicking one reads its pixel via canvas and matches it to the nearest
+// swatch Swatch.php knows. Ordinary scrolling works the entire time.
+// Delegated on the repeater root so it keeps working on rows cloned later by
+// initRepeater(), and on `document` for the images, which live outside it.
+function initColorPicker() {
+    const root = document.querySelector('[data-repeater][data-swatch-map]');
+    if (!root) return;
+
+    let swatches = {};
+    try {
+        swatches = JSON.parse(root.dataset.swatchMap || '{}');
+    } catch (e) {
+        /* malformed map — picking still works, it just won't name the colour */
+    }
+
+    const toRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+    const nearestName = (hex) => {
+        const [r, g, b] = toRgb(hex);
+        let best = null;
+        let bestDist = Infinity;
+
+        for (const [name, swatchHex] of Object.entries(swatches)) {
+            const [sr, sg, sb] = toRgb(swatchHex);
+            const dist = (r - sr) ** 2 + (g - sg) ** 2 + (b - sb) ** 2;
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = name;
+            }
+        }
+
+        // Past this distance the nearest named swatch is not a fair guess —
+        // hand back the raw hex instead of mislabelling, e.g., a bright teal
+        // photo sample as "Navy".
+        return bestDist <= 3600 ? best : null;
+    };
+
+    const hint = document.querySelector('[data-picking-hint]');
+    const hintDefault = hint?.textContent ?? '';
+    let target = null;
+    let armedButton = null;
+    let messageTimer = null;
+
+    // A non-blocking substitute for alert() — a real alert() halts all script
+    // on the page until dismissed, which would freeze the crosshair mid-pick.
+    const showMessage = (text, isError = false) => {
+        if (!hint) return;
+        clearTimeout(messageTimer);
+        hint.textContent = text;
+        hint.classList.toggle('bg-rose-600', isError);
+        hint.classList.toggle('bg-slate-900', !isError);
+        hint.classList.remove('hidden');
+        hint.classList.add('flex');
+        if (isError) {
+            messageTimer = setTimeout(() => {
+                hint.classList.add('hidden');
+                hint.classList.remove('flex', 'bg-rose-600');
+                hint.classList.add('bg-slate-900');
+                hint.textContent = hintDefault;
+            }, 3500);
+        }
+    };
+
+    const arm = (button, input) => {
+        target = input;
+        armedButton = button;
+        button.classList.add('bg-slate-900', 'text-white');
+        showMessage(hintDefault);
+        document.querySelectorAll('[data-pickable-image]').forEach((img) => {
+            img.classList.add('cursor-crosshair', 'ring-2', 'ring-inset', 'ring-slate-900');
+        });
+        document.querySelector('[data-pickable-image]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    const disarm = () => {
+        target = null;
+        armedButton?.classList.remove('bg-slate-900', 'text-white');
+        armedButton = null;
+        clearTimeout(messageTimer);
+        hint?.classList.add('hidden');
+        hint?.classList.remove('flex', 'bg-rose-600');
+        hint?.classList.add('bg-slate-900');
+        if (hint) hint.textContent = hintDefault;
+        document.querySelectorAll('[data-pickable-image]').forEach((img) => {
+            img.classList.remove('cursor-crosshair', 'ring-2', 'ring-inset', 'ring-slate-900');
+        });
+    };
+
+    root.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-color-pick]');
+        if (!button) return;
+        e.preventDefault();
+
+        const input = button.closest('td')?.querySelector('input[name*="[color]"]');
+        if (!input) return;
+
+        if (button === armedButton) {
+            disarm();
+        } else {
+            disarm();
+            arm(button, input);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!target) return;
+
+        const img = e.target.closest('[data-pickable-image]');
+        if (!img) return;
+        e.preventDefault();
+
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const rect = img.getBoundingClientRect();
+            const x = Math.min(canvas.width - 1, Math.max(0, Math.round((e.clientX - rect.left) / rect.width * canvas.width)));
+            const y = Math.min(canvas.height - 1, Math.max(0, Math.round((e.clientY - rect.top) / rect.height * canvas.height)));
+            const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+            const hex = '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+
+            target.value = nearestName(hex) || hex;
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            disarm();
+        } catch (err) {
+            // A cross-origin photo (the demo catalogue's "Linked" images, or
+            // any external URL) taints the canvas and getImageData throws —
+            // no way to read it. Say so and stay armed so another, same-origin
+            // photo can still be tried without re-arming.
+            showMessage("Can't read this photo's colour (it's hosted elsewhere) — try another, or type the name.", true);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') disarm();
+    });
+}
+
 // Preview picked images before the form is posted, so someone uploading eight
 // photographs can see what they chose without saving first.
 function initUploadPreviews() {
@@ -158,7 +304,8 @@ function initUploadPreviews() {
                 if (!file.type.startsWith('image/')) return;
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                img.className = 'h-20 w-16 rounded-md border border-slate-200 object-cover';
+                img.dataset.pickableImage = '';
+                img.className = 'h-40 w-40 rounded-lg border border-slate-200 object-cover transition-shadow';
                 img.onload = () => URL.revokeObjectURL(img.src);
                 target.appendChild(img);
             });
@@ -197,6 +344,7 @@ function init() {
     initAdminMenu();
     initModals();
     initRepeater();
+    initColorPicker();
     initUploadPreviews();
     initFieldToggles();
 }
