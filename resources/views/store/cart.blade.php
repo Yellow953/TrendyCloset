@@ -52,6 +52,9 @@
                 @endforeach
 
                 {{-- Discount code --}}
+                @if($summary['offer'])
+                    <div class="tc-badge mt-5 w-fit border border-line-3 bg-tan px-5 py-3 text-[14px] text-ink">🎉 {{ $summary['offer']->display_headline }} applied</div>
+                @endif
                 @if($summary['coupon'])
                     <form method="POST" action="{{ route('cart.coupon.remove') }}" class="mt-5 flex flex-wrap items-center gap-3">
                         @csrf
@@ -79,7 +82,7 @@
                     </div>
                     @if($summary['discount'] > 0)
                         <div class="flex justify-between text-[14.5px] font-light leading-[2.2] text-muted-3">
-                            <span>Discount ({{ $summary['coupon']->code }})</span>
+                            <span>Discount ({{ $summary['offer']?->display_headline ?? $summary['coupon']->code }})</span>
                             <span class="text-blush">−{{ \App\Models\Product::money($summary['discount']) }}</span>
                         </div>
                     @endif

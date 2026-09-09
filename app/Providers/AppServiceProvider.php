@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\ProductFavorite;
 use App\Support\Cart;
 use App\Support\Catalog;
+use App\Support\OfferBoard;
 use App\Support\Seo;
 use App\Support\Tracking;
 use App\Support\Visitor;
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
         // page's metadata, one page's analytics events.
         $this->app->scoped(Cart::class, fn ($app) => new Cart($app->make(Session::class)));
         $this->app->scoped(Catalog::class, fn () => new Catalog);
+        $this->app->scoped(OfferBoard::class, fn () => new OfferBoard);
         $this->app->scoped(Seo::class, fn () => new Seo);
         $this->app->scoped(Tracking::class, fn () => new Tracking);
     }
@@ -76,7 +78,15 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'bagCount' => $this->app->make(Cart::class)->count(),
                 'favoritesCount' => $this->favoritesCount(),
+                'offerHeadline' => $this->app->make(OfferBoard::class)->headline(),
             ]);
+        });
+
+        // The product card badges whichever live offer covers that product;
+        // sharing the board (rather than resolving it per card) keeps a grid
+        // of twenty cards at the one query the board itself runs.
+        View::composer(['partials.product-card', 'store.product'], function ($view) {
+            $view->with('offerBoard', $this->app->make(OfferBoard::class));
         });
     }
 

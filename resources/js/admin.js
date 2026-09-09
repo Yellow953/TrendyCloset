@@ -166,12 +166,39 @@ function initUploadPreviews() {
     });
 }
 
+// Show/hide field groups by another field's value — e.g. an offer form whose
+// type select decides which of the spend/category/BOGO groups apply. The
+// controlling field carries `data-toggle-field="<name>"`; each group carries
+// `data-toggle-when="value-a,value-b"`. Scoped to its nearest controller (not
+// just the form) so a toggle can nest inside another — e.g. Category %
+// off / BOGO's scope picker (category vs. specific products) sits inside the
+// type toggle without the two cross-wiring each other.
+function initFieldToggles() {
+    document.querySelectorAll('[data-toggle-field]').forEach((scope) => {
+        const control = scope.querySelector(`[name="${scope.dataset.toggleField}"]`);
+        if (!control) return;
+
+        const groups = Array.from(scope.querySelectorAll('[data-toggle-when]'))
+            .filter((group) => group.closest('[data-toggle-field]') === scope);
+
+        const apply = () => {
+            groups.forEach((group) => {
+                group.classList.toggle('hidden', !group.dataset.toggleWhen.split(',').includes(control.value));
+            });
+        };
+
+        control.addEventListener('change', apply);
+        apply();
+    });
+}
+
 function init() {
     initAdminNav();
     initAdminMenu();
     initModals();
     initRepeater();
     initUploadPreviews();
+    initFieldToggles();
 }
 
 if (document.readyState !== 'loading') {

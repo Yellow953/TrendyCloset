@@ -73,7 +73,7 @@
                         </div>
                         @if((float) $order->discount_total > 0)
                             <div class="flex justify-between py-1 text-[13px] font-normal text-slate-600">
-                                <span>Discount @if($order->coupon)<span class="bo-figure text-slate-900">{{ $order->coupon->code }}</span>@endif</span>
+                                <span>Discount @if($order->offer)<span class="bo-figure text-slate-900">{{ $order->offer->name }}</span>@elseif($order->coupon)<span class="bo-figure text-slate-900">{{ $order->coupon->code }}</span>@endif</span>
                                 <span class="bo-figure text-slate-900">−{{ \App\Models\Product::money($order->discount_total) }}</span>
                             </div>
                         @endif

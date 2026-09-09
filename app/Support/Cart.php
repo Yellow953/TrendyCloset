@@ -2,7 +2,9 @@
 
 namespace App\Support;
 
+use App\Enums\OfferType;
 use App\Models\Coupon;
+use App\Models\Offer;
 use App\Models\ProductVariant;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Collection;
@@ -170,9 +172,52 @@ class Cart
         return $coupon && $coupon->isValidFor($this->subtotal()) ? $coupon : null;
     }
 
-    public function discount(): float
+    public function couponDiscount(): float
     {
         return $this->coupon()?->discountFor($this->subtotal()) ?? 0.0;
+    }
+
+    /**
+     * The best currently-applicable automatic offer, by discount amount —
+     * there is no code to type, so the bag always applies the one that saves
+     * the shopper the most rather than stacking every offer that matches.
+     */
+    public function bestOffer(): ?Offer
+    {
+        return $this->offerResults()->first()['offer'] ?? null;
+    }
+
+    public function offerDiscount(): float
+    {
+        return (float) ($this->offerResults()->first()['discount'] ?? 0.0);
+    }
+
+    /**
+     * A coupon code is something the shopper deliberately typed, so it wins a
+     * tie; otherwise whichever of a coupon or an automatic offer saves more.
+     */
+    public function discount(): float
+    {
+        return max($this->couponDiscount(), $this->offerDiscount());
+    }
+
+    /**
+     * Which discount is actually driving the total right now, for the bag and
+     * checkout to label correctly — null when nothing applies.
+     */
+    public function discountSource(): ?string
+    {
+        if ($this->offerDiscount() > $this->couponDiscount()) {
+            return 'offer';
+        }
+
+        return $this->couponDiscount() > 0 ? 'coupon' : null;
+    }
+
+    /** The offer actually driving the discount, only when it beat the coupon. */
+    public function appliedOffer(): ?Offer
+    {
+        return $this->discountSource() === 'offer' ? $this->bestOffer() : null;
     }
 
     public function shipping(): float
@@ -186,8 +231,16 @@ class Cart
 
     public function qualifiesForFreeShipping(): bool
     {
-        return $this->subtotal() >= self::FREE_SHIPPING_THRESHOLD
-            || (bool) $this->coupon()?->free_shipping;
+        if ($this->subtotal() >= self::FREE_SHIPPING_THRESHOLD || (bool) $this->coupon()?->free_shipping) {
+            return true;
+        }
+
+        $subtotal = $this->subtotal();
+
+        return $this->liveOffers()
+            ->contains(fn (Offer $offer) => $offer->type === OfferType::Spend
+                && $offer->free_shipping
+                && ($offer->min_subtotal === null || $subtotal >= (float) $offer->min_subtotal));
     }
 
     /** How much more the shopper must spend to ship free (0 once unlocked). */
@@ -204,7 +257,7 @@ class Cart
     /**
      * Everything the bag/checkout summaries need, in one call.
      *
-     * @return array{subtotal: float, discount: float, shipping: float, total: float, coupon: ?Coupon, free_shipping: bool}
+     * @return array{subtotal: float, discount: float, shipping: float, total: float, coupon: ?Coupon, offer: ?Offer, free_shipping: bool}
      */
     public function summary(): array
     {
@@ -214,8 +267,45 @@ class Cart
             'shipping' => $this->shipping(),
             'total' => $this->total(),
             'coupon' => $this->coupon(),
+            'offer' => $this->appliedOffer(),
             'free_shipping' => $this->qualifiesForFreeShipping(),
         ];
+    }
+
+    /** @var Collection<int, Offer>|null */
+    private ?Collection $liveOffers = null;
+
+    /** @var Collection<int, array{offer: Offer, discount: float}>|null */
+    private ?Collection $offerResults = null;
+
+    /**
+     * @return Collection<int, Offer>
+     */
+    private function liveOffers(): Collection
+    {
+        return $this->liveOffers ??= Offer::live()->with(['category', 'products'])->get();
+    }
+
+    /**
+     * Every live offer that actually discounts the current bag, most
+     * generous first.
+     *
+     * @return Collection<int, array{offer: Offer, discount: float}>
+     */
+    private function offerResults(): Collection
+    {
+        if ($this->offerResults !== null) {
+            return $this->offerResults;
+        }
+
+        $lines = $this->lines();
+        $subtotal = $this->subtotal();
+
+        return $this->offerResults = $this->liveOffers()
+            ->map(fn (Offer $offer) => ['offer' => $offer, 'discount' => $offer->discountFor($lines, $subtotal)])
+            ->filter(fn (array $result) => $result['discount'] > 0)
+            ->sortByDesc('discount')
+            ->values();
     }
 
     /**
@@ -233,6 +323,7 @@ class Cart
     {
         $this->session->put(self::SESSION_KEY.'.items', $items);
         $this->lines = null;
+        $this->offerResults = null;
     }
 
     private function clamp(int $qty, ProductVariant $variant): int

@@ -45,6 +45,11 @@
         </div>
 
         <div class="border-t border-line px-5 py-4">
+            @if($summary['offer'])
+                <div class="mb-3 rounded-field bg-tan px-3 py-2 text-center text-[13px] font-light">
+                    🎉 {{ $summary['offer']->display_headline }} applied
+                </div>
+            @endif
             @if($freeShippingRemainder > 0)
                 <div class="mb-3 rounded-field bg-cream-3 px-3 py-2 text-center text-[13px] font-light">
                     {{ \App\Models\Product::money($freeShippingRemainder) }} away from free shipping

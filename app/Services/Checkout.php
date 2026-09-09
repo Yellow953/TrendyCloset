@@ -44,8 +44,9 @@ class Checkout
 
         $summary = $this->cart->summary();
         $coupon = $summary['coupon'];
+        $offer = $summary['offer'];
 
-        $order = DB::transaction(function () use ($lines, $summary, $coupon, $data) {
+        $order = DB::transaction(function () use ($lines, $summary, $coupon, $offer, $data) {
             // Lock the variants before reading stock, so the check below and
             // the decrement further down cannot be interleaved with another
             // checkout of the same garment.
@@ -88,6 +89,7 @@ class Checkout
             $order = Order::create([
                 'customer_id' => $customer->id,
                 'coupon_id' => $coupon?->id,
+                'offer_id' => $offer?->id,
                 'order_number' => Order::nextNumber(),
                 'status' => OrderStatus::Pending,
                 'email' => $email,

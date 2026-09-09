@@ -13,9 +13,9 @@
 
     <div data-modal-backdrop class="bo-modal-backdrop absolute inset-0 bg-slate-900/50"></div>
 
-    <div {{ $attributes->merge(['class' => 'bo-modal-card relative w-full '.$width.' overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_rgba(15,23,42,.28)]']) }}>
+    <div {{ $attributes->merge(['class' => 'bo-modal-card relative flex w-full '.$width.' max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_rgba(15,23,42,.28)]']) }}>
         @if($title)
-            <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-4">
+            <div class="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-6 py-4">
                 <div>
                     <h2 id="{{ $id }}-title" class="font-semibold text-[21px] leading-tight font-normal">{{ $title }}</h2>
                     @if($subtitle)
@@ -28,6 +28,10 @@
             </div>
         @endif
 
-        {{ $slot }}
+        {{-- Long forms (Offers, with its per-type field groups) can outgrow
+             the viewport; the header above stays put while this scrolls. --}}
+        <div class="min-h-0 flex-1 overflow-y-auto">
+            {{ $slot }}
+        </div>
     </div>
 </div>

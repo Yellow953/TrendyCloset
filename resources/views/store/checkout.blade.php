@@ -142,7 +142,7 @@
                 <div class="border-t border-line-3 pt-4">
                     <div class="flex justify-between text-[14px] font-light leading-[2] text-muted-3"><span>Subtotal</span><span>{{ \App\Models\Product::money($summary['subtotal']) }}</span></div>
                     @if($summary['discount'] > 0)
-                        <div class="flex justify-between text-[14px] font-light leading-[2] text-muted-3"><span>Discount ({{ $summary['coupon']->code }})</span><span class="text-blush">−{{ \App\Models\Product::money($summary['discount']) }}</span></div>
+                        <div class="flex justify-between text-[14px] font-light leading-[2] text-muted-3"><span>Discount ({{ $summary['offer']?->display_headline ?? $summary['coupon']->code }})</span><span class="text-blush">−{{ \App\Models\Product::money($summary['discount']) }}</span></div>
                     @endif
                     <div class="flex justify-between text-[14px] font-light leading-[2] text-muted-3">
                         <span>Shipping</span>

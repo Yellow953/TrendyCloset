@@ -37,6 +37,7 @@
     $colorVariants = $colors->take(5)->mapWithKeys(
         fn ($color) => [$color => $p->sellable_variants->first(fn ($v) => $v->color === $color)]
     );
+    $offer = isset($offerBoard) ? $offerBoard->forProduct($p)->first() : null;
 @endphp
 <div class="group relative">
     <div class="tc-card-media tc-media relative {{ $h }}">
@@ -45,8 +46,15 @@
                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
         </a>
 
-        @if($p->badge_label)
-            <div class="tc-badge pointer-events-none absolute left-3 top-3">{{ $p->badge_label }}</div>
+        @if($p->badge_label || $offer)
+            <div class="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
+                @if($p->badge_label)
+                    <div class="tc-badge">{{ $p->badge_label }}</div>
+                @endif
+                @if($offer)
+                    <div class="tc-badge bg-ink text-white">{{ $offer->display_headline }}</div>
+                @endif
+            </div>
         @endif
 
         @if($p->relationLoaded('variants') && ! $p->in_stock)

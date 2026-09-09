@@ -59,8 +59,16 @@
                            :sizes="$mainImageSizes"
                            class="h-full w-full object-cover" />
                 </div>
-                @if($product->badge_label)
-                    <div class="tc-badge pointer-events-none absolute left-4 top-4 px-3 py-1.5 tracking-[0.04em]">{{ $product->badge_label }}</div>
+                @php($offer = isset($offerBoard) ? $offerBoard->forProduct($product)->first() : null)
+                @if($product->badge_label || $offer)
+                    <div class="pointer-events-none absolute left-4 top-4 flex flex-col items-start gap-1.5">
+                        @if($product->badge_label)
+                            <div class="tc-badge px-3 py-1.5 tracking-[0.04em]">{{ $product->badge_label }}</div>
+                        @endif
+                        @if($offer)
+                            <div class="tc-badge bg-ink px-3 py-1.5 tracking-[0.04em] text-white">{{ $offer->display_headline }}</div>
+                        @endif
+                    </div>
                 @endif
 
                 {{-- Actions on the photograph itself. A sibling of [data-zoom]
