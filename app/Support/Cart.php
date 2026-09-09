@@ -22,9 +22,7 @@ class Cart
 {
     public const SESSION_KEY = 'tc_cart';
 
-    /** Orders at or above this subtotal ship free. */
-    public const FREE_SHIPPING_THRESHOLD = 150.0;
-
+    /** Flat rate — there is no spend threshold that ships free on its own. */
     public const STANDARD_SHIPPING = 9.0;
 
     /** Per-line safety cap, independent of stock. */
@@ -229,9 +227,13 @@ class Cart
         return self::STANDARD_SHIPPING;
     }
 
+    /**
+     * Free shipping is never automatic — only a coupon or a spend-threshold
+     * offer that explicitly grants it, both admin-controlled.
+     */
     public function qualifiesForFreeShipping(): bool
     {
-        if ($this->subtotal() >= self::FREE_SHIPPING_THRESHOLD || (bool) $this->coupon()?->free_shipping) {
+        if ((bool) $this->coupon()?->free_shipping) {
             return true;
         }
 
@@ -241,12 +243,6 @@ class Cart
             ->contains(fn (Offer $offer) => $offer->type === OfferType::Spend
                 && $offer->free_shipping
                 && ($offer->min_subtotal === null || $subtotal >= (float) $offer->min_subtotal));
-    }
-
-    /** How much more the shopper must spend to ship free (0 once unlocked). */
-    public function freeShippingRemainder(): float
-    {
-        return round(max(0, self::FREE_SHIPPING_THRESHOLD - $this->subtotal()), 2);
     }
 
     public function total(): float

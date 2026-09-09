@@ -37,7 +37,6 @@ class CartController extends Controller
         return view('store.cart', [
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
-            'freeShippingRemainder' => $this->cart->freeShippingRemainder(),
             'active' => null,
         ]);
     }
@@ -53,7 +52,6 @@ class CartController extends Controller
             'lines' => $this->cart->lines(),
             'summary' => $this->cart->summary(),
             'count' => $this->cart->count(),
-            'freeShippingRemainder' => $this->cart->freeShippingRemainder(),
         ]);
     }
 

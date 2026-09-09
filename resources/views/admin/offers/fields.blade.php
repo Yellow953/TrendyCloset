@@ -30,11 +30,13 @@
             <x-admin.toggle name="free_shipping" label="Also gives free shipping" :checked="$offer->free_shipping" />
         </div>
 
-        {{-- Category % off and Buy X Get Y share the same scope: a category
-             (widened to its subcategories) or a hand-picked set of products.
-             The nested data-toggle-field further gates on which is chosen —
-             nesting rather than a single condition, since it needs the AND of
-             "type is one of these two" and "scope is this one". --}}
+        {{-- % off and Buy X Get Y share the same scope: a category (widened
+             to its subcategories) or a hand-picked set of products — so a
+             "specific product % off" offer is just % off with Applies to set
+             to Specific products. The nested data-toggle-field further gates
+             on which is chosen — nesting rather than a single condition,
+             since it needs the AND of "type is one of these two" and "scope
+             is this one". --}}
         <div data-toggle-when="category_percent,bogo" class="flex flex-col gap-4 border-t border-slate-100 pt-4">
             <div data-toggle-field="scope" class="flex flex-col gap-4">
                 <x-admin.field name="scope" label="Applies to" required
@@ -44,7 +46,7 @@
                 <div data-toggle-when="category">
                     <x-admin.field name="category_id" label="Category" :value="$offer->category_id"
                                    :options="$categoryOptions"
-                                   hint="Required for Category % off. Leave blank on Buy X Get Y to cover the whole shop." />
+                                   hint="Required for % off. Leave blank on Buy X Get Y to cover the whole shop." />
                 </div>
 
                 <div data-toggle-when="products">
@@ -64,7 +66,7 @@
         </div>
 
         {{-- Percent value: Spend threshold (as a percent or fixed amount,
-             per the Discount field above) and Category % off. --}}
+             per the Discount field above) and % off. --}}
         <div data-toggle-when="spend,category_percent">
             <x-admin.field name="value" label="Value" type="number" step="0.01" :value="$offer->value"
                            hint="A percent (0–100), or — for Spend threshold set to Fixed amount — a dollar amount." />

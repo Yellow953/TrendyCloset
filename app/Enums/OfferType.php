@@ -16,7 +16,7 @@ enum OfferType: string
     {
         return match ($this) {
             self::Spend => 'Spend threshold',
-            self::CategoryPercent => 'Category % off',
+            self::CategoryPercent => '% off',
             self::Bogo => 'Buy X get Y free',
         };
     }

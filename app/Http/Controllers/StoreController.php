@@ -307,8 +307,7 @@ class StoreController extends Controller
         $brand = config('seo.brand');
 
         if ($total === 0) {
-            return "Browse {$heading} at {$brand} — curated by Pamela, with free shipping over "
-                .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+            return "Browse {$heading} at {$brand} — curated by Pamela, with 30-day returns.";
         }
 
         $from = Product::query()
@@ -319,8 +318,7 @@ class StoreController extends Controller
         $price = $from !== null ? ' from '.Product::money($from) : '';
 
         return "Shop {$total} ".Str::plural('piece', $total)." in {$heading} at {$brand}{$price}. "
-            .'Hand-picked by Pamela, with free shipping over '
-            .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+            .'Hand-picked by Pamela, with 30-day returns.';
     }
 
     /**
@@ -472,8 +470,7 @@ class StoreController extends Controller
         $where = $category ? " in {$category}" : '';
 
         return "{$product->name}{$where} at ".config('seo.brand').", {$product->price_label}. "
-            .'Hand-picked by Pamela, with free shipping over '
-            .Product::money(Cart::FREE_SHIPPING_THRESHOLD).' and 30-day returns.';
+            .'Hand-picked by Pamela, with 30-day returns.';
     }
 
     /**
@@ -700,7 +697,6 @@ class StoreController extends Controller
      */
     private function policyTopics(): array
     {
-        $free = Product::money(Cart::FREE_SHIPPING_THRESHOLD);
         $flat = Product::money(Cart::STANDARD_SHIPPING);
 
         return [
@@ -709,7 +705,7 @@ class StoreController extends Controller
                 'intro' => 'Where your order goes, how long it takes, and what it costs.',
                 'sections' => [
                     ['heading' => 'Where we deliver', 'body' => 'We deliver anywhere in '.config('store.contact.country').'. You can also collect from the shop in '.implode(', ', config('store.contact.address')).' — just say so in the order notes.'],
-                    ['heading' => 'Rates', 'body' => "Delivery is {$flat}, and free on orders over {$free}. There is one delivery option, so the price you see at checkout is the price you pay."],
+                    ['heading' => 'Rates', 'body' => "Delivery is a flat {$flat}. There is one delivery option, so the price you see at checkout is the price you pay."],
                     ['heading' => 'Processing time', 'body' => 'Orders placed before 2pm on a working day are packed the same day. Orders go out Monday to Saturday, excluding public holidays.'],
                     ['heading' => 'Delivery windows', 'body' => 'Most orders arrive within 1–3 working days across '.config('store.contact.country').'. Addresses far from Beirut can add a day.'],
                     ['heading' => 'Staying updated', 'body' => 'We confirm every order on WhatsApp at '.config('store.contact.phone_display').' and message you again when it is on its way. If anything is delayed you hear it from us first.'],

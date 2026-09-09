@@ -50,11 +50,6 @@
                     🎉 {{ $summary['offer']->display_headline }} applied
                 </div>
             @endif
-            @if($freeShippingRemainder > 0)
-                <div class="mb-3 rounded-field bg-cream-3 px-3 py-2 text-center text-[13px] font-light">
-                    {{ \App\Models\Product::money($freeShippingRemainder) }} away from free shipping
-                </div>
-            @endif
             <div class="flex items-center justify-between text-[15px]">
                 <span class="font-light text-muted-2">Subtotal</span>
                 <span class="text-[18px] font-semibold text-blush">{{ \App\Models\Product::money($summary['subtotal']) }}</span>

@@ -137,7 +137,6 @@ class SeoController extends Controller
     public function llms(): Response
     {
         $brand = config('seo.brand_full');
-        $free = Product::money(Cart::FREE_SHIPPING_THRESHOLD);
         $flat = Product::money(Cart::STANDARD_SHIPPING);
         $count = Product::query()->active()->count();
         $from = Product::query()->active()->min('price');
@@ -157,7 +156,7 @@ class SeoController extends Controller
         $out[] = '## Shopping';
         $out[] = '';
         $out[] = '- Currency: '.config('seo.currency').'. Prices shown include VAT where applicable.';
-        $out[] = "- Delivery is {$flat} anywhere in ".config('store.contact.country').", free over {$free}, and arrives within 1–3 working days. There is one delivery option; the shop does not ship internationally.";
+        $out[] = "- Delivery is {$flat} anywhere in ".config('store.contact.country').", and arrives within 1–3 working days. There is one delivery option; the shop does not ship internationally.";
         $out[] = '- Collection from the shop is possible — say so in the order notes.';
         $out[] = '- Returns: 30 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';

@@ -90,13 +90,11 @@
                     <a href="{{ route('checkout') }}" class="tc-btn-dark mt-5 w-full text-[14px]">Checkout</a>
                     <div class="mt-3 text-center text-[13px] font-light text-muted">or <a href="{{ route('listing') }}" class="underline underline-offset-2">continue shopping</a></div>
                 </div>
-                <div class="mt-4 rounded-card bg-tan px-5 py-4 text-[13.5px] font-light text-ink">
-                    @if($summary['free_shipping'])
-                        🎉 You've unlocked <b class="font-medium">free shipping</b>.
-                    @else
-                        Add <b class="font-medium">{{ \App\Models\Product::money($freeShippingRemainder) }}</b> more to unlock free shipping.
-                    @endif
-                </div>
+                @if($summary['free_shipping'])
+                    <div class="mt-4 rounded-card bg-tan px-5 py-4 text-[13.5px] font-light text-ink">
+                        🎉 This order ships <b class="font-medium">free</b>.
+                    </div>
+                @endif
             </div>
         </div>
     @endif

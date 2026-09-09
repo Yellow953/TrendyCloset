@@ -51,7 +51,7 @@
                 <div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">VISIT</div>
                 <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="text-[15px] font-light leading-[1.7] transition-colors hover:text-blush">{!! implode('<br>', array_map('e', $contact['address'])) !!}</a>
             </div>
-            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">INSTAGRAM</div><div class="text-[15px] font-light">@trendycloset.byleilakonsol</div></div>
+            <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">INSTAGRAM</div><a href="{{ config('seo.social.instagram') }}" target="_blank" rel="noopener" class="text-[15px] font-light transition-colors hover:text-blush">@trendycloset.byleilakonsol</a></div>
             <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">HOURS</div><div class="text-[15px] font-light leading-[1.8]">{!! implode('<br>', array_map('e', $contact['hours'])) !!}</div></div>
             <div><div class="mb-2 text-[14px] font-medium tracking-[0.06em] text-blush">RESPONSE TIME</div><div class="text-[15px] font-light">{{ ucfirst($contact['response_time']) }}</div></div>
         </div>

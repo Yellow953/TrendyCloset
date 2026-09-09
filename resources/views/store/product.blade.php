@@ -221,12 +221,6 @@
             @if($inStock && $stockLeft <= 10)
                 <div class="text-[13.5px] font-light text-blush">Only {{ $stockLeft }} left</div>
             @endif
-
-            <div class="flex flex-wrap gap-6 border-t border-line pt-5 text-[13px] font-light text-muted-2">
-                <span>🚚 Free shipping over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }}</span>
-                <span>↩ 30-day returns</span>
-                <span>🔒 Secure checkout</span>
-            </div>
         </div>
     </div>
 
@@ -310,7 +304,7 @@
 
             <div data-tab-panel="shipping" class="hidden pt-8 text-center">
                 <p class="mx-auto max-w-[760px] text-[15.5px] font-light leading-[1.9] text-muted-3">
-                    Free delivery across {{ config('store.contact.country') }} on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }}, otherwise {{ \App\Models\Product::money(\App\Support\Cart::STANDARD_SHIPPING) }} (1–3 working days).
+                    Delivery across {{ config('store.contact.country') }} is {{ \App\Models\Product::money(\App\Support\Cart::STANDARD_SHIPPING) }}, arriving in 1–3 working days.
                     You have 30 days to return anything unworn with its tags attached — see our
                     <a href="{{ route('policies', 'returns') }}" class="tc-link">returns policy</a> for the details.
                 </p>

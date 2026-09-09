@@ -13,7 +13,7 @@
                 {{ $offerHeadline->display_headline }} —
                 <a href="{{ route('listing', $offerHeadline->category) }}" class="font-medium underline underline-offset-2">Shop now</a>
             @else
-                Free delivery across {{ config('store.contact.country') }} on orders over {{ \App\Models\Product::money(\App\Support\Cart::FREE_SHIPPING_THRESHOLD) }} —
+                Delivery across {{ config('store.contact.country') }} in 1–3 working days —
                 <a href="{{ route('listing') }}" class="font-medium underline underline-offset-2">Shop now</a>
             @endif
         </div>
