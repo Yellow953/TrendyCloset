@@ -300,12 +300,16 @@ function initUploadPreviews() {
         input.addEventListener('change', () => {
             target.innerHTML = '';
 
+            const ratioField = document.getElementById('photo_ratio');
+            const ratio = ratioField ? ratioField.value.replace(':', ' / ') : '1 / 1';
+
             Array.from(input.files || []).forEach((file) => {
                 if (!file.type.startsWith('image/')) return;
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
                 img.dataset.pickableImage = '';
-                img.className = 'h-40 w-40 rounded-lg border border-slate-200 object-cover transition-shadow';
+                img.className = 'h-40 w-auto rounded-lg border border-slate-200 object-cover transition-shadow';
+                img.style.aspectRatio = ratio;
                 img.onload = () => URL.revokeObjectURL(img.src);
                 target.appendChild(img);
             });

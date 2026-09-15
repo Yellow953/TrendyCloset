@@ -7,6 +7,7 @@
 @import 'tailwindcss' source(none);
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../app/Enums/PhotoRatio.php';
 @source '../views';
 @source not '../views/admin';
 @source not '../views/auth';

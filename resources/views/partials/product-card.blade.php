@@ -7,30 +7,16 @@
      called $sizes because @include inherits the caller's scope, and both the
      listing and the PDP have a $sizes of their own (the size facet). --}}
 @php
-    // Square by default, because that is the shape product photographs are
-    // cropped to on upload (ImageStore::SQUARE) — a fixed pixel height would
-    // letterbox or crop them a second time, differently at every breakpoint.
-    // $h is still honoured for a caller that genuinely needs a fixed frame.
-    $h = $h ?? 'aspect-square';
+    $h = $h ?? $p->photo_ratio->aspectClass();
     $fav = $fav ?? false;
     $imgSizes = $imgSizes ?? '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw';
     $variant = $p->relationLoaded('variants') ? $p->default_variant : null;
 
-    // What the piece comes in, under the price — read off the loaded variants,
-    // so it is what is actually sellable rather than a claim.
-    //
-    // Whichever of the two carries the variety is the one worth the row: a
-    // piece offered in five colours says that with swatches, and one offered in
-    // a single colour says it with its size run instead. Showing both on a
-    // 200px card turns the price into a footnote. Anything past the fifth
-    // collapses into "+N" so every card in a grid keeps the same height.
     $colors = $p->relationLoaded('variants') ? $p->color_run : collect();
     $sizes = $p->relationLoaded('variants') && $colors->count() < 2 ? $p->size_run : collect();
     $extraColors = max($colors->count() - 5, 0);
     $extraSizes = max($sizes->count() - 5, 0);
 
-    // Each chip/swatch below is its own quick-add: clicking a size or colour
-    // posts that exact variant straight to the bag, no PDP visit needed.
     $sizeVariants = $sizes->take(5)->mapWithKeys(
         fn ($size) => [$size => $p->sellable_variants->first(fn ($v) => $v->size === $size)]
     );
@@ -61,9 +47,6 @@
             <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/80 py-2 text-center text-[12px] font-medium tracking-[0.12em] text-white">SOLD OUT</div>
         @endif
 
-        {{-- Hover rail: save, quick-add, view. The three actions deal in from
-             the right one after another (see [data-card-rail] in app.css), and
-             stay reachable by keyboard via focus-within. --}}
         <div data-card-rail class="absolute right-3 top-3 flex flex-col gap-2">
             <form method="POST" action="{{ route('product.favorite', $p) }}" data-async data-favorite-form>
                 @csrf
@@ -100,8 +83,6 @@
     @if($sizes->isNotEmpty())
         <div class="mt-2 flex flex-wrap items-center gap-1.5"
              aria-label="{{ $colors->isNotEmpty() ? $colors->first().'. ' : '' }}Sizes: {{ $sizes->implode(', ') }}">
-            {{-- One colour still earns its dot, leading the size run: it is the
-                 shade of the piece in the photograph, said in 14 pixels. --}}
             @if($colors->isNotEmpty())
                 <x-swatch :color="$colors->first()" class="mr-0.5" />
             @endif

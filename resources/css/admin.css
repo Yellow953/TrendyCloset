@@ -29,6 +29,7 @@
 @source '../views/layouts/auth.blade.php';
 @source '../js/admin.js';
 @source '../../app/Enums/OrderStatus.php';
+@source '../../app/Enums/PhotoRatio.php';
 
 @theme {
     /* The back office is a working tool, not the shop — it drops the brand

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PhotoRatio;
 use App\Enums\ProductEventType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,7 @@ class Product extends Model
         'price',
         'compare_at_price',
         'badge',
+        'photo_ratio',
         'rating',
         'is_featured',
         'is_active',
@@ -34,6 +36,7 @@ class Product extends Model
         return [
             'price' => 'decimal:2',
             'compare_at_price' => 'decimal:2',
+            'photo_ratio' => PhotoRatio::class,
             'rating' => 'integer',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',

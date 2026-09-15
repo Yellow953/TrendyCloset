@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PhotoRatio;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -46,7 +47,7 @@ class ProductController extends Controller
     {
         return view('admin.products.form', [
             'active' => 'products',
-            'product' => new Product(['is_active' => true, 'rating' => 5]),
+            'product' => new Product(['is_active' => true, 'rating' => 5, 'photo_ratio' => PhotoRatio::Square]),
             'categories' => $this->categoryOptions(),
         ]);
     }
@@ -140,6 +141,7 @@ class ProductController extends Controller
             'price' => ['required', 'numeric', 'min:0', 'max:999999'],
             'compare_at_price' => ['nullable', 'numeric', 'min:0', 'max:999999', 'gt:price'],
             'badge' => ['nullable', 'string', 'max:32'],
+            'photo_ratio' => ['required', Rule::enum(PhotoRatio::class)],
             'rating' => ['nullable', 'integer', 'min:1', 'max:5'],
             'sale_ends_at' => ['nullable', 'date'],
             'is_featured' => ['nullable', 'boolean'],
@@ -249,11 +251,7 @@ class ProductController extends Controller
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
 
         foreach ($files as $file) {
-            // Square, centre-cropped: every product frame on the storefront —
-            // card, thumbnail rail, PDP — is a fixed box the photo is cropped
-            // into anyway. Doing it once on upload means the gallery lines up
-            // instead of each shot deciding its own crop at render time.
-            $stored = $this->images->store($file, 'products/'.$product->id, ImageStore::SQUARE);
+            $stored = $this->images->store($file, 'products/'.$product->id, $product->photo_ratio->ratio());
 
             $product->images()->create([
                 'url' => $stored['url'],

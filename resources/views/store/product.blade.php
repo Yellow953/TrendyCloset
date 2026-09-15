@@ -1,11 +1,6 @@
 @extends('layouts.storefront')
 
 @php
-    // The frame the main photograph fills, measured: 54% of the row from lg,
-    // less the 138px thumbnail rail and its gap; full width below that. Defined
-    // once because the preload below and the <x-img> in the gallery have to
-    // state the same thing — disagree and the browser fetches one candidate and
-    // then renders another.
     $mainImageSizes = '(min-width: 1024px) calc(54vw - 197px), (min-width: 768px) calc(100vw - 234px), (min-width: 640px) calc(100vw - 194px), calc(100vw - 40px)';
 @endphp
 
@@ -17,8 +12,8 @@
 @php
     $inStock = $product->in_stock;
     $stockLeft = $variants->sum('stock');
-    // Pre-select the first size that can actually be bought.
     $firstAvailable = $variants->first(fn ($v) => $v->in_stock);
+    $ratioClass = $product->photo_ratio->aspectClass();
 @endphp
 
 @section('content')
@@ -41,7 +36,7 @@
                              src alone would leave the old srcset winning. --}}
                         <button type="button" data-gallery-thumb data-full="{{ $g->url }}"
                                 data-srcset="{{ \App\Support\Img::srcset($g->url) }}"
-                                class="tc-media h-[92px] w-[92px] flex-none transition sm:h-[138px] sm:w-[138px] {{ $loop->first ? 'is-active' : '' }}">
+                                class="tc-media {{ $ratioClass }} h-[92px] w-auto flex-none transition sm:h-[138px] {{ $loop->first ? 'is-active' : '' }}">
                             <x-img :src="$g->url" :alt="$product->name.' view '.$loop->iteration" sizes="138px"
                                    class="h-full w-full object-cover" />
                         </button>
@@ -50,10 +45,7 @@
             @endif
 
             <div class="relative flex-1">
-                {{-- Square, like the file itself: product photographs are cropped
-                     to 1:1 on upload, so a fixed-height frame would crop them a
-                     second time and differently at every breakpoint. --}}
-                <div data-zoom class="tc-media relative aspect-square w-full rounded-panel">
+                <div data-zoom class="tc-media relative {{ $ratioClass }} w-full rounded-panel">
                     {{-- The page's LCP. --}}
                     <x-img data-gallery-main :src="$product->image_url" :alt="$product->name" eager
                            :sizes="$mainImageSizes"
@@ -71,9 +63,6 @@
                     </div>
                 @endif
 
-                {{-- Actions on the photograph itself. A sibling of [data-zoom]
-                     rather than a child, so moving onto a button leaves the
-                     frame and drops the zoom instead of magnifying under it. --}}
                 <div class="absolute right-4 top-4 z-10 flex flex-col gap-2.5">
                     <form method="POST" action="{{ route('product.favorite', $product) }}" data-async data-favorite-form>
                         @csrf
@@ -91,8 +80,6 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[19px] w-[19px]"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.4 10.8 7.2-4.2M8.4 13.2l7.2 4.2"/></svg>
                     </button>
 
-                    {{-- Zoom is a choice, not a surprise: on a touch screen an
-                         armed frame pans instead of scrolling the page. --}}
                     <button type="button" data-zoom-toggle aria-pressed="false"
                             class="tc-card-action h-10 w-10 aria-pressed:bg-ink aria-pressed:text-white"
                             title="Zoom" aria-label="Toggle zoom on the photograph">
@@ -102,8 +89,6 @@
             </div>
         </div>
 
-        {{-- Purchase panel. data-reveal-children walks the panel top to bottom
-             — category, name, price, then the form — as the page settles. --}}
         <div data-reveal-children class="flex flex-1 flex-col gap-5">
             @if($product->category)
                 <div class="text-[13.5px] font-light text-muted">
@@ -151,21 +136,11 @@
                 </div>
             @endif
 
-            {{-- One form, two submits: add to bag, or buy now (adds, then goes
-                 straight to checkout). The radio carries the variant, so size
-                 and stock are enforced by the same request. --}}
-            {{-- data-async covers "Add To Bag"; "Buy Now" is left to submit
-                 normally, since it has to navigate to checkout. --}}
             <form method="POST" action="{{ route('cart.add') }}" data-buy-form data-async class="flex flex-col gap-5">
                 @csrf
 
                 @if($variants->isNotEmpty())
                     <div>
-                        {{-- A colour-only piece carries no size dimension — the
-                             radios below still have to exist (they're what carries
-                             variant_id and what the colour swatches filter by),
-                             but there is nothing to show a "Size" heading or chip
-                             row for. --}}
                         @if($sizes->isNotEmpty())
                             <div class="mb-2.5 flex items-center justify-between">
                                 <span class="text-[15px] font-medium">Size</span>
@@ -224,8 +199,6 @@
         </div>
     </div>
 
-    {{-- Sticky buy bar: slides up once the main Add To Bag scrolls out of view.
-         Its size select stays in sync with the radios above (see app.js). --}}
     @if($inStock)
         <div data-sticky-buy class="fixed inset-x-0 bottom-0 z-30 rounded-t-panel border-t border-line bg-white/95 shadow-[0_-8px_24px_rgba(43,37,35,.10)] backdrop-blur">
             <div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-3 md:px-10">

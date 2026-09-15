@@ -227,8 +227,19 @@
             @endif
         </div>
 
+        {{-- This card sits outside #product-form (see the note above the picker
+             below), so the select needs `form` to submit with the rest of the
+             piece — without it the value never leaves this card. --}}
+        <div class="px-5 pt-5">
+            <x-admin.field name="photo_ratio" label="Photo crop" :options="\App\Enums\PhotoRatio::options()"
+                           :value="$product->photo_ratio?->value" required class="max-w-[260px]" form="product-form"
+                           hint="Square suits most product shots; Portrait (4:5) is Instagram's format, better for a full outfit. Applies to newly chosen files — photos already uploaded keep their existing crop." />
+        </div>
+
+        @php($ratioClass = ($product->photo_ratio ?? \App\Enums\PhotoRatio::Square)->aspectClass())
+
         <div class="flex gap-4 overflow-x-auto px-5 py-5">
-            <label class="flex aspect-[5/5] w-[200px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 text-center transition-colors hover:border-slate-900">
+            <label class="flex {{ $ratioClass }} w-[200px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 text-center transition-colors hover:border-slate-900">
                 <span class="text-[18px] text-slate-400" aria-hidden="true">⬆</span>
                 <span class="mt-2 text-[12.5px] font-medium">Choose images</span>
                 <span class="mt-1 text-[11px] font-normal text-slate-400">JPG, PNG, WebP or AVIF · up to 5 MB each</span>
@@ -238,7 +249,7 @@
             @if($editing)
                 @foreach($product->images as $image)
                     <div class="w-[200px] shrink-0">
-                        <div class="relative aspect-[5/5] overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
+                        <div class="relative {{ $ratioClass }} overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
                             <img src="{{ $image->url }}" alt="" data-pickable-image class="h-full w-full object-cover transition-shadow">
 
                             @if($image->is_primary)
