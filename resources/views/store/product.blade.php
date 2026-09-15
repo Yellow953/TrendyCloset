@@ -305,7 +305,7 @@
             <div data-tab-panel="shipping" class="hidden pt-8 text-center">
                 <p class="mx-auto max-w-[760px] text-[15.5px] font-light leading-[1.9] text-muted-3">
                     Delivery across {{ config('store.contact.country') }} is {{ \App\Models\Product::money(\App\Support\Cart::STANDARD_SHIPPING) }}, arriving in 1–3 working days.
-                    You have 30 days to return anything unworn with its tags attached — see our
+                    You have 7 days to return anything unworn with its tags attached — see our
                     <a href="{{ route('policies', 'returns') }}" class="tc-link">returns policy</a> for the details.
                 </p>
             </div>

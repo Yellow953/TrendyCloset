@@ -262,7 +262,7 @@ class Schema
                 '@type' => 'MerchantReturnPolicy',
                 'applicableCountry' => 'LB',
                 'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                'merchantReturnDays' => 30,
+                'merchantReturnDays' => 7,
                 'returnMethod' => 'https://schema.org/ReturnByMail',
                 'returnFees' => 'https://schema.org/FreeReturn',
                 'merchantReturnLink' => route('policies', 'returns'),

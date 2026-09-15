@@ -33,6 +33,7 @@
         'image' => '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-4.5-4.5L7 20"/>',
         'ruler' => '<path d="M16.5 2.5 21.5 7.5a1.4 1.4 0 0 1 0 2L9.5 21.5a1.4 1.4 0 0 1-2 0L2.5 16.5a1.4 1.4 0 0 1 0-2L14.5 2.5a1.4 1.4 0 0 1 2 0Z"/><path d="m7.5 9.5 2 2"/><path d="m11 6 2 2"/><path d="m4 13 2 2"/>',
         'search-x' => '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="m9 9 4 4"/><path d="m13 9-4 4"/>',
+        'announcement' => '<path d="M3 11v3a2 2 0 0 0 2 2h1l2 5h2l-1.5-5H10l9 4V5l-9 4H5a2 2 0 0 0-2 2Z"/><path d="M17 8.5a4 4 0 0 1 0 7"/>',
     ];
 @endphp
 

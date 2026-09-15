@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Announcement;
 use App\Models\ContactMessage;
 use App\Models\Order;
 use App\Models\ProductFavorite;
@@ -78,7 +79,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'bagCount' => $this->app->make(Cart::class)->count(),
                 'favoritesCount' => $this->favoritesCount(),
-                'offerHeadline' => $this->app->make(OfferBoard::class)->headline(),
+                'announcements' => Announcement::forHeader(),
             ]);
         });
 

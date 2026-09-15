@@ -23,7 +23,7 @@ class Cart
     public const SESSION_KEY = 'tc_cart';
 
     /** Flat rate — there is no spend threshold that ships free on its own. */
-    public const STANDARD_SHIPPING = 9.0;
+    public const STANDARD_SHIPPING = 4.0;
 
     /** Per-line safety cap, independent of stock. */
     private const MAX_QTY = 20;

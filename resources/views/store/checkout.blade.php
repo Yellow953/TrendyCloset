@@ -151,7 +151,7 @@
                     <div class="mt-2.5 flex justify-between text-[18px] font-semibold"><span>Total</span><span>{{ \App\Models\Product::money($summary['total']) }}</span></div>
                 </div>
             </div>
-            <div class="mt-4 flex justify-center gap-[18px] text-[12.5px] font-light text-muted"><span>🔒 SSL encrypted</span><span>↩ 30-day returns</span><span>✓ Buyer protection</span></div>
+            <div class="mt-4 flex justify-center gap-[18px] text-[12.5px] font-light text-muted"><span>🔒 SSL encrypted</span><span>↩ 7-day returns</span><span>✓ Buyer protection</span></div>
         </div>
     </div>
 @endsection

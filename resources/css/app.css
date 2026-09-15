@@ -175,6 +175,12 @@
         @apply flex h-11 w-11 items-center justify-center rounded-full border border-line-2 bg-white text-[18px] text-ink shadow-[0_6px_18px_rgba(43,37,35,.12)] transition-all hover:border-blush hover:text-blush disabled:cursor-default disabled:opacity-0;
     }
 
+    /* Same job as .tc-arrow, scaled down for the pre-header bar — no surface
+       of its own, since it sits on the bar's own colour rather than a photo. */
+    .tc-announcement-arrow {
+        @apply absolute top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[20px] leading-none text-white/80 transition-colors hover:text-white disabled:cursor-default disabled:opacity-0;
+    }
+
     /* Section heading — centred, with a short rule underneath */
     .tc-heading {
         @apply text-center text-[28px] font-normal leading-tight md:text-[34px];

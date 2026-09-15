@@ -9,8 +9,8 @@ use Illuminate\Support\Collection;
 
 /**
  * The currently-live offers, read once per request and reused everywhere they
- * are advertised — the announcement banner, product cards, the PDP — so a
- * page with twenty cards costs one query rather than twenty.
+ * are advertised — product cards, the PDP, the cart — so a page with twenty
+ * cards costs one query rather than twenty.
  */
 class OfferBoard
 {
@@ -23,15 +23,6 @@ class OfferBoard
     public function live(): Collection
     {
         return $this->offers ??= Offer::live()->with(['category', 'products'])->latest('id')->get();
-    }
-
-    /**
-     * The single most prominent live offer, for the header banner. Newest
-     * first — merchandising's latest offer is the one worth announcing.
-     */
-    public function headline(): ?Offer
-    {
-        return $this->live()->first();
     }
 
     /**

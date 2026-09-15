@@ -6,15 +6,30 @@
 {{-- Sticky: the nav follows the page, and the announcement bar above it
      collapses on scroll (see .is-scrolled in app.css, driven by app.js). --}}
 <header data-header class="sticky top-0 z-40 bg-white transition-shadow">
-    {{-- Announcement bar --}}
+    {{-- Announcement bar. $announcements (Announcement::forHeader()) is always
+         at least one item — the fallback delivery line — so this never renders
+         empty. With more than one it's a plain [data-carousel] (see
+         initCarousels() in app.js): swipe/scroll-snap and the prev/next
+         arrows come from that shared primitive, one full-width "card" per
+         announcement, autoplay wired the same way the home carousels are. --}}
     <div data-announcement class="bg-pink text-center text-[12px] font-light text-ink md:text-[13px]">
-        <div class="px-5 py-2.5 md:px-10">
-            @if($offerHeadline)
-                {{ $offerHeadline->display_headline }} —
-                <a href="{{ route('listing', $offerHeadline->category) }}" class="font-medium underline underline-offset-2">Shop now</a>
-            @else
-                Delivery across {{ config('store.contact.country') }} in 1–3 working days —
-                <a href="{{ route('listing') }}" class="font-medium underline underline-offset-2">Shop now</a>
+        <div data-carousel @if($announcements->count() > 1) data-carousel-autoplay="5000" @endif class="relative">
+            <div data-carousel-track class="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth">
+                @foreach($announcements as $announcement)
+                    <div class="flex h-9 w-full shrink-0 snap-start items-center justify-center px-8 md:h-10 md:px-14">
+                        <span class="truncate">
+                            {{ $announcement->message }}
+                            @if($announcement->link_label)
+                                — <a href="{{ $announcement->linkUrl() }}" class="font-medium underline underline-offset-2">{{ $announcement->link_label }}</a>
+                            @endif
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+
+            @if($announcements->count() > 1)
+                <button type="button" data-carousel-prev aria-label="Previous announcement" class="tc-announcement-arrow left-1 md:left-3">&lsaquo;</button>
+                <button type="button" data-carousel-next aria-label="Next announcement" class="tc-announcement-arrow right-1 md:right-3">&rsaquo;</button>
             @endif
         </div>
     </div>

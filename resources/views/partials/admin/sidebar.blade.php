@@ -20,6 +20,7 @@
             'label' => 'Shop',
             'links' => [
                 ['key' => 'slides', 'label' => 'Home slider', 'icon' => 'slides', 'route' => 'admin.slides.index'],
+                ['key' => 'announcements', 'label' => 'Announcements', 'icon' => 'announcement', 'route' => 'admin.announcements.index'],
                 ['key' => 'messages', 'label' => 'Contact', 'icon' => 'messages', 'route' => 'admin.messages.index', 'count' => $unreadMessageCount ?? 0],
                 ['key' => 'analytics', 'label' => 'Analytics', 'icon' => 'analytics', 'route' => 'admin.analytics'],
             ],

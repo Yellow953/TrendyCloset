@@ -158,7 +158,7 @@ class SeoController extends Controller
         $out[] = '- Currency: '.config('seo.currency').'. Prices shown include VAT where applicable.';
         $out[] = "- Delivery is {$flat} anywhere in ".config('store.contact.country').", and arrives within 1–3 working days. There is one delivery option; the shop does not ship internationally.";
         $out[] = '- Collection from the shop is possible — say so in the order notes.';
-        $out[] = '- Returns: 30 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
+        $out[] = '- Returns: 7 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';
         $out[] = '- Customers check out as guests — there is no shopper account to create.';
         $out[] = '- No card details are taken on the website. An order is placed as pending and the shop confirms it and arranges payment over WhatsApp.';

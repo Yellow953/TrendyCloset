@@ -307,7 +307,7 @@ class StoreController extends Controller
         $brand = config('seo.brand');
 
         if ($total === 0) {
-            return "Browse {$heading} at {$brand} — curated by Pamela, with 30-day returns.";
+            return "Browse {$heading} at {$brand} — curated by Pamela, with 7-day returns.";
         }
 
         $from = Product::query()
@@ -318,7 +318,7 @@ class StoreController extends Controller
         $price = $from !== null ? ' from '.Product::money($from) : '';
 
         return "Shop {$total} ".Str::plural('piece', $total)." in {$heading} at {$brand}{$price}. "
-            .'Hand-picked by Pamela, with 30-day returns.';
+            .'Hand-picked by Pamela, with 7-day returns.';
     }
 
     /**
@@ -470,7 +470,7 @@ class StoreController extends Controller
         $where = $category ? " in {$category}" : '';
 
         return "{$product->name}{$where} at ".config('seo.brand').", {$product->price_label}. "
-            .'Hand-picked by Pamela, with 30-day returns.';
+            .'Hand-picked by Pamela, with 7-day returns.';
     }
 
     /**
@@ -713,9 +713,9 @@ class StoreController extends Controller
             ],
             'returns' => [
                 'title' => 'Returns & Refunds',
-                'intro' => 'Thirty days to change your mind, on almost everything.',
+                'intro' => 'One week to change your mind, on almost everything.',
                 'sections' => [
-                    ['heading' => 'The window', 'body' => 'You have 30 days from delivery to start a return. Items must be unworn, unwashed and still have their tags attached.'],
+                    ['heading' => 'The window', 'body' => 'You have 7 days from delivery to start a return. Items must be unworn, unwashed and still have their tags attached.'],
                     ['heading' => 'How to start one', 'body' => 'Email '.config('seo.email').' with your order number and which pieces are going back. We reply with a return label and instructions within one working day.'],
                     ['heading' => 'Refunds', 'body' => 'Refunds are issued to the original payment method within 5 working days of your parcel reaching us. Your bank may take a few days more to show it.'],
                     ['heading' => 'Exchanges', 'body' => 'The fastest exchange is a return plus a fresh order — that way your new size is reserved immediately rather than waiting on the return to land.'],
