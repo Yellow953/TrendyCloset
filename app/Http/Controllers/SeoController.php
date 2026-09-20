@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Support\Cart;
 use App\Support\Catalog;
+use App\Support\Schema;
+use App\Support\Tracking;
 use Illuminate\Http\Response;
 
 /**
@@ -90,9 +92,6 @@ class SeoController extends Controller
             $add(route('listing', $category), $category->updated_at, 'weekly', '0.8');
         }
 
-        // Photographs are most of what a fashion shop has to offer a search
-        // engine, so each product URL carries its gallery as image:image —
-        // that is what puts the pieces into Google Images.
         Product::query()
             ->active()
             ->select(['id', 'slug', 'updated_at'])
@@ -117,13 +116,73 @@ class SeoController extends Controller
             $add(route('policies', $topic), null, 'yearly', '0.4');
         }
 
-        // The XML declaration is prepended here, not written in the Blade: with
-        // short_open_tag on, a literal "<?" puts Blade's own tokenizer into PHP
-        // mode and the rest of the template is never compiled.
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
             .view('seo.sitemap', ['urls' => $urls])->render();
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    }
+
+    /**
+     * The catalogue as a Meta (and Google Merchant Center) product feed —
+     * Commerce Manager fetches this on its own schedule, so ads stay in sync
+     * with real price and stock without this app ever calling out to Meta.
+     *
+     * One row per product, not per variant: variants here share one image
+     * gallery and mostly share one price, so there is no single correct
+     * g:color/g:size to put on a variant-grouped item.
+     */
+    public function metaFeed(): Response
+    {
+        $items = [];
+
+        Product::query()
+            ->active()
+            ->with('images:id,product_id,url,position')
+            ->orderBy('id')
+            ->chunk(500, function ($products) use (&$items) {
+                foreach ($products as $product) {
+                    $imageLink = $product->image_url;
+
+                    if ($imageLink === null) {
+                        continue;
+                    }
+
+                    $images = $product->images->sortBy('position')->pluck('url')->filter()->values();
+                    $price = $product->on_sale ? $product->compare_at_price : $product->price;
+                    $salePrice = $product->on_sale ? $product->price : null;
+
+                    $items[] = [
+                        'id' => Tracking::contentId($product),
+                        'title' => $product->name,
+                        'description' => Schema::text($product->description)
+                            ?: $product->name.' from '.config('seo.brand').'.',
+                        'link' => route('product', $product),
+                        'image_link' => $imageLink,
+                        'additional_image_link' => $images->reject(fn ($url) => $url === $imageLink)->take(10)->all(),
+                        'availability' => $product->in_stock ? 'in stock' : 'out of stock',
+                        'condition' => 'new',
+                        'price' => $this->moneyFor($price),
+                        'sale_price' => $salePrice !== null ? $this->moneyFor($salePrice) : null,
+                        'brand' => config('seo.brand'),
+                        'mpn' => Tracking::contentId($product),
+                        'product_type' => $product->category?->name,
+                    ];
+                }
+            });
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+            .view('seo.meta-feed', ['items' => $items])->render();
+
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    }
+
+    /**
+     * Meta/Google feed prices are "49.00 USD", not "$49.00" — Product::money()
+     * is for on-page display and hardcodes the currency symbol.
+     */
+    private function moneyFor(int|float|string $amount): string
+    {
+        return number_format((float) $amount, 2, '.', '').' '.config('seo.currency');
     }
 
     /**

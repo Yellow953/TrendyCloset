@@ -24,33 +24,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StoreController::class, 'home'])->name('home');
 
-/*
-| Crawler surfaces. robots.txt is a route rather than a file in public/ so it
-| can name the sitemap at whatever domain APP_URL points at; llms.txt is the
-| plain-language brief for LLM agents.
-*/
+// SEO
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
+Route::get('/feed/meta-products.xml', [SeoController::class, 'metaFeed'])->name('feed.meta');
 
-/*
-| Catalogue. One listing action serves the whole shop, a single category and
-| the New in / Sale edits (`?edit=`), so filters and sorting behave identically
-| whichever door the shopper came through.
-*/
+// Shop
 Route::get('/shop/{category:slug?}', [StoreController::class, 'listing'])->name('listing');
 Route::get('/product/{product:slug}', [StoreController::class, 'product'])->name('product');
 Route::post('/product/{product:slug}/favorite', [StoreController::class, 'favorite'])->name('product.favorite');
 Route::get('/favorites/drawer', [StoreController::class, 'favoritesDrawer'])->name('favorites.drawer');
 Route::get('/favorites', [StoreController::class, 'favorites'])->name('favorites');
-
-// The storefront used to live at /women, before the nav was driven by the DB.
 Route::redirect('/women', '/shop');
-
-/*
-| Bag — session-backed, no `carts` table. Checkout renders the real bag but
-| does not yet place an order.
-*/
 Route::get('/bag', [CartController::class, 'index'])->name('cart');
 Route::get('/bag/drawer', [CartController::class, 'drawer'])->name('cart.drawer');
 Route::post('/bag', [CartController::class, 'store'])->name('cart.add');
@@ -60,26 +46,14 @@ Route::post('/bag/coupon', [CartController::class, 'applyCoupon'])->name('cart.c
 Route::delete('/bag/coupon', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::post('/checkout', [CartController::class, 'placeOrder'])->name('checkout.place');
-// Gated on the session that placed it, not on the number in the URL.
 Route::get('/order/{number}', [CartController::class, 'confirmed'])->name('order.confirmed');
-
 Route::get('/about', [StoreController::class, 'about'])->name('about');
 Route::get('/contact', [StoreController::class, 'contact'])->name('contact');
 Route::post('/contact', [StoreController::class, 'sendContact'])->name('contact.send');
-// Five policy documents behind one action; /policies opens the first.
 Route::get('/policies/{topic?}', [StoreController::class, 'policies'])->name('policies');
+Route::post('/track/whatsapp', [StoreController::class, 'trackWhatsapp'])->middleware('throttle:30,1')->name('track.whatsapp');
 
-// A tap on a wa.me link, reported by app.js as the browser leaves. Throttled
-// because it is the one analytics write a visitor can trigger directly.
-Route::post('/track/whatsapp', [StoreController::class, 'trackWhatsapp'])
-    ->middleware('throttle:30,1')
-    ->name('track.whatsapp');
-
-/*
-| Admin authentication — the storefront is public; these routes gate the
-| back-office CRM. Registration is intentionally disabled: staff accounts are
-| created via seeder/tinker, never self-service.
-*/
+// Auth
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);
@@ -89,7 +63,6 @@ Route::middleware('guest')->group(function () {
     Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
-
 Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -97,11 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::post('password/confirm', [ConfirmPasswordController::class, 'confirm']);
 });
 
-/*
-| Back office. Every authenticated user is staff (customers cannot sign in), so
-| `auth` gates the CRM as a whole; the narrower `admin` group below covers the
-| things only an administrator should touch — discount codes and staff accounts.
-*/
+// Back Office
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -124,8 +93,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
 
-    // The home-page hero. Storefront content rather than catalogue, but it is
-    // merchandising all the same, so any staff member may change it.
     Route::get('slides', [HeroSlideController::class, 'index'])->name('slides.index');
     Route::get('slides/create', [HeroSlideController::class, 'create'])->name('slides.create');
     Route::post('slides', [HeroSlideController::class, 'store'])->name('slides.store');
@@ -134,7 +101,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::patch('slides/{slide}/toggle', [HeroSlideController::class, 'toggle'])->name('slides.toggle');
     Route::delete('slides/{slide}', [HeroSlideController::class, 'destroy'])->name('slides.destroy');
 
-    // The pre-header bar above the main nav, on every storefront page.
     Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
     Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
@@ -158,12 +124,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::patch('messages/{message}/unread', [MessageController::class, 'unread'])->name('messages.unread');
     Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 
-    // Admin-only: trading figures, discount codes and who may sign in.
     Route::middleware('admin')->group(function () {
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics');
-
-        // Both are short forms, so they are created and edited in modals on
-        // their own index rather than on a page of their own.
         Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
         Route::post('coupons', [CouponController::class, 'store'])->name('coupons.store');
         Route::put('coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');

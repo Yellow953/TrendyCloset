@@ -67,9 +67,6 @@ class Schema
                 'addressRegion' => 'Mount Lebanon',
                 'addressCountry' => 'LB',
             ],
-            // It is a real shop with a door, not only a website — the opening
-            // hours and the service area are what a local pack listing is built
-            // from, and what an assistant quotes when asked "are they open?".
             'openingHoursSpecification' => self::openingHours(),
             'areaServed' => [
                 '@type' => 'Country',
@@ -106,8 +103,6 @@ class Schema
         foreach ((array) config('store.contact.hours', []) as $line) {
             [$dayPart, $timePart] = array_pad(explode(',', $line, 2), 2, '');
 
-            // The /u matters: the hours are written with an en-dash, and without
-            // it the character class matches one byte of a three-byte character.
             if (! preg_match('/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/iu', $timePart, $m)) {
                 continue;
             }
@@ -220,7 +215,6 @@ class Schema
             'description' => self::text($product->description) ?: $product->name.' from '.config('seo.brand').'.',
             'url' => $url,
             'image' => $images->isNotEmpty() ? $images->all() : null,
-            // Also the analytics product id — see Tracking::contentId().
             'sku' => 'TC-'.$product->id,
             'productID' => 'TC-'.$product->id,
             'category' => $product->category?->name,
@@ -228,8 +222,6 @@ class Schema
                 '@type' => 'Brand',
                 'name' => config('seo.brand'),
             ],
-            // Sizes and colours actually stocked, so an engine can answer
-            // "does this come in a medium?" without loading the page.
             'size' => self::variantValues($product, 'size'),
             'color' => self::variantValues($product, 'color'),
             'offers' => self::offer($product, $url),
@@ -274,8 +266,6 @@ class Schema
                     'value' => number_format(Cart::STANDARD_SHIPPING, 2, '.', ''),
                     'currency' => config('seo.currency'),
                 ],
-                // The shop delivers across Lebanon; saying so is what lets a
-                // shopper in Beirut see a delivery estimate in the result.
                 'shippingDestination' => [
                     '@type' => 'DefinedRegion',
                     'addressCountry' => 'LB',
@@ -411,7 +401,7 @@ class Schema
     /**
      * Collapse free text to a single clean line — JSON-LD values carry no markup.
      */
-    private static function text(?string $value): ?string
+    public static function text(?string $value): ?string
     {
         $value = trim(preg_replace('/\s+/', ' ', strip_tags((string) $value)));
 
