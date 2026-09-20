@@ -65,7 +65,7 @@ class Product extends Model
      */
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class)->orderBy('position');
     }
 
     /**

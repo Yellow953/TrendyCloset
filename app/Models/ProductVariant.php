@@ -20,6 +20,7 @@ class ProductVariant extends Model
         'price_override',
         'stock',
         'is_active',
+        'position',
     ];
 
     /** The letter run, in the order a rail reads. */

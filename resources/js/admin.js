@@ -141,6 +141,42 @@ function initRepeater() {
             e.preventDefault();
             e.target.closest('[data-repeater-row]')?.remove();
         });
+
+        // Drag-to-reorder: the ⠿ handle is the only thing that arms a row as
+        // draggable, so selecting text in a field never starts a drag. Row
+        // order on save comes from DOM order, not the `variants[N]` index
+        // (see syncVariants()), so dragging alone is enough to persist it.
+        let dragging = null;
+
+        list.addEventListener('mousedown', (e) => {
+            e.target.closest('[data-repeater-handle]')?.closest('[data-repeater-row]')?.setAttribute('draggable', 'true');
+        });
+
+        document.addEventListener('mouseup', () => {
+            list.querySelectorAll('[data-repeater-row][draggable="true"]').forEach((row) => row.removeAttribute('draggable'));
+        });
+
+        list.addEventListener('dragstart', (e) => {
+            dragging = e.target.closest('[data-repeater-row]');
+            if (!dragging) return;
+            e.dataTransfer.effectAllowed = 'move';
+            dragging.classList.add('opacity-40');
+        });
+
+        list.addEventListener('dragend', () => {
+            dragging?.classList.remove('opacity-40');
+            dragging?.removeAttribute('draggable');
+            dragging = null;
+        });
+
+        list.addEventListener('dragover', (e) => {
+            if (!dragging) return;
+            e.preventDefault();
+            const target = e.target.closest('[data-repeater-row]');
+            if (!target || target === dragging) return;
+            const before = e.clientY < target.getBoundingClientRect().top + target.offsetHeight / 2;
+            list.insertBefore(dragging, before ? target : target.nextSibling);
+        });
     });
 }
 

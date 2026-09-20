@@ -71,7 +71,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load(['variants' => fn ($q) => $q->orderBy('id'), 'images' => fn ($q) => $q->orderBy('position')]);
+        $product->load(['variants', 'images' => fn ($q) => $q->orderBy('position')]);
 
         return view('admin.products.form', [
             'active' => 'products',
@@ -178,7 +178,10 @@ class ProductController extends Controller
     /**
      * Reconcile the inline size/colour repeater against what is stored. Rows
      * the form no longer carries are deleted; rows with an id are updated in
-     * place so their order history keeps pointing at the same variant.
+     * place so their order history keeps pointing at the same variant. Row
+     * order is whatever the admin last dragged it to — the browser submits
+     * fields in DOM order regardless of each row's `variants[N]` index, so
+     * that order is just the position we persist.
      */
     private function syncVariants(Product $product, Request $request): void
     {
@@ -187,7 +190,7 @@ class ProductController extends Controller
 
         $keptIds = [];
 
-        foreach ($rows as $row) {
+        foreach ($rows->values() as $position => $row) {
             $attributes = [
                 'sku' => filled($row['sku'] ?? null) ? $row['sku'] : $this->generateSku($product, $row),
                 'size' => filled($row['size'] ?? null) ? $row['size'] : null,
@@ -195,6 +198,7 @@ class ProductController extends Controller
                 'price_override' => filled($row['price_override'] ?? null) ? (float) $row['price_override'] : null,
                 'stock' => max(0, (int) ($row['stock'] ?? 0)),
                 'is_active' => (bool) ($row['is_active'] ?? false),
+                'position' => $position + 1,
             ];
 
             $variant = filled($row['id'] ?? null)

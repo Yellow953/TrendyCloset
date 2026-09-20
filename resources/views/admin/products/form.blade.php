@@ -80,6 +80,7 @@
                         <table class="bo-table">
                             <thead>
                                 <tr>
+                                    <th class="w-[28px]"></th>
                                     <th class="w-[110px]">Size</th>
                                     <th class="w-[170px]">Colour</th>
                                     <th class="w-[130px]">SKU</th>
@@ -92,6 +93,9 @@
                             <tbody data-repeater-rows>
                                 @foreach($variants as $i => $variant)
                                     <tr data-repeater-row>
+                                        <td class="px-5 py-2.5 text-slate-300">
+                                            <button type="button" data-repeater-handle class="cursor-grab select-none active:cursor-grabbing" title="Drag to reorder" aria-label="Drag to reorder">⠿</button>
+                                        </td>
                                         <td class="px-5 py-2.5">
                                             <input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant['id'] ?? '' }}">
                                             <select name="variants[{{ $i }}][size]" class="bo-input-sm">
@@ -133,6 +137,9 @@
                          a fresh number by initRepeater() in app.js. --}}
                     <template>
                         <tr data-repeater-row>
+                            <td class="px-5 py-2.5 text-slate-300">
+                                <button type="button" data-repeater-handle class="cursor-grab select-none active:cursor-grabbing" title="Drag to reorder" aria-label="Drag to reorder">⠿</button>
+                            </td>
                             <td class="px-5 py-2.5">
                                 <input type="hidden" name="variants[__INDEX__][id]" value="">
                                 <select name="variants[__INDEX__][size]" class="bo-input-sm">
