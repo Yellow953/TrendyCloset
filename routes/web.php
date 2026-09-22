@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -92,6 +93,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
     Route::put('categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('colors', [ColorController::class, 'index'])->name('colors.index');
+    Route::get('colors/create', [ColorController::class, 'create'])->name('colors.create');
+    Route::post('colors', [ColorController::class, 'store'])->name('colors.store');
+    Route::get('colors/{color}/edit', [ColorController::class, 'edit'])->name('colors.edit');
+    Route::put('colors/{color}', [ColorController::class, 'update'])->name('colors.update');
+    Route::delete('colors/{color}', [ColorController::class, 'destroy'])->name('colors.destroy');
 
     Route::get('slides', [HeroSlideController::class, 'index'])->name('slides.index');
     Route::get('slides/create', [HeroSlideController::class, 'create'])->name('slides.create');

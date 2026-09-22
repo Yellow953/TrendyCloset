@@ -278,14 +278,14 @@ function initColorPicker() {
         if (!button) return;
         e.preventDefault();
 
-        const input = button.closest('td')?.querySelector('input[name*="[color]"]');
-        if (!input) return;
+        const select = button.closest('td')?.querySelector('select[name*="[color]"]');
+        if (!select) return;
 
         if (button === armedButton) {
             disarm();
         } else {
             disarm();
-            arm(button, input);
+            arm(button, select);
         }
     });
 
@@ -309,9 +309,16 @@ function initColorPicker() {
             const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
             const hex = '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
 
-            target.value = nearestName(hex) || hex;
-            target.dispatchEvent(new Event('input', { bubbles: true }));
-            disarm();
+            const match = nearestName(hex);
+            if (match) {
+                target.value = match;
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+                disarm();
+            } else {
+                // A select has no free-text slot to fall back to — say so and
+                // stay armed so another spot can be tried without re-arming.
+                showMessage('No close match in the colour list for that pixel — add it under Colors first, or try another spot.', true);
+            }
         } catch (err) {
             // A cross-origin photo (the demo catalogue's "Linked" images, or
             // any external URL) taints the canvas and getImageData throws —
@@ -379,12 +386,29 @@ function initFieldToggles() {
     });
 }
 
+// A colour's hex field on the Colors admin screen: a native colour-picker
+// swatch and a visible hex text input, kept in sync either direction — the
+// client never has to already know a hex code, but can still type/paste one.
+function initColorSync() {
+    document.querySelectorAll('[data-color-sync]').forEach((wrap) => {
+        const picker = wrap.querySelector('[data-color-sync-picker]');
+        const text = wrap.querySelector('[data-color-sync-text]');
+        if (!picker || !text) return;
+
+        picker.addEventListener('input', () => { text.value = picker.value; });
+        text.addEventListener('input', () => {
+            if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+        });
+    });
+}
+
 function init() {
     initAdminNav();
     initAdminMenu();
     initModals();
     initRepeater();
     initColorPicker();
+    initColorSync();
     initUploadPreviews();
     initFieldToggles();
 }

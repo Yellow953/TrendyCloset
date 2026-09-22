@@ -65,17 +65,6 @@
                         <button type="button" data-repeater-add class="bo-btn bo-btn-sm">＋ Add row</button>
                     </div>
 
-                    {{-- Shared by every row's colour field below (both the
-                         rendered rows and the __INDEX__ template) — a
-                         datalist suggests the swatches Swatch.php can paint,
-                         but the field stays free text so a one-off colour
-                         can still be typed in and saved as-is. --}}
-                    <datalist id="swatch-colors">
-                        @foreach(\App\Support\Swatch::names() as $color)
-                            <option value="{{ $color }}">
-                        @endforeach
-                    </datalist>
-
                     <div class="overflow-x-auto">
                         <table class="bo-table">
                             <thead>
@@ -107,8 +96,15 @@
                                         </td>
                                         <td class="px-5 py-2.5">
                                             <div class="flex items-center gap-1.5">
-                                                <input name="variants[{{ $i }}][color]" value="{{ $variant['color'] ?? '' }}"
-                                                       list="swatch-colors" placeholder="Colour" class="bo-input-sm min-w-0 flex-1">
+                                                <select name="variants[{{ $i }}][color]" class="bo-input-sm min-w-0 flex-1">
+                                                    <option value=""></option>
+                                                    @foreach(\App\Support\Swatch::names() as $color)
+                                                        <option value="{{ $color }}" @selected(($variant['color'] ?? '') === $color)>{{ $color }}</option>
+                                                    @endforeach
+                                                    @if(($variant['color'] ?? null) && ! in_array($variant['color'], \App\Support\Swatch::names(), true))
+                                                        <option value="{{ $variant['color'] }}" selected>{{ $variant['color'] }} (inactive)</option>
+                                                    @endif
+                                                </select>
                                                 <button type="button" data-color-pick class="bo-btn bo-btn-sm" title="Pick colour from a photo" aria-label="Pick colour from a photo">🎨</button>
                                             </div>
                                         </td>
@@ -151,7 +147,12 @@
                             </td>
                             <td class="px-5 py-2.5">
                                 <div class="flex items-center gap-1.5">
-                                    <input name="variants[__INDEX__][color]" list="swatch-colors" placeholder="Colour" class="bo-input-sm min-w-0 flex-1">
+                                    <select name="variants[__INDEX__][color]" class="bo-input-sm min-w-0 flex-1">
+                                        <option value=""></option>
+                                        @foreach(\App\Support\Swatch::names() as $color)
+                                            <option value="{{ $color }}">{{ $color }}</option>
+                                        @endforeach
+                                    </select>
                                     <button type="button" data-color-pick class="bo-btn bo-btn-sm" title="Pick colour from a photo" aria-label="Pick colour from a photo">🎨</button>
                                 </div>
                             </td>

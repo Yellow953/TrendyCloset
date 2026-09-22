@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\PhotoRatio;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\ImageStore;
@@ -98,8 +99,6 @@ class ProductController extends Controller
         $name = $product->name;
 
         DB::transaction(function () use ($product) {
-            // Order items snapshot their own product name and price, so sales
-            // history survives this; only the catalogue row and its files go.
             foreach ($product->images as $image) {
                 $this->images->forget($image->disk_path);
             }
@@ -148,11 +147,13 @@ class ProductController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'photos' => ['nullable', 'array', 'max:10'],
             'photos.*' => array_merge(['nullable'], ImageStore::RULES),
+            'variants' => ['nullable', 'array'],
+            'variants.*.color' => ['nullable', Rule::in(Color::active()->pluck('name'))],
         ], [
             'compare_at_price.gt' => 'The "was" price must be higher than the price, or the piece is not on sale.',
         ]);
 
-        unset($data['photos']);
+        unset($data['photos'], $data['variants']);
 
         $data['slug'] = ($data['slug'] ?? null) ?: $this->uniqueSlug($data['name'], $product);
         $data['is_featured'] = $request->boolean('is_featured');
