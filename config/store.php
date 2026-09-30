@@ -28,13 +28,7 @@ return [
         'map_url' => 'https://maps.app.goo.gl/HgJqRHujguCD8Job7',
         'map_embed' => 'https://maps.google.com/maps?q='.rawurlencode('Trendy Closet, Tal el Zaatar, Dekwaneh, Lebanon').'&z=16&output=embed',
 
-        // One line per opening pattern — Monday is shorter than the rest.
-        'hours' => [
-            'Monday, 3pm–8pm',
-            'Tuesday–Saturday, 10:30am–8pm',
-            'Sunday, closed',
-        ],
-
+        // Opening hours live in the opening_hours table (Admin → Opening hours).
         'response_time' => 'within a few hours',
     ],
 

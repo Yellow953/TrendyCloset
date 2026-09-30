@@ -1,7 +1,9 @@
 @extends('layouts.storefront')
 
 @section('content')
-    @php($contact = config('store.contact'))
+    @php
+        $contact = config('store.contact');
+    @endphp
 
     {{-- Hero --}}
     <div class="relative h-[340px] overflow-hidden bg-tan">
@@ -73,7 +75,7 @@
             <p class="text-[15px] font-light leading-[1.8] text-muted-3">Come try pieces on and say hi — Pamela is usually in, and there's always something new on the rail.</p>
             <div class="mt-1.5 text-[14.5px] font-light leading-[1.9] text-ink">
                 Trendy Closet<br>{!! implode('<br>', array_map('e', $contact['address'])) !!}<br><br>
-                {!! implode('<br>', array_map('e', $contact['hours'])) !!}
+                {!! implode('<br>', array_map('e', \App\Models\OpeningHour::lines())) !!}
             </div>
             <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener"
                class="tc-link mt-1.5 w-fit text-[13.5px]">Get directions</a>

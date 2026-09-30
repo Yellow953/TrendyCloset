@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\OpeningHour;
 use App\Models\Product;
 use App\Support\Cart;
 use App\Support\Catalog;
@@ -224,7 +225,7 @@ class SeoController extends Controller
         $out[] = '- Contact: '.config('seo.email').', or WhatsApp '.config('store.contact.phone_display')
             .'. Questions are answered '.config('store.contact.response_time').'.';
         $out[] = '- The shop is also a physical store: '.implode(', ', config('store.contact.address'))
-            .'. Opening hours: '.implode('; ', config('store.contact.hours')).'.';
+            .'. Opening hours: '.implode('; ', OpeningHour::lines()).'.';
         $out[] = '';
 
         $out[] = '## Key pages';

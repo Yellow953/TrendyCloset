@@ -78,7 +78,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-blush"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>
                     <span class="break-all">{{ config('seo.email') }}</span>
                 </a>
-                <div class="text-[13.5px] leading-[1.8]">{!! implode('<br>', array_map('e', $contact['hours'])) !!}</div>
+                <div class="text-[13.5px] leading-[1.8]">{!! implode('<br>', array_map('e', \App\Models\OpeningHour::lines())) !!}</div>
             </div>
         </div>
     </div>

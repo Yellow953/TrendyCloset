@@ -39,6 +39,7 @@
                 ['key' => 'colors', 'label' => 'Colors', 'icon' => 'colors', 'route' => 'admin.colors.index'],
                 ['key' => 'offers', 'label' => 'Offers', 'icon' => 'offers', 'route' => 'admin.offers.index'],
                 ['key' => 'coupons', 'label' => 'Discount codes', 'icon' => 'coupons', 'route' => 'admin.coupons.index'],
+                ['key' => 'hours', 'label' => 'Opening hours', 'icon' => 'clock', 'route' => 'admin.hours.edit'],
                 ['key' => 'users', 'label' => 'Staff', 'icon' => 'users', 'route' => 'admin.users.index'],
             ],
         ],

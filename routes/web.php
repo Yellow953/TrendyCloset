@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\OfferController;
+use App\Http\Controllers\Admin\OpeningHourController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
@@ -143,6 +144,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('offers', [OfferController::class, 'store'])->name('offers.store');
         Route::put('offers/{offer}', [OfferController::class, 'update'])->name('offers.update');
         Route::delete('offers/{offer}', [OfferController::class, 'destroy'])->name('offers.destroy');
+
+        Route::get('hours', [OpeningHourController::class, 'edit'])->name('hours.edit');
+        Route::put('hours', [OpeningHourController::class, 'update'])->name('hours.update');
 
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::post('users', [UserController::class, 'store'])->name('users.store');

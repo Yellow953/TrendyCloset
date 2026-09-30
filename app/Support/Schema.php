@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\OpeningHour;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -67,7 +68,7 @@ class Schema
                 'addressRegion' => 'Mount Lebanon',
                 'addressCountry' => 'LB',
             ],
-            'openingHoursSpecification' => self::openingHours(),
+            'openingHoursSpecification' => OpeningHour::specification(),
             'areaServed' => [
                 '@type' => 'Country',
                 'name' => config('store.contact.country'),
@@ -81,67 +82,6 @@ class Schema
                 'availableLanguage' => ['English', 'Arabic', 'French'],
             ],
         ]);
-    }
-
-    /**
-     * The shop's opening hours, parsed out of the `store.contact.hours` lines so
-     * the schema and the contact page can never drift apart. A line the parser
-     * does not recognise (or a "closed" day) is simply left out.
-     *
-     * @return array<int, array<string, mixed>>|null
-     */
-    private static function openingHours(): ?array
-    {
-        $days = [
-            'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday',
-            'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday',
-            'sunday' => 'Sunday',
-        ];
-
-        $out = [];
-
-        foreach ((array) config('store.contact.hours', []) as $line) {
-            [$dayPart, $timePart] = array_pad(explode(',', $line, 2), 2, '');
-
-            if (! preg_match('/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/iu', $timePart, $m)) {
-                continue;
-            }
-
-            // "Tuesday–Saturday" is a run; "Monday" is one day.
-            $names = preg_split('/\s*[–—-]\s*/u', trim($dayPart));
-            $from = $days[mb_strtolower($names[0] ?? '')] ?? null;
-            $to = $days[mb_strtolower($names[1] ?? '')] ?? null;
-
-            if (! $from) {
-                continue;
-            }
-
-            $keys = array_values($days);
-            $span = $to
-                ? array_slice($keys, array_search($from, $keys, true), array_search($to, $keys, true) - array_search($from, $keys, true) + 1)
-                : [$from];
-
-            $out[] = [
-                '@type' => 'OpeningHoursSpecification',
-                'dayOfWeek' => $span,
-                'opens' => self::clock($m[1], $m[2] ?? '', $m[3]),
-                'closes' => self::clock($m[4], $m[5] ?? '', $m[6]),
-            ];
-        }
-
-        return $out ?: null;
-    }
-
-    /** 12-hour clock parts to the ISO 24-hour time schema.org expects. */
-    private static function clock(string $hour, string $minute, string $meridiem): string
-    {
-        $hour = (int) $hour % 12;
-
-        if (mb_strtolower($meridiem) === 'pm') {
-            $hour += 12;
-        }
-
-        return sprintf('%02d:%02d', $hour, $minute === '' ? 0 : (int) $minute);
     }
 
     /**

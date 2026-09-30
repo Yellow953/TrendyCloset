@@ -235,8 +235,12 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   floating WhatsApp button lifts clear of it.
 - **WhatsApp** — `partials/whatsapp.blade.php` renders a floating button on every storefront page
   from `config/store.php` (`WHATSAPP_NUMBER` / `WHATSAPP_MESSAGE`); an empty number hides it.
+- **Opening hours are data** — the `opening_hours` table (`App\Models\OpeningHour`, one row per ISO
+  weekday), edited at *Settings → Opening hours* (`admin.hours.edit`, admin-only). Views, `/llms.txt`
+  and the schema read `OpeningHour::lines()` / `specification()`; consecutive days with the same
+  hours are grouped ("Tuesday–Saturday, 10:30am–8pm"). A missing row reads as closed.
 - **Contact details are config, never markup.** `config/store.php`'s `contact` block holds the
-  address lines, the display number, the Google Maps links and the opening hours; `config/seo.php`'s
+  address lines, the display number and the Google Maps links; `config/seo.php`'s
   `email` holds the address (it is also what the Organization schema and `/llms.txt` quote). Footer,
   contact page, About's "Visit us" map and the policy prose all read from those two keys — if a
   detail changes, it changes in one place. The number is **WhatsApp-only**: link it to `wa.me`,
@@ -267,11 +271,9 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   `Product`+`Offer`, `BreadcrumbList`, `CollectionPage`, `ItemList`, `FAQPage`, `WebPage`.
   **Do not add `aggregateRating` or `review`** — there is no reviews table, and fabricated rating
   counts are what earns a structured-data manual action. `Product->rating` is editorial, not reviews.
-  - The `OnlineStore` node's `openingHoursSpecification` is **parsed** out of
-    `store.contact.hours` by `Schema::openingHours()`, so the schema and the contact page can
-    never drift. It reads lines shaped like `Tuesday–Saturday, 10:30am–8pm`; a line it cannot
-    parse (`Sunday, closed`) is simply left out. The regex needs its `/u` — the hours are written
-    with an en-dash, and a byte-wise character class silently matches nothing.
+  - The `OnlineStore` node's `openingHoursSpecification` comes from `OpeningHour::specification()`,
+    the same rows that `OpeningHour::lines()` renders as text, so the schema and the pages can
+    never drift. Closed days are left out of the schema.
   - `WebSite` carries a `SearchAction` pointing at `/shop?q=` — a real, shareable GET that works
     with JS off. Never advertise a search endpoint that does not answer.
   - `Offer` is Lebanon-shaped: `applicableCountry`/`shippingDestination` are `LB` and transit is
