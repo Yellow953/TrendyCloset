@@ -388,6 +388,38 @@ function initClearables() {
     });
 }
 
+// Stock line on the product page follows the chosen variant; with none chosen
+// it falls back to the product total.
+function initVariantStock() {
+    const form = document.querySelector('[data-buy-form]');
+    const badge = document.querySelector('[data-stock-badge]');
+    if (!form || !badge) return;
+
+    const low = document.querySelector('[data-stock-low]');
+    const qty = form.querySelector('input[name="quantity"]');
+    const radios = [...form.querySelectorAll('input[name="variant_id"][data-stock]')];
+
+    const sync = () => {
+        const chosen = radios.find((r) => r.checked);
+        const stock = Number(chosen ? chosen.dataset.stock : badge.dataset.total);
+
+        badge.textContent = stock > 0 ? `${stock} in stock` : 'Out of stock';
+        if (low) {
+            low.textContent = `Only ${stock} left`;
+            low.hidden = stock < 1 || stock > 10;
+        }
+        if (qty && chosen) {
+            qty.max = Math.min(Math.max(stock, 1), 20);
+            if (Number(qty.value) > Number(qty.max)) qty.value = qty.max;
+        }
+    };
+
+    form.addEventListener('change', sync);
+    document.querySelectorAll('[data-clear-target="variant_id"], [data-sticky-size]').forEach((el) =>
+        el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'click', () => queueMicrotask(sync)));
+    sync();
+}
+
 // Product page colour swatches. A variant is a size *and* a colour together,
 // so picking a colour narrows the size chips to the ones that actually exist
 // in it, and hands the selection to the first one that does.
@@ -790,6 +822,7 @@ function init() {
     initQuantitySteppers();
     initClearables();
     initColorFilter();
+    initVariantStock();
     initAutoSubmit();
     initStickyHeader();
     initFilterPanel();

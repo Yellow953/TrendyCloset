@@ -150,7 +150,7 @@
                         <div class="flex flex-wrap gap-2.5">
                             @foreach($variants as $v)
                                 <label data-color="{{ $v->color }}" class="{{ $sizes->isEmpty() ? 'sr-only' : ($v->in_stock ? 'cursor-pointer' : 'cursor-not-allowed') }}">
-                                    <input type="radio" name="variant_id" value="{{ $v->id }}" class="peer sr-only"
+                                    <input type="radio" name="variant_id" value="{{ $v->id }}" data-stock="{{ $v->stock }}" class="peer sr-only"
                                         @checked($firstAvailable?->is($v))
                                         @disabled(! $v->in_stock)>
                                     @if($sizes->isNotEmpty())
@@ -168,7 +168,7 @@
                 @endif
 
                 @if($inStock)
-                    <div class="tc-badge bg-cream-3 px-3 py-1.5 text-[13.5px] text-blush">{{ $stockLeft }} in stock</div>
+                    <div data-stock-badge data-total="{{ $stockLeft }}" class="tc-badge bg-cream-3 px-3 py-1.5 text-[13.5px] text-blush">{{ $stockLeft }} in stock</div>
                 @else
                     <div class="tc-badge bg-cream-2 px-3 py-1.5 text-[13.5px] text-blush">Out of stock</div>
                 @endif
@@ -193,8 +193,8 @@
                 </button>
             </form>
 
-            @if($inStock && $stockLeft <= 10)
-                <div class="text-[13.5px] font-light text-blush">Only {{ $stockLeft }} left</div>
+            @if($inStock)
+                <div data-stock-low class="text-[13.5px] font-light text-blush" @if($stockLeft > 10) hidden @endif>Only {{ $stockLeft }} left</div>
             @endif
         </div>
     </div>

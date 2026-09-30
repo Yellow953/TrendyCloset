@@ -4,7 +4,7 @@
 @props(['color' => null])
 <span title="{{ $color }}"
       {{ $attributes->class([
-          'h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-inset',
+          'inline-block h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-inset',
           \App\Support\Swatch::needsOutline($color) ? 'ring-line-2' : 'ring-black/10',
       ]) }}
       style="background-color: {{ \App\Support\Swatch::hex($color) }}"></span>
