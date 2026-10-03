@@ -12,17 +12,23 @@ namespace App\Support;
  */
 final class TrackedEvent
 {
+    public readonly string $id;
+
     /**
      * @param  string  $name  canonical name — see Tracking::META / Tracking::GA4
      * @param  array<int, array{id: string, name: ?string, category: ?string, price: float, quantity: int}>  $items
      * @param  array<string, mixed>  $extra  event-specific fields (search term, order number)
+     * @param  string|null  $id  shared by the browser and server copies so Meta counts them once
      */
     public function __construct(
         public readonly string $name,
         public readonly array $items = [],
         public readonly ?float $value = null,
         public readonly array $extra = [],
-    ) {}
+        ?string $id = null,
+    ) {
+        $this->id = $id ?? (string) \Illuminate\Support\Str::uuid();
+    }
 
     /**
      * Distinct product ids, in the order they were added.

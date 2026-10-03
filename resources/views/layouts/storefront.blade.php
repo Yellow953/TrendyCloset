@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Where app.js reports a tap on a wa.me link. Absent = no reporting. --}}
-    <meta name="wa-track" content="{{ route('track.whatsapp') }}">
+    <meta name="wa-track" content="{{ route('track.whatsapp') }}" data-tracking='@json(\App\Support\Tracking::contacted())'>
 
     @include('partials.seo')
 

@@ -742,7 +742,7 @@ function report(payload) {
 
     if (payload.meta && typeof window.fbq === 'function') {
         try {
-            window.fbq('track', payload.meta.name, payload.meta.params || {});
+            window.fbq('track', payload.meta.name, payload.meta.params || {}, payload.meta.id ? { eventID: payload.meta.id } : undefined);
         } catch { /* ignored */ }
     }
 
@@ -787,7 +787,10 @@ function applyFavorite(form, favorited) {
 // navigation. Never blocks or delays the link itself: the tap must feel instant
 // whether or not the beacon lands.
 function initWhatsappTracking() {
-    const endpoint = document.querySelector('meta[name="wa-track"]')?.content;
+    const meta = document.querySelector('meta[name="wa-track"]');
+    const endpoint = meta?.content;
+    let tracking = null;
+    try { tracking = JSON.parse(meta?.dataset.tracking || 'null'); } catch { /* ignored */ }
     const token = document.querySelector('meta[name="csrf-token"]')?.content;
     if (!endpoint || !token) return;
 
@@ -795,9 +798,15 @@ function initWhatsappTracking() {
         const link = e.target.closest('a[href*="wa.me"]');
         if (!link) return;
 
+        // One id for both copies of the Contact event: this one and the server's.
+        const eventId = 'wa-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+        if (tracking?.meta) tracking.meta.id = eventId;
+        report(tracking);
+
         const body = new FormData();
         body.append('_token', token);
         body.append('from', location.pathname);
+        body.append('event_id', eventId);
 
         try {
             fetch(endpoint, { method: 'POST', body, keepalive: true, credentials: 'same-origin' })

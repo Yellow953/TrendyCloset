@@ -34,6 +34,7 @@ class Tracking
         'saved' => 'AddToWishlist',
         'checkout_started' => 'InitiateCheckout',
         'purchased' => 'Purchase',
+        'contacted' => 'Contact',
     ];
 
     /** Canonical name => GA4 recommended event. */
@@ -44,6 +45,7 @@ class Tracking
         'saved' => 'add_to_wishlist',
         'checkout_started' => 'begin_checkout',
         'purchased' => 'purchase',
+        'contacted' => 'generate_lead',
     ];
 
     /** @var array<int, TrackedEvent> */
@@ -130,12 +132,16 @@ class Tracking
                 'order_number' => $order->order_number,
                 'shipping' => self::amount($order->shipping_total ?? 0),
             ],
-        ));
+            // Fixed per order, so a reload of the confirmation page is the same event.
+            id: 'purchase-'.$order->order_number,
+        ), $order);
     }
 
-    private function push(TrackedEvent $event): static
+    private function push(TrackedEvent $event, ?Order $order = null): static
     {
         $this->events[] = $event;
+
+        MetaConversions::send(self::toMeta($event), $order);
 
         return $this;
     }
@@ -175,15 +181,22 @@ class Tracking
      *
      * @return array{meta: array<string, mixed>, ga4: array<string, mixed>}|null
      */
-    public static function payload(TrackedEvent $event): ?array
+    public static function payload(TrackedEvent $event, bool $send = true): ?array
     {
+        if ($send) {
+            MetaConversions::send(self::toMeta($event));
+        }
+
         if (! self::enabled()) {
             return null;
         }
 
+        $meta = self::toMeta($event);
+        $ga4 = self::toGa4($event);
+
         return [
-            'meta' => self::toMeta($event),
-            'ga4' => self::toGa4($event),
+            'meta' => ['name' => $meta['name'], 'params' => (object) $meta['params'], 'id' => $meta['id']],
+            'ga4' => ['name' => $ga4['name'], 'params' => (object) $ga4['params']],
         ];
     }
 
@@ -211,6 +224,25 @@ class Tracking
         ));
     }
 
+    /**
+     * A tap through to WhatsApp — for this shop, often the order itself. Rendered
+     * into every page and fired on the tap, so nothing is sent from here; the
+     * browser picks the event id and {@see self::reportContact()} reuses it.
+     *
+     * @return array{meta: array<string, mixed>, ga4: array<string, mixed>}|null
+     */
+    public static function contacted(): ?array
+    {
+        return self::payload(new TrackedEvent(name: 'contacted', extra: ['method' => 'whatsapp']), send: false);
+    }
+
+    public static function reportContact(string $eventId): void
+    {
+        MetaConversions::send(self::toMeta(
+            new TrackedEvent(name: 'contacted', extra: ['method' => 'whatsapp'], id: $eventId),
+        ));
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Translation
@@ -218,7 +250,7 @@ class Tracking
     */
 
     /**
-     * @return array{name: string, params: array<string, mixed>}
+     * @return array{name: string, params: array<string, mixed>, id: string}
      */
     private static function toMeta(TrackedEvent $event): array
     {
@@ -252,11 +284,15 @@ class Tracking
             unset($params['currency']);
         }
 
+        if ($event->name === 'contacted') {
+            unset($params['currency'], $params['content_type']);
+        }
+
         if ($event->name === 'purchased') {
             $params['order_id'] = $event->extra['order_number'];
         }
 
-        return ['name' => self::META[$event->name], 'params' => self::prune($params)];
+        return ['name' => self::META[$event->name], 'params' => self::prune($params), 'id' => $event->id];
     }
 
     /**
@@ -283,6 +319,10 @@ class Tracking
             $params['search_term'] = $event->extra['term'];
             // GA4 has no currency/value on a search; sending them muddies reports.
             unset($params['currency'], $params['value']);
+        }
+
+        if ($event->name === 'contacted') {
+            $params = ['method' => $event->extra['method']];
         }
 
         if ($event->name === 'purchased') {

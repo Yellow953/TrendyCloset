@@ -24,7 +24,7 @@
         fbq('init', @json($metaPixelId));
         fbq('track', 'PageView');
         @foreach($tracking->metaEvents() as $event)
-        fbq('track', @json($event['name']), @json((object) $event['params']));
+        fbq('track', @json($event['name']), @json((object) $event['params']), {eventID: @json($event['id'])});
         @endforeach
     </script>
     <noscript><img height="1" width="1" style="display:none" alt=""

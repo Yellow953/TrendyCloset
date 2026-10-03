@@ -345,10 +345,25 @@ tables, which stay the source of truth for the back office — these two are for
 - GA4 goes through **gtag.js directly, not a GTM container** — there is no container to administer
   and the events are already described server-side. `purchase` carries `transaction_id` (the order
   number, which is also Meta's `order_id`) so a refresh cannot double-count, plus `shipping`.
-- There is **no Conversions API and no server-side GA4**: nothing is sent from PHP, so there are no
-  `eventID`s to deduplicate and no test-event code to configure. Adding either means adding both
-  halves of the deduplication.
-- The privacy policy's "Advertising & measurement cookies" section exists because these do. If
+- **Meta Conversions API** (`App\Support\MetaConversions`) mirrors every Meta event from the server
+  when `META_CAPI_TOKEN` is set. `TrackedEvent->id` is the dedup key: the browser fires it as
+  `eventID`, the server sends it as `event_id`, and Meta keeps one. `Tracking::push()` and
+  `payload()` send automatically — a new event needs no extra wiring. Sends are `defer()`red past
+  the response, skipped for bots (`TrackPageView::isBot()`), and failures only log.
+  - Purchase's id is `purchase-{order_number}` so a reload is the same event, and only it carries
+    hashed customer data (`ph` digits-only, `em`, `fn`/`ln`, `ct`, `country` ISO). Every event
+    carries IP, UA, hashed `tc_visitor` as `external_id`, and `_fbp`/`_fbc` — which is why those
+    two cookies are excluded from `encryptCookies` in `bootstrap/app.php`.
+  - `META_TEST_EVENT_CODE` routes server events to Events Manager → Test Events; unset it after.
+  - There is still **no server-side GA4**.
+- A tap on any `wa.me` link fires Meta `Contact` / GA4 `generate_lead` (`Tracking::contacted()`,
+  carried on the `wa-track` meta tag). The browser picks the event id and posts it to
+  `/track/whatsapp`, which sends the server copy via `Tracking::reportContact()`.
+- `/feed/meta-products.xml` is the Meta catalogue feed: one row per **product** (not variant), `g:id`
+  = `TC-{id}`, so it joins the pixel's `content_ids` directly. Colour and size are the product's
+  sellable runs; `gender`/`age_group` are fixed `female`/`adult`.
+- The privacy policy's "Advertising & measurement cookies" section exists because these do, and
+  discloses the server-side reporting and hashed order details. If
   either is removed, that copy changes with it.
 
 **Styling** — `resources/css/app.css` is the source of truth for design tokens:

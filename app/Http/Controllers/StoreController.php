@@ -647,6 +647,12 @@ class StoreController extends Controller
             'from' => mb_substr((string) $request->input('from', ''), 0, 120) ?: null,
         ]);
 
+        $eventId = (string) $request->input('event_id');
+
+        if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $eventId)) {
+            Tracking::reportContact($eventId);
+        }
+
         return response()->noContent();
     }
 
@@ -738,7 +744,7 @@ class StoreController extends Controller
                 'sections' => [
                     ['heading' => 'What we collect', 'body' => 'To fulfil an order we keep your name, phone number and delivery address, plus your email if you give us one. We take no card details on this website at all — payment is arranged directly with you when we confirm the order.'],
                     ['heading' => 'Browsing data', 'body' => 'We set a long-lived cookie so your bag and favourites survive between visits, and we count product views to see which pieces resonate. This is tied to a random identifier, not to your identity.'],
-                    ['heading' => 'Advertising & measurement cookies', 'body' => 'We use the Meta pixel so our Facebook and Instagram ads reach people who are actually interested, and Google Analytics to see which pages and pieces people spend time on. Both are told which pages you viewed on this site. You can opt out in your Meta ad preferences, with the Google Analytics opt-out add-on, or by blocking third-party cookies in your browser.'],
+                    ['heading' => 'Advertising & measurement cookies', 'body' => 'We use the Meta pixel so our Facebook and Instagram ads reach people who are actually interested, and Google Analytics to see which pages and pieces people spend time on. Both are told which pages you viewed on this site. Our server also reports those visits, and any order you place, to Meta directly; with an order we include your phone number, email, name and city in hashed (scrambled) form, used only to tell whether an ad led to it. You can opt out in your Meta ad preferences, with the Google Analytics opt-out add-on, or by blocking third-party cookies in your browser.'],
                     ['heading' => 'Marketing', 'body' => 'We message you only if you asked us to. Every newsletter carries a one-click unsubscribe, and we never sell or rent your details to anyone.'],
                     ['heading' => 'Your rights', 'body' => 'You can ask for a copy of everything we hold about you, ask us to correct it, or ask us to delete it. Write to '.config('seo.email').' and we will action it within 30 days.'],
                     ['heading' => 'Retention', 'body' => 'Order records are kept for as long as tax law requires. Everything else is deleted once it stops being useful to you as a customer.'],

@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackPageView::class,
         ]);
 
+        $middleware->encryptCookies(except: ['_fbp', '_fbc']);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);

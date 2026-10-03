@@ -44,9 +44,10 @@ return [
     | not at all — no script, no beacon — so local and staging cost a visitor
     | nothing and never pollute a live property. Set these in production only.
     |
-    | Meta: verifying the wiring is done from Events Manager → Test Events, which
-    | pairs with the browser session; there is no test-event code to set here.
-    | That is a Conversions API concern, and the site sends nothing server-side.
+    | Meta: with META_CAPI_TOKEN set, every pixel event is also sent from the
+    | server (App\Support\MetaConversions) under the same event id, so Meta
+    | deduplicates the pair. META_TEST_EVENT_CODE routes the server copies to
+    | Events Manager → Test Events; remove it once verified.
     |
     | Google: this is a GA4 measurement id (G-XXXXXXXXXX), loaded through gtag.js
     | directly rather than a Tag Manager container — there is no GTM container to
@@ -56,6 +57,9 @@ return [
 
     'meta' => [
         'pixel_id' => env('META_PIXEL_ID'),
+        'capi_token' => env('META_CAPI_TOKEN'),
+        'test_event_code' => env('META_TEST_EVENT_CODE'),
+        'graph_version' => env('META_GRAPH_VERSION', 'v24.0'),
     ],
 
     'google' => [

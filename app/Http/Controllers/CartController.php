@@ -83,6 +83,10 @@ class CartController extends Controller
 
         $status = $variant->product->name.' added to your bag.';
 
+        // Built before branching so "Buy now", which never reaches the pixel,
+        // still reaches the Conversions API.
+        $tracking = Tracking::addedToCart($variant->product, $quantity, $quantity * (float) $variant->effective_price);
+
         // The card and PDP buttons post this over fetch (see initAsyncForms in
         // app.js) so adding never costs the shopper their scroll position.
         if ($request->expectsJson()) {
@@ -91,7 +95,7 @@ class CartController extends Controller
                 'bagCount' => $this->cart->count(),
                 // Fired by app.js: this add never reloads the page, so it can
                 // not ride along on a render the way a product view does.
-                'tracking' => Tracking::addedToCart($variant->product, $quantity, $quantity * (float) $variant->effective_price),
+                'tracking' => $tracking,
             ]);
         }
 

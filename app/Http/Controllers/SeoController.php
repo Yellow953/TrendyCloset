@@ -96,7 +96,7 @@ class SeoController extends Controller
         Product::query()
             ->active()
             ->select(['id', 'slug', 'updated_at'])
-            ->with('images:id,product_id,url,position')
+            ->with(['images:id,product_id,url,position', 'variants'])
             ->orderBy('id')
             ->chunk(500, function ($products) use ($add) {
                 foreach ($products as $product) {
@@ -138,7 +138,7 @@ class SeoController extends Controller
 
         Product::query()
             ->active()
-            ->with('images:id,product_id,url,position')
+            ->with(['images:id,product_id,url,position', 'variants'])
             ->orderBy('id')
             ->chunk(500, function ($products) use (&$items) {
                 foreach ($products as $product) {
@@ -165,6 +165,10 @@ class SeoController extends Controller
                         'price' => $this->moneyFor($price),
                         'sale_price' => $salePrice !== null ? $this->moneyFor($salePrice) : null,
                         'brand' => config('seo.brand'),
+                        'gender' => 'female',
+                        'age_group' => 'adult',
+                        'color' => $product->color_run->implode('/') ?: null,
+                        'size' => $product->size_run->implode(', ') ?: null,
                         'mpn' => Tracking::contentId($product),
                         'product_type' => $product->category?->name,
                     ];

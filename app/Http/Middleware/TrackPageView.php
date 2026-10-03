@@ -92,10 +92,10 @@ class TrackPageView
             return false;
         }
 
-        return ! $this->isBot((string) $request->userAgent());
+        return ! self::isBot((string) $request->userAgent());
     }
 
-    private function isBot(string $agent): bool
+    public static function isBot(string $agent): bool
     {
         if ($agent === '') {
             return true;
