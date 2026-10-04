@@ -33,8 +33,14 @@
 
             <div class="px-6 py-5">
                 @foreach($order->items as $item)
-                    <div class="flex items-start justify-between gap-4 border-b border-line py-3 last:border-0">
-                        <div>
+                    <div class="flex items-center gap-4 border-b border-line py-3 last:border-0">
+                        <div class="tc-media h-16 w-16 shrink-0 rounded-field bg-cream-3">
+                            @if($item->variant?->product?->image_url)
+                                <x-img :src="$item->variant->product->image_url" :alt="$item->product_name"
+                                       sizes="64px" class="h-full w-full object-cover" />
+                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
                             <div class="text-[14.5px] font-normal">{{ $item->product_name }}</div>
                             <div class="mt-0.5 text-[12.5px] font-light text-muted">
                                 {{ collect([$item->variant_size ? 'Size '.$item->variant_size : null, $item->variant_color])->filter()->implode(' · ') }}

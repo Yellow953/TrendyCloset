@@ -31,7 +31,6 @@ class CartController extends Controller
 
     public function index()
     {
-        // Session state, unique per shopper: never index the bag or checkout.
         $this->seo->page('Your Bag')->noindex();
 
         return view('store.cart', [
@@ -83,23 +82,16 @@ class CartController extends Controller
 
         $status = $variant->product->name.' added to your bag.';
 
-        // Built before branching so "Buy now", which never reaches the pixel,
-        // still reaches the Conversions API.
         $tracking = Tracking::addedToCart($variant->product, $quantity, $quantity * (float) $variant->effective_price);
 
-        // The card and PDP buttons post this over fetch (see initAsyncForms in
-        // app.js) so adding never costs the shopper their scroll position.
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => $status,
                 'bagCount' => $this->cart->count(),
-                // Fired by app.js: this add never reloads the page, so it can
-                // not ride along on a render the way a product view does.
                 'tracking' => $tracking,
             ]);
         }
 
-        // "Buy now" is the same add, but it takes you straight to checkout.
         if ($request->input('action') === 'buy') {
             return redirect()->route('checkout');
         }
@@ -163,8 +155,6 @@ class CartController extends Controller
 
         $this->seo->page('Checkout')->noindex();
 
-        // Reaching the form, not paying — the gap between this and
-        // `order_placed` is the checkout drop-off.
         app(SiteAnalytics::class)->record(SiteEventType::CheckoutStarted, [
             'value' => (float) $this->cart->summary()['total'],
         ]);
@@ -217,9 +207,6 @@ class CartController extends Controller
             'ship_country.in' => 'Please pick a country from the list.',
         ]);
 
-        // The number is stored as it was given, with the code the shopper
-        // picked in front of it — Customer::normalizePhone() then trusts the
-        // leading "+" rather than assuming a Lebanese local number.
         $data['ship_phone'] = '+'.$data['ship_phone_code'].' '.trim($data['ship_phone']);
 
         try {
@@ -234,8 +221,6 @@ class CartController extends Controller
             order: $order,
         );
 
-        // The confirmation page is gated on this, not on the order number:
-        // knowing someone's order number must not reveal their address.
         $request->session()->put('tc_order', $order->id);
 
         return redirect()->route('order.confirmed', $order->order_number);
@@ -246,17 +231,12 @@ class CartController extends Controller
      */
     public function confirmed(Request $request, string $number)
     {
-        // `items.variant` is what the analytics product ids are built from.
-        $order = Order::with('items.variant')->where('order_number', $number)->firstOrFail();
+        $order = Order::with('items.variant.product.images')->where('order_number', $number)->firstOrFail();
 
         abort_unless($request->session()->get('tc_order') === $order->id, 404);
 
         $this->seo->page('Order '.$order->order_number)->noindex();
 
-        // The conversion. This page is session-gated and reachable only once per
-        // order, so a refresh cannot double-count it for a different shopper —
-        // the order number rides along (`order_id` / `transaction_id`) so both
-        // destinations drop the duplicate if the shopper does reload.
         $this->tracking->purchased($order);
 
         return view('store.order-confirmed', [
