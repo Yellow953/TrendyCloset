@@ -91,6 +91,12 @@ and do not add auth traits to `Customer` without revisiting this decision.
   defaulting to `store.contact.country`. `Order::addressLines()` is what composes them back into
   label lines — building and floor share one — so no view ever concatenates an address itself.
   `ship_region` / `ship_postcode` exist on the table but nothing asks for them.
+**Order emails** — `App\Services\OrderNotifications::placed()` runs after checkout: `NewOrder` to
+`store.notifications.orders` (`ORDER_NOTIFY_EMAIL`, comma-separated, falls back to `SEO_EMAIL`) and
+`OrderReceived` to the shopper **only if they gave an email**. Both are `defer()`red past the response
+and a failure only logs, so mail can never break checkout. Views are in `resources/views/mail/`
+(table layout, inline styles — no Tailwind in email). Locally `MAIL_MAILER=log`; production needs a
+real mailer.
 **The bag** — `App\Support\Cart` (scoped binding, session key `tc_cart`). There is still **no `Cart`
 model or `carts` table**: an abandoned bag is not a CRM record, and shoppers check out as guests.
 - The session stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are

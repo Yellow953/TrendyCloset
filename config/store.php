@@ -18,8 +18,6 @@ return [
         'message' => env('WHATSAPP_MESSAGE', 'Hi Pamela! I have a question about a piece on Trendy Closet.'),
     ],
 
-    // Every contact detail on the storefront, except the email address, which
-    // lives in config/seo.php. The number is WhatsApp only — never tel:.
     'contact' => [
         'phone_display' => '+961 76 158 735',
         'country' => 'Lebanon',
@@ -27,9 +25,11 @@ return [
         'address' => ['Tal el Zaatar, Dekwaneh', 'Mount Lebanon, Lebanon'],
         'map_url' => 'https://maps.app.goo.gl/HgJqRHujguCD8Job7',
         'map_embed' => 'https://maps.google.com/maps?q='.rawurlencode('Trendy Closet, Tal el Zaatar, Dekwaneh, Lebanon').'&z=16&output=embed',
-
-        // Opening hours live in the opening_hours table (Admin → Opening hours).
         'response_time' => 'within a few hours',
+    ],
+
+    'notifications' => [
+        'orders' => env('ORDER_NOTIFY_EMAIL') ?: env('SEO_EMAIL', 'Trendycloset.byleilakonsol@gmail.com'),
     ],
 
 ];

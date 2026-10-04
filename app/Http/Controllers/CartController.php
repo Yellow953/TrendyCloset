@@ -6,6 +6,7 @@ use App\Enums\SiteEventType;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Services\Checkout;
+use App\Services\OrderNotifications;
 use App\Services\ProductAnalytics;
 use App\Services\SiteAnalytics;
 use App\Support\Cart;
@@ -220,6 +221,8 @@ class CartController extends Controller
             ['value' => (float) $order->grand_total],
             order: $order,
         );
+
+        app(OrderNotifications::class)->placed($order);
 
         $request->session()->put('tc_order', $order->id);
 
