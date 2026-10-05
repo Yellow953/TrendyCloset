@@ -54,7 +54,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[17px] w-[17px]"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
             <span>Filters</span>
             @if($filterCount)
-                <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-blush px-1.5 text-[11px] font-medium text-white">{{ $filterCount }}</span>
+                <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-blush px-1.5 text-[11px] font-medium text-ink">{{ $filterCount }}</span>
             @endif
         </button>
 

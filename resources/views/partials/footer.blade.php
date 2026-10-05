@@ -16,7 +16,7 @@
             <form class="flex w-full max-w-md overflow-hidden rounded-field border border-line-2 bg-white transition-colors focus-within:border-blush lg:w-auto">
                 <input type="email" placeholder="Your email address" aria-label="Your email address"
                        class="w-full bg-transparent px-5 py-3.5 text-[14px] font-light text-ink placeholder:text-muted outline-none lg:w-[300px]">
-                <button type="submit" class="whitespace-nowrap bg-ink px-7 py-3.5 text-[14px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush">Subscribe</button>
+                <button type="submit" class="whitespace-nowrap bg-ink px-7 py-3.5 text-[14px] font-medium tracking-[0.06em] text-white transition-colors hover:bg-blush hover:text-ink">Subscribe</button>
             </form>
         </div>
     </div>

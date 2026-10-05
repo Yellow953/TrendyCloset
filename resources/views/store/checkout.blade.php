@@ -133,7 +133,7 @@
                             <div class="tc-media h-[70px] w-[58px] rounded-field bg-white">
                                 <x-img :src="$product->image_url" :alt="$product->name" sizes="58px" class="h-full w-full object-cover" />
                             </div>
-                            <div class="pointer-events-none absolute -right-[7px] -top-[7px] flex h-5 w-5 items-center justify-center rounded-full bg-blush text-[11px] font-medium text-white">{{ $line['qty'] }}</div>
+                            <div class="pointer-events-none absolute -right-[7px] -top-[7px] flex h-5 w-5 items-center justify-center rounded-full bg-blush text-[11px] font-medium text-ink">{{ $line['qty'] }}</div>
                         </div>
                         <div class="flex-1"><div class="text-[14px] font-normal">{{ $product->name }}</div><div class="text-[12.5px] font-light text-muted">{{ $variant->label }}</div></div>
                         <div class="text-[14px] font-medium">{{ \App\Models\Product::money($line['total']) }}</div>

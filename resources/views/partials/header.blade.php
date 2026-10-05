@@ -12,7 +12,7 @@
          initCarousels() in app.js): swipe/scroll-snap and the prev/next
          arrows come from that shared primitive, one full-width "card" per
          announcement, autoplay wired the same way the home carousels are. --}}
-    <div data-announcement class="bg-pink text-center text-[12px] font-light text-ink md:text-[13px]">
+    <div data-announcement class="bg-brand text-center text-[12px] font-light text-ink md:text-[13px]">
         <div data-carousel @if($announcements->count() > 1) data-carousel-autoplay="5000" @endif class="relative">
             <div data-carousel-track class="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth">
                 @foreach($announcements as $announcement)
@@ -92,12 +92,12 @@
                  href is the no-JS fallback. --}}
             <a href="{{ route('favorites') }}" data-drawer-open="{{ route('favorites.drawer') }}" aria-label="Favourites ({{ $favoritesCount }})" class="relative transition-colors hover:text-blush">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>
-                <span data-fav-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $favoritesCount }}</span>
+                <span data-fav-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-ink">{{ $favoritesCount }}</span>
             </a>
 
             <a href="{{ route('cart') }}" data-drawer-open="{{ route('cart.drawer') }}" aria-label="Bag ({{ $bagCount }})" class="relative transition-colors hover:text-blush">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[22px] w-[22px]"><path d="M6 7.5h12l-1 12.5H7L6 7.5Z"/><path d="M9 7.5a3 3 0 0 1 6 0"/></svg>
-                <span data-bag-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-white">{{ $bagCount }}</span>
+                <span data-bag-count class="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blush px-1 text-[10px] font-medium text-ink">{{ $bagCount }}</span>
             </a>
         </div>
     </div>
