@@ -124,7 +124,7 @@
                 @php($currentColor = $firstAvailable?->color ?? $colors->first())
                 <div>
                     <div class="mb-2.5 text-[15px] font-medium">Colour <span data-color-label class="font-light text-muted">— {{ $currentColor }}</span></div>
-                    <div data-color-picker class="flex gap-2.5">
+                    <div data-color-picker class="flex flex-wrap gap-2.5">
                         @foreach($colors as $c)
                             <label class="cursor-pointer" title="{{ $c }}">
                                 <input type="radio" name="color_choice" value="{{ $c }}" class="peer sr-only" @checked($currentColor === $c)>
