@@ -49,11 +49,14 @@ class ImageStore
      * @param  float|null  $ratio  width ÷ height to crop to, centred; null keeps
      *                             the photograph's own shape
      * @param  int  $maxEdge  longest edge in pixels after scaling down
+     * @param  array{float, float, float, float}|null  $region  x, y, width, height of a
+     *                             hand-picked crop, as fractions of the straightened
+     *                             photograph; null leaves the centring to {@see crop()}
      * @return array{url: string, path: string}
      */
-    public function store(UploadedFile $file, string $directory, ?float $ratio = null, int $maxEdge = self::MAX_EDGE): array
+    public function store(UploadedFile $file, string $directory, ?float $ratio = null, int $maxEdge = self::MAX_EDGE, ?array $region = null): array
     {
-        $encoded = $this->normalise($file, $ratio, $maxEdge);
+        $encoded = $this->normalise($file, $ratio, $maxEdge, $region);
 
         if ($encoded === null) {
             // Could not be re-encoded — keep the original rather than lose it.
@@ -86,7 +89,7 @@ class ImageStore
      *
      * @return string|null the WebP bytes, or null if the file could not be read
      */
-    private function normalise(UploadedFile $file, ?float $ratio, int $maxEdge): ?string
+    private function normalise(UploadedFile $file, ?float $ratio, int $maxEdge, ?array $region = null): ?string
     {
         if (! function_exists('imagewebp') || ! function_exists('imagecreatefromstring')) {
             return null;
@@ -103,6 +106,7 @@ class ImageStore
         }
 
         $image = $this->deorient($image, $file);
+        $image = $this->region($image, $region);
         $image = $this->crop($image, $ratio);
         $image = $this->scale($image, $maxEdge);
 
@@ -150,6 +154,43 @@ class ImageStore
         }
 
         return $rotated;
+    }
+
+    /**
+     * Cut out the window the shopkeeper framed by hand. Fractions rather than
+     * pixels, because the browser and GD only agree on the photograph's shape,
+     * not its size. {@see crop()} still runs afterwards and trims any rounding.
+     *
+     * @param  \GdImage  $image
+     * @return \GdImage
+     */
+    private function region($image, ?array $region)
+    {
+        if ($region === null || count($region) !== 4) {
+            return $image;
+        }
+
+        [$x, $y, $w, $h] = array_map(fn ($value) => min(1.0, max(0.0, (float) $value)), array_values($region));
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        $left = min($width - 1, (int) round($x * $width));
+        $top = min($height - 1, (int) round($y * $height));
+        $cropWidth = min($width - $left, (int) round($w * $width));
+        $cropHeight = min($height - $top, (int) round($h * $height));
+
+        if ($cropWidth < 1 || $cropHeight < 1) {
+            return $image;
+        }
+
+        $cropped = imagecrop($image, ['x' => $left, 'y' => $top, 'width' => $cropWidth, 'height' => $cropHeight]);
+
+        if ($cropped === false) {
+            return $image;
+        }
+
+        return $cropped;
     }
 
     /**

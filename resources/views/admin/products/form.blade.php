@@ -251,7 +251,7 @@
                 <span class="text-[18px] text-slate-400" aria-hidden="true">⬆</span>
                 <span class="mt-2 text-[12.5px] font-medium">Choose images</span>
                 <span class="mt-1 text-[11px] font-normal text-slate-400">JPG, PNG, WebP or AVIF · up to 5 MB each</span>
-                <input form="product-form" type="file" name="photos[]" accept="image/*" multiple class="hidden" data-upload="#photo-preview">
+                <input form="product-form" type="file" name="photos[]" accept="image/*" multiple class="hidden" data-upload="#photo-preview" data-upload-crop="photo_crops">
             </label>
 
             @if($editing)
@@ -298,6 +298,7 @@
                 @else
                     Uploads are attached once the product is created.
                 @endif
+                Each new photo is cropped from its centre unless you choose “Adjust crop” on it.
             </p>
         </div>
     </div>
@@ -313,6 +314,36 @@
 @endsection
 
 @section('modals')
+    {{-- One window shared by every freshly chosen photo; initUploadPreviews()
+         in admin.js loads the file into it and writes the result back. --}}
+    <x-admin.modal id="photo-crop" title="Adjust crop" subtitle="Drag the photo to reposition it, zoom to tighten. What sits inside the frame is what the shop shows.">
+        <div data-cropper class="px-6 py-5">
+            <div class="flex justify-center rounded-lg bg-slate-900 p-4">
+                <div data-cropper-frame class="relative cursor-grab touch-none overflow-hidden bg-slate-800 select-none active:cursor-grabbing">
+                    <img data-cropper-image alt="" draggable="false" class="pointer-events-none absolute top-0 left-0 max-w-none origin-top-left">
+                    <div class="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3" aria-hidden="true">
+                        @for($cell = 0; $cell < 9; $cell++)
+                            <span class="border-white/25 {{ $cell % 3 ? 'border-l' : '' }} {{ $cell > 2 ? 'border-t' : '' }}"></span>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+
+            <label class="mt-4 flex items-center gap-3 text-[12px] font-medium text-slate-500">
+                Zoom
+                <input type="range" data-cropper-zoom min="1" max="4" step="0.01" value="1" class="min-w-0 flex-1 accent-slate-900">
+            </label>
+
+            <div class="mt-5 flex items-center justify-between gap-2.5">
+                <button type="button" data-cropper-reset class="bo-btn">Reset to centre</button>
+                <div class="flex gap-2.5">
+                    <button type="button" data-modal-close class="bo-btn">Cancel</button>
+                    <button type="button" data-cropper-apply data-modal-close class="bo-btn-primary">Apply crop</button>
+                </div>
+            </div>
+        </div>
+    </x-admin.modal>
+
     @if($editing)
         <x-admin.confirm id="delete-product"
                          :action="route('admin.products.destroy', $product)"

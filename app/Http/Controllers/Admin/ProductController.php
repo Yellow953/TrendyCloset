@@ -147,13 +147,15 @@ class ProductController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'photos' => ['nullable', 'array', 'max:10'],
             'photos.*' => array_merge(['nullable'], ImageStore::RULES),
+            'photo_crops' => ['nullable', 'array'],
+            'photo_crops.*' => ['nullable', 'regex:/^\d(\.\d+)?(,\d(\.\d+)?){3}$/'],
             'variants' => ['nullable', 'array'],
             'variants.*.color' => ['nullable', Rule::in(Color::active()->pluck('name'))],
         ], [
             'compare_at_price.gt' => 'The "was" price must be higher than the price, or the piece is not on sale.',
         ]);
 
-        unset($data['photos'], $data['variants']);
+        unset($data['photos'], $data['photo_crops'], $data['variants']);
 
         $data['slug'] = ($data['slug'] ?? null) ?: $this->uniqueSlug($data['name'], $product);
         $data['is_featured'] = $request->boolean('is_featured');
@@ -255,8 +257,16 @@ class ProductController extends Controller
         $position = (int) $product->images()->max('position');
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
 
-        foreach ($files as $file) {
-            $stored = $this->images->store($file, 'products/'.$product->id, $product->photo_ratio->ratio());
+        foreach ($files as $index => $file) {
+            // Set by the crop window on the form; absent means "centre it".
+            $crop = $request->input('photo_crops.'.$index);
+
+            $stored = $this->images->store(
+                $file,
+                'products/'.$product->id,
+                $product->photo_ratio->ratio(),
+                region: $crop ? array_map('floatval', explode(',', $crop)) : null,
+            );
 
             $product->images()->create([
                 'url' => $stored['url'],
