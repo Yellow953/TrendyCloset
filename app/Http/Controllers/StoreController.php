@@ -35,6 +35,8 @@ class StoreController extends Controller
     /** How many products a listing page shows. */
     private const PER_PAGE = 12;
 
+    private const DEFAULT_SORT = 'newest';
+
     /** Display names for the `?edit=` cuts, used by the heading and the meta. */
     private const EDIT_LABELS = ['new' => 'New In', 'sale' => 'Sale', 'featured' => "Pamela's Picks"];
 
@@ -206,7 +208,7 @@ class StoreController extends Controller
 
         $size = $request->query('size');
         $color = $request->query('color');
-        $sort = $request->query('sort', 'popular');
+        $sort = $request->query('sort', self::DEFAULT_SORT);
 
         $products = $scope()
             ->with(['images', 'variants'])
@@ -274,7 +276,7 @@ class StoreController extends Controller
         // A search term is a facet too: `?q=` is one shopper's slice of the same
         // catalogue, and an indexed search page is a thin duplicate.
         $faceted = $request->hasAny(['size', 'color', 'min', 'max', 'q'])
-            || $request->query('sort', 'popular') !== 'popular';
+            || $request->query('sort', self::DEFAULT_SORT) !== self::DEFAULT_SORT;
 
         $title = $page > 1 ? $heading.' — Page '.$page : $heading;
 
@@ -378,11 +380,11 @@ class StoreController extends Controller
     private function applySort($query, string $sort): void
     {
         match ($sort) {
-            'newest' => $query->orderByDesc('created_at')->orderByDesc('id'),
+            'popular' => $query->withEngagement()->orderByDesc('views_count')->orderByDesc('id'),
             'price-asc' => $query->orderBy('price'),
             'price-desc' => $query->orderByDesc('price'),
             'rating' => $query->orderByDesc('rating')->orderByDesc('id'),
-            default => $query->withEngagement()->orderByDesc('views_count')->orderByDesc('id'),
+            default => $query->orderByDesc('created_at')->orderByDesc('id'),
         };
     }
 

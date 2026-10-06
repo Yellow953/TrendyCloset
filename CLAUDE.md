@@ -46,7 +46,8 @@ and `CartController` (the bag). Named routes: `home` `/`, `listing` `/shop/{cate
   edits (`?edit=new|sale|featured`), so filters and sorting behave identically everywhere. Browsing
   a *parent* category widens to its children via `Product::inCategory()` — products live on leaves.
 - Filters are query params: `edit`, `size`, `color`, `min`, `max`, `sort`
-  (`popular|newest|price-asc|price-desc|rating`). `popular` sorts by real `views_count` from
+  (`newest|popular|price-asc|price-desc|rating`). **`newest` is the default**
+  (`StoreController::DEFAULT_SORT`) on every listing; `popular` sorts by real `views_count` from
   `withEngagement()`, not a hard-coded order.
 - The filter rail is a left sidebar from `lg`; **below that it collapses behind a "Filters" button**
   (`[data-filter-toggle]` / `[data-filter-panel]`, `initFilterPanel()`) so a phone opens on products
