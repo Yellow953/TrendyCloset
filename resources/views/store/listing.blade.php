@@ -193,8 +193,8 @@
                     @endforeach
                     <label for="tc-sort" class="text-[13px] font-light text-muted">Sort</label>
                     <select id="tc-sort" name="sort" data-auto-submit class="border-b border-line-2 bg-transparent py-1.5 pr-6 text-[14px] font-normal text-ink outline-none transition-colors focus:border-blush">
-                        <option value="popular" @selected($filters['sort'] === 'popular')>Most popular</option>
                         <option value="newest" @selected($filters['sort'] === 'newest')>Newest first</option>
+                        <option value="popular" @selected($filters['sort'] === 'popular')>Most popular</option>
                         <option value="price-asc" @selected($filters['sort'] === 'price-asc')>Price: low to high</option>
                         <option value="price-desc" @selected($filters['sort'] === 'price-desc')>Price: high to low</option>
                         <option value="rating" @selected($filters['sort'] === 'rating')>Top rated</option>

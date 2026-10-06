@@ -46,7 +46,8 @@ and `CartController` (the bag). Named routes: `home` `/`, `listing` `/shop/{cate
   edits (`?edit=new|sale|featured`), so filters and sorting behave identically everywhere. Browsing
   a *parent* category widens to its children via `Product::inCategory()` — products live on leaves.
 - Filters are query params: `edit`, `size`, `color`, `min`, `max`, `sort`
-  (`popular|newest|price-asc|price-desc|rating`). `popular` sorts by real `views_count` from
+  (`newest|popular|price-asc|price-desc|rating`). **`newest` is the default**
+  (`StoreController::DEFAULT_SORT`) on every listing; `popular` sorts by real `views_count` from
   `withEngagement()`, not a hard-coded order.
 - The filter rail is a left sidebar from `lg`; **below that it collapses behind a "Filters" button**
   (`[data-filter-toggle]` / `[data-filter-panel]`, `initFilterPanel()`) so a phone opens on products
@@ -134,7 +135,10 @@ model or `carts` table**: an abandoned bag is not a CRM record, and shoppers che
   `$maxEdge` (1600 default) and re-encodes as **WebP q82** with alpha preserved — a 4MB phone JPEG
   lands as a ~60KB file. Product photographs pass `ImageStore::SQUARE` so the card, thumbnail rail
   and PDP all line up; the hero passes no ratio (its band is a different shape at every breakpoint)
-  and `maxEdge: 2000`. Re-encoding is **best-effort**: if GD cannot read the file, the original is
+  and `maxEdge: 2000`. The centre crop is only the default: the product form's "Adjust crop" window
+  (`initCropper()` in `admin.js`) posts `photo_crops[<file index>]` as `x,y,w,h` fractions of the
+  photo, which `store()` takes as `$region` and cuts before the ratio crop. It covers newly chosen
+  files only — a saved image is already cropped and the original is not kept. Re-encoding is **best-effort**: if GD cannot read the file, the original is
   written unchanged rather than the upload being lost.
 - Every action passes `active` (nav highlight key: `home` `shop` `new` `sale` `about` …).
   `bagCount`, `bagTotal`, `navTree`, `catalog` and `favoritesCount` are **not** passed by actions —

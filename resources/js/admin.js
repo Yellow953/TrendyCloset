@@ -333,30 +333,193 @@ function initColorPicker() {
     });
 }
 
+// The crop window on the product form. The frame *is* the crop: the photo is
+// dragged and zoomed behind it, never smaller than the frame, so there is no
+// way to produce a shape the storefront does not use. What goes to the server
+// is the framed window as fractions of the photo ("x,y,w,h") — ImageStore cuts
+// the full-size upload, so the pixels on screen here are only a guide.
+function initCropper() {
+    const root = document.querySelector('[data-cropper]');
+    if (!root) return null;
+
+    const frame = root.querySelector('[data-cropper-frame]');
+    const image = root.querySelector('[data-cropper-image]');
+    const slider = root.querySelector('[data-cropper-zoom]');
+    const maxZoom = Number(slider.max);
+
+    let zoom = 1;
+    let left = 0;
+    let top = 0;
+    let drag = null;
+    let done = null;
+    let url = null;
+
+    // The scale at which the photo exactly covers the frame.
+    const cover = () => Math.max(frame.clientWidth / image.naturalWidth, frame.clientHeight / image.naturalHeight);
+
+    const paint = () => {
+        const width = image.naturalWidth * cover() * zoom;
+        const height = image.naturalHeight * cover() * zoom;
+
+        left = Math.min(0, Math.max(frame.clientWidth - width, left));
+        top = Math.min(0, Math.max(frame.clientHeight - height, top));
+
+        image.style.width = `${width}px`;
+        image.style.height = `${height}px`;
+        image.style.transform = `translate(${left}px, ${top}px)`;
+        slider.value = zoom;
+    };
+
+    const centre = () => {
+        zoom = 1;
+        left = (frame.clientWidth - image.naturalWidth * cover()) / 2;
+        top = (frame.clientHeight - image.naturalHeight * cover()) / 2;
+        paint();
+    };
+
+    // Zoom about the middle of the frame, so what is being looked at stays put.
+    const setZoom = (next) => {
+        next = Math.min(maxZoom, Math.max(1, next));
+        const midX = frame.clientWidth / 2;
+        const midY = frame.clientHeight / 2;
+
+        left = midX - (midX - left) * (next / zoom);
+        top = midY - (midY - top) * (next / zoom);
+        zoom = next;
+        paint();
+    };
+
+    const restore = (value) => {
+        const [x, y, w] = value.split(',').map(Number);
+        const width = frame.clientWidth / w;
+
+        zoom = Math.min(maxZoom, Math.max(1, width / (image.naturalWidth * cover())));
+        left = -x * width;
+        top = -y * image.naturalHeight * cover() * zoom;
+        paint();
+    };
+
+    frame.addEventListener('pointerdown', (e) => {
+        frame.setPointerCapture(e.pointerId);
+        drag = { x: e.clientX - left, y: e.clientY - top };
+    });
+    frame.addEventListener('pointermove', (e) => {
+        if (!drag) return;
+        left = e.clientX - drag.x;
+        top = e.clientY - drag.y;
+        paint();
+    });
+    ['pointerup', 'pointercancel'].forEach((type) => frame.addEventListener(type, () => { drag = null; }));
+
+    frame.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        setZoom(zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08));
+    }, { passive: false });
+
+    slider.addEventListener('input', () => setZoom(Number(slider.value)));
+    root.querySelector('[data-cropper-reset]').addEventListener('click', centre);
+
+    root.querySelector('[data-cropper-apply]').addEventListener('click', () => {
+        if (!done || !image.naturalWidth) return;
+
+        const width = image.naturalWidth * cover() * zoom;
+        const height = image.naturalHeight * cover() * zoom;
+        const region = [-left / width, -top / height, frame.clientWidth / width, frame.clientHeight / height];
+
+        // A small render of the result for the tile on the form.
+        const canvas = document.createElement('canvas');
+        canvas.height = 320;
+        canvas.width = Math.round(320 * frame.clientWidth / frame.clientHeight);
+        canvas.getContext('2d').drawImage(
+            image,
+            region[0] * image.naturalWidth, region[1] * image.naturalHeight,
+            region[2] * image.naturalWidth, region[3] * image.naturalHeight,
+            0, 0, canvas.width, canvas.height,
+        );
+
+        const value = region.map((n) => Math.min(1, Math.max(0, n)).toFixed(5)).join(',');
+        const apply = done;
+        canvas.toBlob((blob) => apply(value, blob ? URL.createObjectURL(blob) : null));
+    });
+
+    return {
+        open(file, ratio, value, onApply) {
+            done = onApply;
+            if (url) URL.revokeObjectURL(url);
+            url = URL.createObjectURL(file);
+
+            frame.style.aspectRatio = ratio;
+            frame.style.width = `min(100%, max(180px, calc((100vh - 330px) * ${ratio})))`;
+
+            image.style.width = '0';
+            image.onload = () => (value ? restore(value) : centre());
+            image.src = url;
+        },
+    };
+}
+
 // Preview picked images before the form is posted, so someone uploading eight
-// photographs can see what they chose without saving first.
+// photographs can see what they chose without saving first. An input carrying
+// `data-upload-crop="<field>"` also gets an "Adjust crop" button per photo,
+// which posts the chosen window as `<field>[<index of the file>]`.
 function initUploadPreviews() {
+    const cropper = initCropper();
+
     document.querySelectorAll('[data-upload]').forEach((input) => {
         const target = document.querySelector(input.dataset.upload);
         if (!target) return;
 
-        input.addEventListener('change', () => {
+        const cropField = cropper ? input.dataset.uploadCrop : null;
+        const ratioField = document.getElementById('photo_ratio');
+
+        const render = () => {
             target.innerHTML = '';
 
-            const ratioField = document.getElementById('photo_ratio');
-            const ratio = ratioField ? ratioField.value.replace(':', ' / ') : '1 / 1';
+            const [ratioWidth, ratioHeight] = (ratioField ? ratioField.value : '1:1').split(':').map(Number);
 
-            Array.from(input.files || []).forEach((file) => {
+            Array.from(input.files || []).forEach((file, index) => {
                 if (!file.type.startsWith('image/')) return;
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
                 img.dataset.pickableImage = '';
                 img.className = 'h-40 w-auto rounded-lg border border-slate-200 object-cover transition-shadow';
-                img.style.aspectRatio = ratio;
+                img.style.aspectRatio = `${ratioWidth} / ${ratioHeight}`;
                 img.onload = () => URL.revokeObjectURL(img.src);
-                target.appendChild(img);
+
+                if (!cropField) {
+                    target.appendChild(img);
+                    return;
+                }
+
+                const crop = document.createElement('input');
+                crop.type = 'hidden';
+                crop.name = `${cropField}[${index}]`;
+                if (input.form?.id) crop.setAttribute('form', input.form.id);
+
+                const edit = document.createElement('button');
+                edit.type = 'button';
+                edit.textContent = 'Adjust crop';
+                edit.className = 'text-[11.5px] font-medium text-slate-900 hover:underline';
+                edit.dataset.modalOpen = 'photo-crop';
+                edit.addEventListener('click', () => {
+                    cropper.open(file, ratioWidth / ratioHeight, crop.value, (value, preview) => {
+                        crop.value = value;
+                        if (preview) img.src = preview;
+                        edit.textContent = 'Adjust crop ✓';
+                    });
+                });
+
+                const tile = document.createElement('div');
+                tile.className = 'flex flex-col items-start gap-1.5';
+                tile.append(img, edit, crop);
+                target.appendChild(tile);
             });
-        });
+        };
+
+        input.addEventListener('change', render);
+
+        // A crop framed at one shape means nothing at another, so start over.
+        if (cropField) ratioField?.addEventListener('change', render);
     });
 }
 
