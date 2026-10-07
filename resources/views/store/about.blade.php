@@ -5,32 +5,21 @@
         $contact = config('store.contact');
     @endphp
 
-    {{-- Hero --}}
-    <div class="relative h-[340px] overflow-hidden bg-tan">
-        <x-img :src="$hero['img']" alt="Trendy Closet studio" eager sizes="100vw"
-               class="absolute inset-0 h-full w-full object-cover" />
-        {{-- Scrim keeps the copy readable whatever the photo does --}}
-        <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-cream-2/85 via-cream-2/45 to-transparent"></div>
-        <div class="pointer-events-none absolute inset-0 flex flex-col justify-center px-8 md:px-16">
-            <div class="text-[12px] font-medium tracking-[0.28em] text-blush-soft">OUR STORY</div>
-            {{-- The page's <h1>: it was a <div>, which left About with no
-                 top-level heading at all. --}}
-            <h1 class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Your closet,<br><span class="font-serif font-medium italic text-blush">your style, your trend</span></h1>
-            {{-- Kept narrow: the scrim only carries copy on the left of the photograph. --}}
-            <p class="mt-4 max-w-[360px] text-[15px] font-light leading-[1.65] text-muted-2 md:max-w-[440px] md:text-[15.5px]">Hand picked by Pamela and styled before it ever ships.</p>
-        </div>
-    </div>
-
     {{-- Story --}}
     <div class="flex flex-col items-center gap-14 px-8 py-14 md:px-16 lg:flex-row">
         {{-- Upright frame: the photograph is a portrait 736x1312, and a wide
              band would crop it to a strip of hangers. --}}
         <div class="mx-auto aspect-[4/5] w-full max-w-[440px] flex-1 overflow-hidden rounded-panel lg:mx-0 lg:max-w-[480px]">
-            <x-img :src="$portrait['img']" alt="A rail of Trendy Closet pieces" sizes="(min-width: 1024px) 480px, (min-width: 640px) 440px, 100vw"
+            <x-img :src="$portrait['img']" alt="A rail of Trendy Closet pieces" eager sizes="(min-width: 1024px) 480px, (min-width: 640px) 440px, 100vw"
                    class="h-full w-full object-cover" />
         </div>
         <div class="flex flex-1 flex-col gap-4">
-            <h2 class="text-[30px] font-normal">Hi, I'm Pamela</h2>
+            <div>
+                <div class="text-[12px] font-medium tracking-[0.28em] text-blush-soft">OUR STORY</div>
+                <h1 class="mt-2.5 text-[34px] font-light leading-[1.15] text-ink md:text-[46px]">Your closet,<br><span class="font-serif font-medium italic text-blush">your style, your trend</span></h1>
+                <p class="mt-4 text-[15px] font-light leading-[1.65] text-muted-2 md:text-[15.5px]">Hand picked by Pamela and styled before it ever ships.</p>
+            </div>
+            <h2 class="mt-6 text-[30px] font-normal">Hi, I'm Pamela</h2>
             <p class="text-[15px] font-light leading-[1.75] text-muted-3">At Trendy Closet, fashion is more than what you wear — it's a way to express who you are. We're a family-owned boutique in Dekwaneh, Lebanon, for women who love discovering fresh styles, quality pieces and effortless looks at affordable prices.</p>
             <p class="text-[15px] font-light leading-[1.75] text-muted-3">Your wardrobe should always feel exciting. That's why new arrivals land every week — the latest fashion wear and denim, carefully selected to keep your style fresh, trendy and uniquely yours.</p>
             <div class="mt-3 flex flex-wrap gap-3.5">

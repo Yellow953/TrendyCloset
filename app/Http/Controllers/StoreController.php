@@ -586,7 +586,6 @@ class StoreController extends Controller
             ->schema(Schema::webPage('Our Story', route('about'), 'The story behind Trendy Closet and its founder, Pamela.'));
 
         return view('store.about', [
-            'hero' => $this->img('photo-1490481651871-ab68de25d43d', 'Priscilla Du Preez', 'priscilladupreez', 1400),
             // The rail, not a stock model posing as Pamela. The shop's own
             // photograph, so it is a local file rather than an img() descriptor.
             'portrait' => ['img' => asset('images/about-rail.webp'), 'credit' => null, 'credit_href' => null],

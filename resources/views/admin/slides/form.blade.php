@@ -59,7 +59,7 @@
 
                         <x-admin.field name="cta_url" label="Button link" :value="$slide->cta_url"
                                        placeholder="/shop?edit=sale"
-                                       hint="A path on this shop — /shop, /shop/dresses, /shop?edit=new, /shop?edit=sale — or a full URL. Blank sends shoppers to /shop." />
+                                       hint="A path on this shop — /shop, /shop/dresses, or a full URL. Blank sends shoppers to /shop." />
                     </div>
                 </div>
             </div>

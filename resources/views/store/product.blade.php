@@ -117,7 +117,7 @@
             @endif
 
             @if($product->description)
-                <p class="max-w-[560px] text-[14.5px] font-light leading-[1.75] text-muted-3">{{ $product->description }}</p>
+                <p class="max-w-[560px] text-[14.5px] font-light leading-[1.75] text-muted-3">{!! nl2br(e($product->description)) !!}</p>
             @endif
 
             @if($colors->isNotEmpty())
@@ -249,7 +249,7 @@
 
             <div data-tab-panel="description" class="pt-8 text-center">
                 <p class="mx-auto max-w-[760px] text-[15.5px] font-light leading-[1.9] text-muted-3">
-                    {{ $product->description }}
+                    {!! nl2br(e($product->description)) !!}
                     @if($product->category)
                         Filed under <a href="{{ route('listing', $product->category) }}" class="tc-link">{{ $product->category->name }}</a>, and styled by Pamela before it ever shipped.
                     @endif
