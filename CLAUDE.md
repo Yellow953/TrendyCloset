@@ -179,8 +179,13 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
     updated in place by `app.js`). There is deliberately **no account icon**: only staff log in, and
     the login page is not shopper-facing.
   - **Search** is a plain GET form in a collapsible header panel onto `/shop?q=…` — a shareable URL
-    that works with JS off; `initSearch()` only reveals the panel. `Product::search()` matches name,
-    description, category name and variant colour. `q` behaves as a facet for SEO: `noindex, follow`,
+    that works with JS off; `initSearch()` reveals the panel and, while typing, swaps the
+    `partials/search-results` fragment from `/search/suggest` (`search.suggest`, six products + a
+    "view all" link) in under the field. The suggest action deliberately records **no** search
+    event — that stays with the submitted listing, or one word would log a row per keystroke.
+    `Product::search()` splits the term into words and each must match *somewhere*: name,
+    description, category name, or an active variant's colour, SKU or (exact) size — so
+    "ecru jeans" finds a colour and a name. `q` behaves as a facet for SEO: `noindex, follow`,
     canonical back to the clean listing.
   - **The drawer** (`partials/drawer`) is one slide-over shared by bag and favourites. The header
     icons carry `data-drawer-open="<fragment url>"` (`/bag/drawer`, `/favorites/drawer`) with the

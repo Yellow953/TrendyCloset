@@ -535,6 +535,25 @@ class StoreController extends Controller
     }
 
     /**
+     * Live results under the header search field. Not recorded as a search:
+     * one typed word would otherwise log a row per keystroke.
+     */
+    public function searchSuggest(Request $request)
+    {
+        $term = mb_substr(trim((string) $request->query('q', '')), 0, 80);
+
+        $matches = Product::query()->active()->search($term);
+
+        return view('partials.search-results', [
+            'term' => $term,
+            'total' => mb_strlen($term) < 2 ? 0 : (clone $matches)->count(),
+            'products' => mb_strlen($term) < 2
+                ? collect()
+                : $matches->with(['images', 'variants'])->latest()->limit(6)->get(),
+        ]);
+    }
+
+    /**
      * The favourites drawer's contents, as an HTML fragment — the counterpart
      * to CartController::drawer. Fetched by app.js when the drawer opens and
      * re-fetched after every change.

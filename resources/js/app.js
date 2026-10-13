@@ -520,25 +520,76 @@ function initStickyBuy() {
 }
 
 // Header search. The form is a plain GET onto the listing and works on its
-// own; JS only reveals the panel and puts the caret in the field.
+// own; JS reveals the panel and fetches a results fragment while typing.
 function initSearch() {
     const panel = document.querySelector('[data-search-panel]');
     const input = panel?.querySelector('[data-search-input]');
+    const results = panel?.querySelector('[data-search-results]');
     const toggles = document.querySelectorAll('[data-search-toggle]');
     if (!panel || !toggles.length) return;
+
+    let timer;
+    let request;
+
+    const clear = () => {
+        clearTimeout(timer);
+        request?.abort();
+        if (results) {
+            results.hidden = true;
+            results.innerHTML = '';
+        }
+    };
+
+    const suggest = async () => {
+        const term = input.value.trim();
+        request?.abort();
+        if (term.length < 2) return clear();
+
+        request = new AbortController();
+        try {
+            const url = `${panel.dataset.searchSuggest}?q=${encodeURIComponent(term)}`;
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: request.signal,
+            });
+            if (!response.ok) return;
+            results.innerHTML = await response.text();
+            results.hidden = false;
+        } catch {
+            // Superseded by a newer keystroke, or offline: the form still submits.
+        }
+    };
 
     const setOpen = (open) => {
         panel.hidden = !open;
         toggles.forEach((t) => t.setAttribute('aria-expanded', String(open)));
         if (open) input?.focus();
+        else clear();
     };
 
     toggles.forEach((toggle) => {
         toggle.addEventListener('click', () => setOpen(panel.hidden));
     });
 
+    if (input && results && panel.dataset.searchSuggest) {
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(suggest, 180);
+        });
+        input.addEventListener('focus', () => {
+            if (results.innerHTML) results.hidden = false;
+        });
+        document.addEventListener('click', (event) => {
+            if (!panel.contains(event.target) && !event.target.closest('[data-search-toggle]')) {
+                results.hidden = true;
+            }
+        });
+    }
+
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !panel.hidden) setOpen(false);
+        if (event.key !== 'Escape' || panel.hidden) return;
+        if (results && !results.hidden) results.hidden = true;
+        else setOpen(false);
     });
 }
 

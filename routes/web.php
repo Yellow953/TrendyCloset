@@ -34,6 +34,7 @@ Route::get('/feed/meta-products.xml', [SeoController::class, 'metaFeed'])->name(
 
 // Shop
 Route::get('/shop/{category:slug?}', [StoreController::class, 'listing'])->name('listing');
+Route::get('/search/suggest', [StoreController::class, 'searchSuggest'])->middleware('throttle:120,1')->name('search.suggest');
 Route::get('/product/{product:slug}', [StoreController::class, 'product'])->name('product');
 Route::post('/product/{product:slug}/favorite', [StoreController::class, 'favorite'])->name('product.favorite');
 Route::get('/favorites/drawer', [StoreController::class, 'favoritesDrawer'])->name('favorites.drawer');

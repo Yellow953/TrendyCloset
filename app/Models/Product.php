@@ -307,13 +307,23 @@ class Product extends Model
      */
     public function scopeSearch(Builder $query, string $term): void
     {
-        $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
+        $words = array_slice(preg_split('/\s+/', trim($term), -1, PREG_SPLIT_NO_EMPTY), 0, 6);
 
-        $query->where(function (Builder $q) use ($like) {
-            $q->where('name', 'like', $like)
-                ->orWhere('description', 'like', $like)
-                ->orWhereHas('category', fn ($c) => $c->where('name', 'like', $like))
-                ->orWhereHas('variants', fn ($v) => $v->where('is_active', true)->where('color', 'like', $like));
-        });
+        // Every word has to land somewhere, but not all in the same field —
+        // "ecru jeans" is a colour and a name.
+        foreach ($words as $word) {
+            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $word).'%';
+
+            $query->where(function (Builder $q) use ($like, $word) {
+                $q->where('name', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhereHas('category', fn ($c) => $c->where('name', 'like', $like))
+                    ->orWhereHas('variants', fn ($v) => $v->where('is_active', true)->where(
+                        fn ($m) => $m->where('color', 'like', $like)
+                            ->orWhere('sku', 'like', $like)
+                            ->orWhere('size', $word)
+                    ));
+            });
+        }
     }
 }
