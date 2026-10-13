@@ -424,6 +424,8 @@ class StoreController extends Controller
         $variants = $product->variants->where('is_active', true);
         $sizes = ProductVariant::sortSizes($variants->pluck('size')->filter()->unique()->values());
         $colors = $variants->pluck('color')->filter()->unique()->values();
+        $wanted = request()->query('color');
+        $selectedColor = is_string($wanted) ? $colors->first(fn ($c) => strcasecmp($c, $wanted) === 0) : null;
         $breadcrumb = array_filter([$product->category?->parent, $product->category]);
 
         $this->seo
@@ -448,6 +450,7 @@ class StoreController extends Controller
             'sizes' => $sizes,
             'variants' => $variants->values(),
             'colors' => $colors,
+            'selectedColor' => $selectedColor,
             'related' => $related,
             'favorited' => $analytics->hasFavorited($product),
             'favoritesCountForProduct' => $product->favorites()->count(),

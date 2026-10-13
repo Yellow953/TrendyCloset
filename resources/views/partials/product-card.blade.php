@@ -15,9 +15,6 @@
     $colors = $p->relationLoaded('variants') ? $p->color_run : collect();
     $extraColors = max($colors->count() - 5, 0);
 
-    $colorVariants = $colors->take(5)->mapWithKeys(
-        fn ($color) => [$color => $p->sellable_variants->first(fn ($v) => $v->color === $color)]
-    );
     $offer = isset($offerBoard) ? $offerBoard->forProduct($p)->first() : null;
 @endphp
 <div class="group relative">
@@ -78,19 +75,12 @@
     @if($colors->isNotEmpty())
         <div class="mt-2 flex items-center gap-1.5" aria-label="Colours: {{ $colors->implode(', ') }}">
             @foreach($colors->take(5) as $color)
-                @php
-                    $colorVariant = $colorVariants[$color];
-                @endphp
-                <form method="POST" action="{{ route('cart.add') }}" data-async>
-                    @csrf
-                    <input type="hidden" name="variant_id" value="{{ $colorVariant?->id }}">
-                    <button type="submit" @disabled(! $colorVariant)
-                            class="flex rounded-full transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
-                            title="Add {{ $p->name }} — {{ $color }} to bag"
-                            aria-label="Add {{ $p->name }}, colour {{ $color }}, to bag">
-                        <x-swatch :color="$color" />
-                    </button>
-                </form>
+                <a href="{{ route('product', [$p, 'color' => $color]) }}"
+                   class="flex rounded-full transition-transform hover:scale-110"
+                   title="{{ $p->name }} — {{ $color }}"
+                   aria-label="View {{ $p->name }} in {{ $color }}">
+                    <x-swatch :color="$color" />
+                </a>
             @endforeach
             @if($extraColors)
                 <span class="text-[12px] font-light text-muted">+{{ $extraColors }}</span>
