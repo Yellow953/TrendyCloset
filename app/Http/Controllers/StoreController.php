@@ -14,14 +14,17 @@ use App\Services\ProductAnalytics;
 use App\Services\SiteAnalytics;
 use App\Support\Cart;
 use App\Support\Catalog;
+use App\Support\ContactChallenge;
 use App\Support\Schema;
 use App\Support\Seo;
 use App\Support\Tracking;
 use App\Support\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Trendy Closet storefront. Catalogue content (categories, products, imagery,
@@ -421,6 +424,8 @@ class StoreController extends Controller
         $variants = $product->variants->where('is_active', true);
         $sizes = ProductVariant::sortSizes($variants->pluck('size')->filter()->unique()->values());
         $colors = $variants->pluck('color')->filter()->unique()->values();
+        $wanted = request()->query('color');
+        $selectedColor = is_string($wanted) ? $colors->first(fn ($c) => strcasecmp($c, $wanted) === 0) : null;
         $breadcrumb = array_filter([$product->category?->parent, $product->category]);
 
         $this->seo
@@ -445,6 +450,7 @@ class StoreController extends Controller
             'sizes' => $sizes,
             'variants' => $variants->values(),
             'colors' => $colors,
+            'selectedColor' => $selectedColor,
             'related' => $related,
             'favorited' => $analytics->hasFavorited($product),
             'favoritesCountForProduct' => $product->favorites()->count(),
@@ -526,6 +532,25 @@ class StoreController extends Controller
         }
 
         return back()->with('status', $status);
+    }
+
+    /**
+     * Live results under the header search field. Not recorded as a search:
+     * one typed word would otherwise log a row per keystroke.
+     */
+    public function searchSuggest(Request $request)
+    {
+        $term = mb_substr(trim((string) $request->query('q', '')), 0, 80);
+
+        $matches = Product::query()->active()->search($term);
+
+        return view('partials.search-results', [
+            'term' => $term,
+            'total' => mb_strlen($term) < 2 ? 0 : (clone $matches)->count(),
+            'products' => mb_strlen($term) < 2
+                ? collect()
+                : $matches->with(['images', 'variants'])->latest()->limit(6)->get(),
+        ]);
     }
 
     /**
@@ -611,7 +636,7 @@ class StoreController extends Controller
             )
             ->schema(Schema::webPage('Contact Us', route('contact'), 'How to reach Trendy Closet.'));
 
-        return view('store.contact', ['active' => 'contact']);
+        return view('store.contact', ['active' => 'contact', 'challenge' => ContactChallenge::issue()]);
     }
 
     /**
@@ -619,18 +644,36 @@ class StoreController extends Controller
      */
     public function sendContact(Request $request)
     {
+        $thanks = 'Thanks — your message is with Pamela. We reply '.config('store.contact.response_time').'.';
+
+        // A bot is told the same thing a person is, so it learns nothing.
+        if (ContactChallenge::looksAutomated($request->input(ContactChallenge::HONEYPOT))) {
+            return back()->with('status', $thanks);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'subject' => ['nullable', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:5000'],
+            'challenge' => ['required', 'string', 'max:10'],
+        ], [
+            'challenge.required' => 'Please answer the quick question so we know you are a person.',
         ]);
 
-        ContactMessage::create($data);
+        if (! ContactChallenge::passes($data['challenge'])) {
+            throw ValidationException::withMessages([
+                'challenge' => 'That answer was not right — here is a fresh question. Type it as a number.',
+            ]);
+        }
+
+        ContactChallenge::clear();
+
+        ContactMessage::create(Arr::except($data, 'challenge'));
 
         app(SiteAnalytics::class)->record(SiteEventType::ContactFormSent);
 
-        return back()->with('status', 'Thanks — your message is with Pamela. We reply '.config('store.contact.response_time').'.');
+        return back()->with('status', $thanks);
     }
 
     /**

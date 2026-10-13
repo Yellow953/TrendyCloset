@@ -105,14 +105,16 @@
     {{-- Search. A plain GET form onto the listing, so results are a normal,
          shareable URL (`/shop?q=…`) and it still works with JS off — the
          toggle button is the only part JS owns. --}}
-    <div id="tc-search" data-search-panel class="border-b border-line bg-white" @if(! request()->filled('q')) hidden @endif>
+    <div id="tc-search" data-search-panel data-search-suggest="{{ route('search.suggest') }}" class="relative border-b border-line bg-white" @if(! request()->filled('q')) hidden @endif>
         <form method="GET" action="{{ route('listing') }}" class="mx-auto flex max-w-[760px] items-center gap-3 px-5 py-4 md:px-10">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-[20px] w-[20px] shrink-0 text-muted-2"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
             <input type="search" name="q" value="{{ request('q') }}" data-search-input autocomplete="off"
                    placeholder="Search for a piece, a colour, a category…"
-                   class="tc-input flex-1" aria-label="Search products">
+                   class="tc-input flex-1" aria-label="Search products" aria-controls="tc-search-results">
             <button type="submit" class="tc-btn-dark whitespace-nowrap px-6 py-3 text-[14px]">Search</button>
         </form>
+        <div id="tc-search-results" data-search-results aria-live="polite" hidden
+             class="absolute inset-x-0 top-full z-40 max-h-[70vh] overflow-y-auto border-b border-line bg-white shadow-[0_18px_30px_-18px_rgba(0,0,0,0.25)]"></div>
     </div>
 
     {{-- Mobile drawer (toggled by the checkbox above) --}}

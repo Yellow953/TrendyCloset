@@ -12,7 +12,8 @@
 @php
     $inStock = $product->in_stock;
     $stockLeft = $variants->sum('stock');
-    $firstAvailable = $variants->first(fn ($v) => $v->in_stock);
+    $firstAvailable = ($selectedColor ? $variants->first(fn ($v) => $v->in_stock && $v->color === $selectedColor) : null)
+        ?? $variants->first(fn ($v) => $v->in_stock);
     $ratioClass = $product->photo_ratio->aspectClass();
 @endphp
 
@@ -51,7 +52,9 @@
                            :sizes="$mainImageSizes"
                            class="h-full w-full object-cover" />
                 </div>
-                @php($offer = isset($offerBoard) ? $offerBoard->forProduct($product)->first() : null)
+                @php
+                    $offer = isset($offerBoard) ? $offerBoard->forProduct($product)->first() : null;
+                @endphp
                 @if($product->badge_label || $offer)
                     <div class="pointer-events-none absolute left-4 top-4 flex flex-col items-start gap-1.5">
                         @if($product->badge_label)
@@ -121,7 +124,9 @@
             @endif
 
             @if($colors->isNotEmpty())
-                @php($currentColor = $firstAvailable?->color ?? $colors->first())
+                @php
+                    $currentColor = $selectedColor ?? $firstAvailable?->color ?? $colors->first();
+                @endphp
                 <div>
                     <div class="mb-2.5 text-[15px] font-medium">Colour <span data-color-label class="font-light text-muted">— {{ $currentColor }}</span></div>
                     <div data-color-picker class="flex flex-wrap gap-2.5">
