@@ -255,6 +255,11 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
   contact page, About's "Visit us" map and the policy prose all read from those two keys — if a
   detail changes, it changes in one place. The number is **WhatsApp-only**: link it to `wa.me`,
   never `tel:`, and do not put `telephone` in the schema.
+- **The contact form defends itself** — `App\Support\ContactChallenge`, no third party and no JS: a
+  sum asked in words (answer held in the session), a hidden honeypot field, a 3-second minimum
+  between rendering the form and posting it, and `throttle:5,10` on `contact.send`. A tripped
+  honeypot or time trap gets the **same thank-you a person gets** and nothing is saved, so a bot
+  learns nothing; only a wrong sum shows an error, with a fresh question.
 - **Blade gotcha:** the inline `@php(...)` form has miscompiled here (emitting `<?php(...)` with no
   closing tag, which swallows the rest of the file). Prefer a `@php ... @endphp` block, and keep it
   **inside** `@section`.

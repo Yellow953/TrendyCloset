@@ -51,7 +51,7 @@ Route::post('/checkout', [CartController::class, 'placeOrder'])->name('checkout.
 Route::get('/order/{number}', [CartController::class, 'confirmed'])->name('order.confirmed');
 Route::get('/about', [StoreController::class, 'about'])->name('about');
 Route::get('/contact', [StoreController::class, 'contact'])->name('contact');
-Route::post('/contact', [StoreController::class, 'sendContact'])->name('contact.send');
+Route::post('/contact', [StoreController::class, 'sendContact'])->middleware('throttle:5,10')->name('contact.send');
 Route::get('/policies/{topic?}', [StoreController::class, 'policies'])->name('policies');
 Route::post('/track/whatsapp', [StoreController::class, 'trackWhatsapp'])->middleware('throttle:30,1')->name('track.whatsapp');
 

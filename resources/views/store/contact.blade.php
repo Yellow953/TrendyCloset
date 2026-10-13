@@ -33,6 +33,14 @@
                 <textarea name="message" rows="4" placeholder="Message" required class="tc-input h-[140px] resize-none">{{ old('message') }}</textarea>
                 @error('message')<div class="mt-1 text-[12.5px] text-blush">{{ $message }}</div>@enderror
             </div>
+            <div>
+                <label for="contact-challenge" class="tc-field-label">Quick check — {{ $challenge }}</label>
+                <input id="contact-challenge" name="challenge" inputmode="numeric" autocomplete="off" placeholder="Answer as a number" required class="tc-input sm:w-[220px]">
+                @error('challenge')<div class="mt-1 text-[12.5px] text-blush">{{ $message }}</div>@enderror
+            </div>
+            <div class="absolute -left-[9999px]" aria-hidden="true">
+                <label>Leave this empty <input name="{{ \App\Support\ContactChallenge::HONEYPOT }}" tabindex="-1" autocomplete="off"></label>
+            </div>
             <button type="submit" class="tc-btn-dark w-full text-[14px] sm:w-[180px]">Send Message</button>
         </form>
 
