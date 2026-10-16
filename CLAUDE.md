@@ -339,8 +339,14 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - **Delivery is Lebanon-only, one option, 1–3 working days.** The express tier, courier tracking
   emails, customs-and-duties section and "free worldwide shipping" announcement bar were demo-era
   fiction and have been removed from the policies, the product page, the header and `/llms.txt`.
-  Nothing on the site takes card details either — an order lands `pending` and the shop arranges
-  payment over WhatsApp, which is what the privacy policy and terms now say.
+  Nothing on the site takes card details either — an order lands `pending`, the shop confirms it on
+  WhatsApp, and it is **paid cash on delivery**. Say so wherever a shopper decides (PDP under Buy Now,
+  bag, drawer, checkout), plus the privacy policy, confirmation page and `/llms.txt`.
+  - **Order on WhatsApp** (`partials/whatsapp-order`, from `Cart::whatsappOrderUrl()`) sits beside
+    Checkout in the drawer, bag and checkout: a `wa.me` link with the bag written out as the message.
+    It fires the usual `Contact` / `generate_lead`, not `Purchase` — those orders are entered by hand.
+  - The drawer shows delivery and the total, not just the subtotal: a cost that appears only at the
+    last step is a leading reason bags are abandoned.
   - **Returns copy still promises 30 days with refunds and free return postage** (policies, product
     page, checkout badges, `MerchantReturnPolicy`, `/llms.txt`). The shop's real policy is a 2-day
     exchange with no refund. This was raised and the owner chose to keep the copy on 2026-08-16 —

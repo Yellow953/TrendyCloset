@@ -15,7 +15,7 @@
             <span class="tc-heading-rule"></span>
             <p class="mx-auto mt-5 max-w-[46ch] text-[14.5px] leading-relaxed font-light text-muted-2">
                 Your order is with us. We have sent nothing yet — we will message you on
-                <b class="font-medium text-ink">{{ $order->ship_phone }}</b> to confirm your pieces and arrange payment.
+                <b class="font-medium text-ink">{{ $order->ship_phone }}</b> to confirm your pieces, then you pay cash on delivery.
             </p>
         </div>
 

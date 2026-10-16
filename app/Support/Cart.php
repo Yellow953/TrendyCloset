@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\OfferType;
 use App\Models\Coupon;
 use App\Models\Offer;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
@@ -283,6 +284,31 @@ class Cart
             'offer' => $this->appliedOffer(),
             'free_shipping' => $this->qualifiesForFreeShipping(),
         ];
+    }
+
+    /**
+     * A wa.me link with the bag written out as a message, for shoppers who
+     * would rather order by chat than fill in the checkout form.
+     */
+    public function whatsappOrderUrl(): ?string
+    {
+        $number = config('store.whatsapp.number');
+
+        if (! $number || $this->isEmpty()) {
+            return null;
+        }
+
+        $summary = $this->summary();
+
+        $text = collect(["Hi! I'd like to order:"])
+            ->merge($this->lines()->map(fn (array $line) => '• '.$line['variant']->product->name
+                .' ('.$line['variant']->label.') × '.$line['qty'].' — '.Product::money($line['total'])))
+            ->when($summary['discount'] > 0, fn ($t) => $t->push('Discount'.($summary['coupon'] ? ' ('.$summary['coupon']->code.')' : '').': −'.Product::money($summary['discount'])))
+            ->push('Delivery: '.($summary['shipping'] > 0 ? Product::money($summary['shipping']) : 'Free'))
+            ->push('Total: '.Product::money($summary['total']).' (cash on delivery)')
+            ->implode("\n");
+
+        return 'https://wa.me/'.$number.'?text='.rawurlencode($text);
     }
 
     /** @var Collection<int, Offer>|null */
