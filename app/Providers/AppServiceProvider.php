@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // All per-request state: one bag, one set of catalogue queries, one
         // page's metadata, one page's analytics events.
-        $this->app->scoped(Cart::class, fn ($app) => new Cart($app->make(Session::class)));
+        $this->app->scoped(Cart::class, fn ($app) => new Cart($app->make('request'), $app->make(Session::class)));
         $this->app->scoped(Catalog::class, fn () => new Catalog);
         $this->app->scoped(OfferBoard::class, fn () => new OfferBoard);
         $this->app->scoped(Seo::class, fn () => new Seo);

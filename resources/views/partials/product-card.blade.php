@@ -1,5 +1,7 @@
 {{-- Product card. $p is an App\Models\Product — eager-load `images` and
      `variants` (the hover rail quick-adds the first in-stock variant).
+     Every image is a swipeable slide; only the first downloads with the page,
+     the rest wait for interaction (initCardGalleries()).
      $h overrides the image height. $fav pre-fills the heart where the caller
      already knows the piece is saved (the favourites page). $imgSizes describes
      the slot the card sits in, for the responsive image ladder — the default
@@ -16,13 +18,40 @@
     $extraColors = max($colors->count() - 5, 0);
 
     $offer = isset($offerBoard) ? $offerBoard->forProduct($p)->first() : null;
+
+    $primary = $p->primaryImage();
+    $gallery = $p->images->sortBy('position')
+        ->reject(fn ($image) => $image->is($primary))
+        ->prepend($primary)->filter()->values();
 @endphp
 <div class="group relative">
     <div class="tc-card-media tc-media relative {{ $h }}">
         <a href="{{ route('product', $p) }}" class="block h-full w-full" aria-label="{{ $p->name }}">
-            <x-img :src="$p->image_url" :alt="$p->name" :sizes="$imgSizes"
-                   class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <div data-card-track class="no-scrollbar flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain">
+                @foreach($gallery as $image)
+                    <div data-card-slide class="h-full w-full shrink-0 snap-start snap-always overflow-hidden">
+                        <x-img :src="$image->url" :alt="$loop->first ? $p->name : ''" :sizes="$imgSizes" :deferred="! $loop->first"
+                               class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                @endforeach
+            </div>
         </a>
+
+        @if($gallery->count() > 1)
+            <div data-card-dots class="tc-card-dots {{ $p->relationLoaded('variants') && ! $p->in_stock ? 'bottom-11' : 'bottom-3' }}">
+                <button type="button" data-card-step="-1" class="tc-card-arrow" aria-label="Previous photo of {{ $p->name }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3"><path d="m15 6-6 6 6 6"/></svg>
+                </button>
+                <span class="flex items-center gap-1" aria-hidden="true">
+                    @foreach($gallery as $image)
+                        <span data-dot @class(['is-on' => $loop->first])></span>
+                    @endforeach
+                </span>
+                <button type="button" data-card-step="1" class="tc-card-arrow" aria-label="Next photo of {{ $p->name }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+            </div>
+        @endif
 
         @if($p->badge_label || $offer)
             <div class="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
@@ -40,7 +69,7 @@
         @endif
 
         <div data-card-rail class="absolute right-3 top-3 flex flex-col gap-2">
-            <form method="POST" action="{{ route('product.favorite', $p) }}" data-async data-favorite-form>
+            <form method="POST" action="{{ route('product.favorite', $p) }}" data-async data-favorite-form data-card-fav>
                 @csrf
                 <button type="submit" aria-pressed="{{ $fav ? 'true' : 'false' }}" class="tc-card-action aria-pressed:text-blush aria-pressed:[&_svg]:fill-current" title="Save to favourites" aria-label="Save {{ $p->name }} to favourites">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-[18px] w-[18px]"><path d="M12 20.5 4.6 13.3a4.5 4.5 0 1 1 6.4-6.3l1 1 1-1a4.5 4.5 0 1 1 6.4 6.3Z"/></svg>

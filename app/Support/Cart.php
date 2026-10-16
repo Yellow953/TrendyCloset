@@ -7,10 +7,14 @@ use App\Models\Coupon;
 use App\Models\Offer;
 use App\Models\ProductVariant;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cookie;
 
 /**
- * The shopper's bag, kept in the session rather than the database.
+ * The shopper's bag, kept in its own encrypted cookie rather than the database
+ * or the session — sessions expire in hours, a bag should survive the evening
+ * a shopper spends asking about it on WhatsApp.
  *
  * There is deliberately no `carts` table: an abandoned bag is not a record the
  * CRM wants, and shoppers check out as guests (see the identity split in
@@ -20,7 +24,10 @@ use Illuminate\Support\Collection;
  */
 class Cart
 {
-    public const SESSION_KEY = 'tc_cart';
+    public const COOKIE = 'tc_cart';
+
+    /** Thirty days, renewed on every change to the bag. */
+    private const LIFETIME_MINUTES = 60 * 24 * 30;
 
     /** Flat rate — there is no spend threshold that ships free on its own. */
     public const STANDARD_SHIPPING = 4.0;
@@ -31,7 +38,13 @@ class Cart
     /** @var Collection<int, array{variant: ProductVariant, qty: int, unit: float, total: float}>|null */
     private ?Collection $lines = null;
 
-    public function __construct(private readonly Session $session) {}
+    /** @var array{items: array<int, int>, coupon: ?string}|null */
+    private ?array $state = null;
+
+    public function __construct(
+        private readonly Request $request,
+        private readonly Session $session,
+    ) {}
 
     /**
      * Add a variant to the bag, clamped to what is actually in stock.
@@ -74,8 +87,10 @@ class Cart
 
     public function clear(): void
     {
-        $this->session->forget(self::SESSION_KEY);
+        $this->state = ['items' => [], 'coupon' => null];
+        Cookie::queue(Cookie::forget(self::COOKIE));
         $this->lines = null;
+        $this->offerResults = null;
     }
 
     /**
@@ -143,14 +158,16 @@ class Cart
             return false;
         }
 
-        $this->session->put(self::SESSION_KEY.'.coupon', $coupon->code);
+        $this->state()['coupon'] = $coupon->code;
+        $this->save();
 
         return true;
     }
 
     public function removeCoupon(): void
     {
-        $this->session->forget(self::SESSION_KEY.'.coupon');
+        $this->state()['coupon'] = null;
+        $this->save();
     }
 
     /**
@@ -159,7 +176,7 @@ class Cart
      */
     public function coupon(): ?Coupon
     {
-        $code = $this->session->get(self::SESSION_KEY.'.coupon');
+        $code = $this->state()['coupon'];
 
         if (! $code) {
             return null;
@@ -309,7 +326,54 @@ class Cart
      */
     private function rawItems(): array
     {
-        return (array) $this->session->get(self::SESSION_KEY.'.items', []);
+        return $this->state()['items'];
+    }
+
+    /**
+     * The bag as read from the cookie, once per request. A bag still sitting in
+     * the session from before the cookie existed is adopted the first time it
+     * is read, so nobody's bag empties on deploy.
+     *
+     * @return array{items: array<int, int>, coupon: ?string}
+     */
+    private function &state(): array
+    {
+        if ($this->state === null) {
+            $raw = json_decode((string) $this->request->cookie(self::COOKIE), true);
+            $legacy = $this->session->pull('tc_cart');
+
+            if (! is_array($raw) && is_array($legacy)) {
+                $raw = $legacy;
+            }
+
+            $items = [];
+
+            foreach ((array) ($raw['items'] ?? []) as $id => $qty) {
+                if ((int) $id > 0 && (int) $qty > 0) {
+                    $items[(int) $id] = (int) $qty;
+                }
+            }
+
+            $this->state = [
+                'items' => $items,
+                'coupon' => is_string($raw['coupon'] ?? null) ? $raw['coupon'] : null,
+            ];
+
+            if (is_array($legacy)) {
+                $this->save();
+            }
+        }
+
+        return $this->state;
+    }
+
+    private function save(): void
+    {
+        $state = $this->state();
+
+        Cookie::queue($state['items'] === [] && $state['coupon'] === null
+            ? Cookie::forget(self::COOKIE)
+            : Cookie::make(self::COOKIE, json_encode($state), self::LIFETIME_MINUTES, httpOnly: true, sameSite: 'lax'));
     }
 
     /**
@@ -317,7 +381,8 @@ class Cart
      */
     private function persist(array $items): void
     {
-        $this->session->put(self::SESSION_KEY.'.items', $items);
+        $this->state()['items'] = $items;
+        $this->save();
         $this->lines = null;
         $this->offerResults = null;
     }
