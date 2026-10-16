@@ -98,9 +98,12 @@ and do not add auth traits to `Customer` without revisiting this decision.
 and a failure only logs, so mail can never break checkout. Views are in `resources/views/mail/`
 (table layout, inline styles — no Tailwind in email). Locally `MAIL_MAILER=log`; production needs a
 real mailer.
-**The bag** — `App\Support\Cart` (scoped binding, session key `tc_cart`). There is still **no `Cart`
-model or `carts` table**: an abandoned bag is not a CRM record, and shoppers check out as guests.
-- The session stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are
+**The bag** — `App\Support\Cart` (scoped binding), stored in its **own encrypted 30-day cookie**
+`tc_cart`, renewed on every change — **not** the session, which expires after `SESSION_LIFETIME`
+(2h) and used to empty a bag overnight. A bag still found in an old session under `tc_cart` is
+adopted on first read. There is still **no `Cart` model or `carts` table**: an abandoned bag is not
+a CRM record, and shoppers check out as guests.
+- The cookie stores only `variant_id => qty` plus a coupon code. Prices, stock and imagery are
   re-read from the catalogue on every request, so a week-old bag can never charge last week's price.
 - Quantities are clamped to `variant->stock`; setting a quantity of 0 removes the line. Lines whose
   variant or product went inactive silently drop out of `lines()`.
@@ -202,9 +205,13 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
     newsletter as its opening band and a bottom bar of socials, copyright and payment marks.
   - `product-card` takes a `Product` (`$p`); its media box is **`aspect-square`**, matching the 1:1
     crop uploads get, so a grid never re-crops the photograph a second time. `$h` still overrides the
-    frame for a caller that needs a fixed height, but no page passes it. On hover it reveals a rail of
-    three actions — favourite, quick-add (posts `default_variant`, so eager-load `variants` or the
-    button renders disabled), and view. Under the price it shows **whichever of colour or size
+    frame for a caller that needs a fixed height, but no page passes it. Its top-right rail holds
+    favourite (**always visible**), then quick-add (posts `default_variant`, so eager-load `variants`
+    or the button renders disabled) and view, which deal in on hover. The media is a **scroll-snap
+    gallery of every product image** (primary first); a pill at the foot of the photo holds the dots, with arrows either side for a fine pointer (never on the sides, where they would hit the rail). Only
+    the first photo downloads with the page: later slides render `<x-img deferred>` (URLs parked in
+    `data-src`/`data-srcset`) and `initCardGalleries()` — delegated at the document, no per-card
+    setup — loads them on hover/touch/focus or as a swipe nears them. Without JS the card is one photo. Under the price it shows **whichever of colour or size
     carries the variety**: swatches when the piece comes in 2+ colours, otherwise its size run led by
     the single colour's dot (`Product->color_run` / `size_run`, both read off the loaded `variants`
     and both limited to five with a `+N`). Chips are `<x-swatch :color>`, which paints from
@@ -332,8 +339,14 @@ rail reads (XS→2XL, then numeric waists) and `$variant->label` renders "Size M
 - **Delivery is Lebanon-only, one option, 1–3 working days.** The express tier, courier tracking
   emails, customs-and-duties section and "free worldwide shipping" announcement bar were demo-era
   fiction and have been removed from the policies, the product page, the header and `/llms.txt`.
-  Nothing on the site takes card details either — an order lands `pending` and the shop arranges
-  payment over WhatsApp, which is what the privacy policy and terms now say.
+  Nothing on the site takes card details either — an order lands `pending`, the shop confirms it on
+  WhatsApp, and it is **paid cash on delivery**. Say so wherever a shopper decides (PDP under Buy Now,
+  bag, drawer, checkout), plus the privacy policy, confirmation page and `/llms.txt`.
+  - **Order on WhatsApp** (`partials/whatsapp-order`, from `Cart::whatsappOrderUrl()`) sits beside
+    Checkout in the drawer, bag and checkout: a `wa.me` link with the bag written out as the message.
+    It fires the usual `Contact` / `generate_lead`, not `Purchase` — those orders are entered by hand.
+  - The drawer shows delivery and the total, not just the subtotal: a cost that appears only at the
+    last step is a leading reason bags are abandoned.
   - **Returns copy still promises 30 days with refunds and free return postage** (policies, product
     page, checkout badges, `MerchantReturnPolicy`, `/llms.txt`). The shop's real policy is a 2-day
     exchange with no refund. This was raised and the owner chose to keep the copy on 2026-08-16 —

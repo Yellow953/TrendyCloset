@@ -225,7 +225,7 @@ class SeoController extends Controller
         $out[] = '- Returns: 7 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';
         $out[] = '- Customers check out as guests — there is no shopper account to create.';
-        $out[] = '- No card details are taken on the website. An order is placed as pending and the shop confirms it and arranges payment over WhatsApp.';
+        $out[] = '- Payment is cash on delivery; no card details are taken on the website. An order is placed as pending and the shop confirms it over WhatsApp before it ships.';
         $out[] = '- Contact: '.config('seo.email').', or WhatsApp '.config('store.contact.phone_display')
             .'. Questions are answered '.config('store.contact.response_time').'.';
         $out[] = '- The shop is also a physical store: '.implode(', ', config('store.contact.address'))

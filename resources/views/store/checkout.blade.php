@@ -4,7 +4,7 @@
     {{-- Checkout progress sub-header --}}
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 md:px-10 py-4">
         <div class="flex items-center gap-2.5 text-[13px] font-normal text-muted">
-            <a href="{{ route('cart') }}" class="font-medium text-ink hover:text-blush">Bag</a><span>—</span><span class="font-medium text-blush">Information</span><span>—</span><span>Shipping</span><span>—</span><span>Payment</span>
+            <a href="{{ route('cart') }}" class="font-medium text-ink hover:text-blush">Bag</a><span>—</span><span class="font-medium text-blush">Details &amp; delivery</span><span>—</span><span>Confirmation</span>
         </div>
         <div class="text-[13px] font-light text-jade">🔒 Secure checkout</div>
     </div>
@@ -12,7 +12,7 @@
     <div class="flex flex-col gap-12 px-5 md:px-10 pb-12 pt-9 lg:flex-row">
         {{-- The real thing: this writes an order. There is no payment gateway,
              so no card details are collected — the order lands as `pending` and
-             the back office arranges payment. --}}
+             is paid in cash on delivery. --}}
         <form method="POST" action="{{ route('checkout.place') }}" class="flex flex-col gap-[26px] lg:flex-[1.5]">
             @csrf
 
@@ -101,7 +101,7 @@
             <div>
                 <div class="mb-3 text-[18px] font-medium">Delivery</div>
                 <div class="flex justify-between rounded-card border border-blush bg-cream-3 p-4 text-[14px] font-normal">
-                    <span><b class="font-medium">Standard</b> · 3–5 business days</span>
+                    <span><b class="font-medium">Delivery</b> · 1–3 working days across {{ config('store.contact.country') }}</span>
                     <span class="{{ $summary['shipping'] > 0 ? '' : 'text-jade' }}">{{ $summary['shipping'] > 0 ? \App\Models\Product::money($summary['shipping']) : 'Free' }}</span>
                 </div>
             </div>
@@ -113,13 +113,17 @@
             </div>
 
             <div class="rounded-card border border-line-2 bg-cream-3 p-4 text-[13.5px] leading-relaxed font-light text-muted-3">
-                <b class="font-medium text-ink">Payment</b> is arranged after you place your order — we will email you at the
-                address above to confirm your pieces and settle up. No card details are taken here.
+                <b class="font-medium text-ink">💵 Pay cash on delivery.</b> Nothing to pay now. You pay the driver when your pieces
+                arrive, and we message you on WhatsApp at the number above to confirm your order first. No card details are taken here.
             </div>
 
-            <button type="submit" class="tc-btn-dark text-[15px]">
-                Place order · {{ \App\Models\Product::money($summary['total']) }}
-            </button>
+            <div class="flex flex-col gap-2.5">
+                <button type="submit" class="tc-btn-dark text-[15px]">
+                    Place order · {{ \App\Models\Product::money($summary['total']) }}
+                </button>
+                <div class="text-center text-[13px] font-light text-muted">Rather not fill this in?</div>
+                @include('partials.whatsapp-order')
+            </div>
         </form>
 
         {{-- Summary --}}
@@ -151,7 +155,7 @@
                     <div class="mt-2.5 flex justify-between text-[18px] font-semibold"><span>Total</span><span>{{ \App\Models\Product::money($summary['total']) }}</span></div>
                 </div>
             </div>
-            <div class="mt-4 flex justify-center gap-[18px] text-[12.5px] font-light text-muted"><span>🔒 SSL encrypted</span><span>↩ 7-day returns</span><span>✓ Buyer protection</span></div>
+            <div class="mt-4 flex justify-center gap-[18px] text-[12.5px] font-light text-muted"><span>💵 Cash on delivery</span><span>🚚 1–3 working days</span><span>↩ 7-day returns</span></div>
         </div>
     </div>
 @endsection

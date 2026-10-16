@@ -128,6 +128,67 @@ function autoplayCarousel(root, track, step, end) {
     }, { threshold: 0.25 }).observe(root);
 }
 
+// Product card galleries. Only the first photo ships with the page; the rest
+// carry data-src and load the moment a shopper shows intent (hover, touch,
+// focus) or arrives next to them while swiping. Delegated at the document so
+// a grid of cards costs nothing until one is touched.
+function initCardGalleries() {
+    const trackOf = (el) => el.closest('.tc-card-media')?.querySelector('[data-card-track]');
+    const indexOf = (track) => Math.round(track.scrollLeft / Math.max(track.clientWidth, 1));
+
+    const load = (track, index) => {
+        const img = track.children[index]?.querySelector('img[data-src]');
+        if (!img) return;
+        if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+        img.removeAttribute('data-srcset');
+    };
+
+    const prepare = (track) => {
+        const i = indexOf(track);
+        load(track, i);
+        load(track, i + 1);
+    };
+
+    const sync = (track) => {
+        prepare(track);
+        const i = indexOf(track);
+        track.closest('.tc-card-media')
+            ?.querySelectorAll('[data-card-dots] [data-dot]')
+            .forEach((dot, n) => dot.classList.toggle('is-on', n === i));
+    };
+
+    const intent = (event) => {
+        const track = event.target.closest?.('.tc-card-media') && trackOf(event.target);
+        if (track && track.children.length > 1) prepare(track);
+    };
+    document.addEventListener('pointerover', intent, { passive: true });
+    document.addEventListener('touchstart', intent, { passive: true });
+    document.addEventListener('focusin', intent);
+
+    let frame = null;
+    document.addEventListener('scroll', (event) => {
+        const track = event.target;
+        if (!(track instanceof Element) || !track.matches('[data-card-track]')) return;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => sync(track));
+    }, { capture: true, passive: true });
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-card-step]');
+        const track = button && trackOf(button);
+        if (!track) return;
+        const count = track.children.length;
+        const target = (indexOf(track) + Number(button.dataset.cardStep) + count) % count;
+        load(track, target);
+        track.scrollTo({
+            left: target * track.clientWidth,
+            behavior: reducedMotion.matches ? 'auto' : 'smooth',
+        });
+    });
+}
+
 // Selects that submit their form on change (the listing sort control).
 // A <noscript> button covers the JS-off case.
 function initAutoSubmit() {
@@ -874,6 +935,7 @@ function init() {
     initDrawer();
     initAsyncForms();
     initCarousels();
+    initCardGalleries();
     initTabs();
     initStickyBuy();
     initGalleries();

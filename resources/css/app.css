@@ -193,6 +193,43 @@
     .tc-card-action {
         @apply flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink shadow-[0_4px_12px_rgba(43,37,35,.16)] transition-colors hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-ink;
     }
+
+    /* Card gallery: one pill at the foot of the photo — dots for everyone, and
+       arrows either side of them for a mouse (touch swipes). Kept clear of the
+       action rail on the right at any card width. */
+    .tc-card-dots {
+        @apply pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center rounded-full bg-white/75 px-2 py-1.5 backdrop-blur-sm;
+    }
+    .tc-card-arrow {
+        @apply pointer-events-auto hidden h-5 w-0 items-center justify-center overflow-hidden rounded-full text-ink opacity-0 transition-all duration-300 hover:bg-ink hover:text-white;
+    }
+    .tc-card-dots [data-dot] {
+        @apply h-1.5 w-1.5 rounded-full bg-ink/30 transition-all duration-300;
+    }
+    .tc-card-dots [data-dot].is-on {
+        @apply w-3.5 bg-ink;
+    }
+}
+
+/* Without script the later slides would never load, so the card is one photo. */
+html:not(.tc-js) [data-card-slide] ~ [data-card-slide],
+html:not(.tc-js) .tc-card-dots {
+    display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    .tc-js .tc-card-arrow {
+        display: flex;
+    }
+    .group:hover .tc-card-arrow,
+    .tc-card-dots:focus-within .tc-card-arrow {
+        width: 1.25rem;
+        opacity: 1;
+    }
+    .group:hover .tc-card-dots,
+    .tc-card-dots:focus-within {
+        gap: 0.375rem;
+        padding-inline: 0.25rem;
+    }
 }
 
 /* ---------------------------------------------------------------------------
@@ -548,11 +585,13 @@ html:not(.tc-js) [data-share] {
     opacity: 1;
     transform: none;
 }
-[data-card-rail] > *:nth-child(2) {
-    transition-delay: 55ms;
+/* The heart is always on show — saving should not depend on hovering. */
+[data-card-rail] > [data-card-fav] {
+    opacity: 1;
+    transform: none;
 }
 [data-card-rail] > *:nth-child(3) {
-    transition-delay: 110ms;
+    transition-delay: 55ms;
 }
 
 /* --- Micro-interactions ---------------------------------------------------
