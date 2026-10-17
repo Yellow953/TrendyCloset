@@ -8,6 +8,7 @@
 @php
     $metaPixelId = \App\Support\Tracking::metaPixelId();
     $ga4Id = \App\Support\Tracking::ga4Id();
+    $carried = $tracking->carried();
 @endphp
 
 @if($metaPixelId)
@@ -23,6 +24,9 @@
 
         fbq('init', @json($metaPixelId));
         fbq('track', 'PageView');
+        @if($carried['meta'] ?? null)
+        fbq('track', @json($carried['meta']['name']), @json((object) $carried['meta']['params']), {eventID: @json($carried['meta']['id'])});
+        @endif
         @foreach($tracking->metaEvents() as $event)
         fbq('track', @json($event['name']), @json((object) $event['params']), {eventID: @json($event['id'])});
         @endforeach
@@ -38,6 +42,9 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', @json($ga4Id));
+        @if($carried['ga4'] ?? null)
+        gtag('event', @json($carried['ga4']['name']), @json((object) $carried['ga4']['params']));
+        @endif
         @foreach($tracking->ga4Events() as $event)
         gtag('event', @json($event['name']), @json((object) $event['params']));
         @endforeach

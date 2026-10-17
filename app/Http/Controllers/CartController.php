@@ -93,6 +93,8 @@ class CartController extends Controller
             ]);
         }
 
+        Tracking::flash($tracking);
+
         if ($request->input('action') === 'buy') {
             return redirect()->route('checkout');
         }

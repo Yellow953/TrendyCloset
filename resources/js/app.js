@@ -920,6 +920,15 @@ function initWhatsappTracking() {
         body.append('from', location.pathname);
         body.append('event_id', eventId);
 
+        // "Order on WhatsApp" is also a checkout; the server rebuilds it from the bag.
+        if (link.hasAttribute('data-wa-order')) {
+            let order = null;
+            try { order = JSON.parse(link.dataset.waOrder || 'null'); } catch { /* ignored */ }
+            if (order?.meta) order.meta.id = eventId + '-order';
+            report(order);
+            body.append('order', '1');
+        }
+
         try {
             fetch(endpoint, { method: 'POST', body, keepalive: true, credentials: 'same-origin' })
                 .catch(() => {});

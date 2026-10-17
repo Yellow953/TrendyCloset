@@ -32,6 +32,9 @@
         @if(!empty($item['product_type']))
         <g:product_type>{{ $item['product_type'] }}</g:product_type>
         @endif
+        @if(!empty($item['custom_label_0']))
+        <g:custom_label_0>{{ $item['custom_label_0'] }}</g:custom_label_0>
+        @endif
     </item>
 @endforeach
 </channel>

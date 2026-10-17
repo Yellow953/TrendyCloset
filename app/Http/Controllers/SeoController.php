@@ -138,7 +138,7 @@ class SeoController extends Controller
 
         Product::query()
             ->active()
-            ->with(['images:id,product_id,url,position', 'variants'])
+            ->with(['images:id,product_id,url,position', 'variants', 'category.parent'])
             ->orderBy('id')
             ->chunk(500, function ($products) use (&$items) {
                 foreach ($products as $product) {
@@ -170,7 +170,8 @@ class SeoController extends Controller
                         'color' => $product->color_run->implode('/') ?: null,
                         'size' => $product->size_run->implode(', ') ?: null,
                         'mpn' => Tracking::contentId($product),
-                        'product_type' => $product->category?->name,
+                        'product_type' => $this->categoryPath($product),
+                        'custom_label_0' => $this->season($product),
                     ];
                 }
             });
@@ -179,6 +180,28 @@ class SeoController extends Controller
             .view('seo.meta-feed', ['items' => $items])->render();
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    }
+
+    /**
+     * "Winter Section > Tops" rather than "Tops": the two seasons share leaf
+     * names, so a bare leaf cannot tell a product set which one it is.
+     */
+    private function categoryPath(Product $product): ?string
+    {
+        $category = $product->category;
+
+        return $category
+            ? collect([$category->parent?->name, $category->name])->filter()->implode(' > ')
+            : null;
+    }
+
+    private function season(Product $product): ?string
+    {
+        $root = $product->category?->parent ?? $product->category;
+
+        return $root && preg_match('/^(winter|summer|spring|autumn|fall)\b/i', $root->name, $m)
+            ? strtolower($m[1])
+            : null;
     }
 
     /**
@@ -220,7 +243,7 @@ class SeoController extends Controller
         $out[] = '## Shopping';
         $out[] = '';
         $out[] = '- Currency: '.config('seo.currency').'. Prices shown include VAT where applicable.';
-        $out[] = "- Delivery is {$flat} anywhere in ".config('store.contact.country').", and arrives within 1–3 working days. There is one delivery option; the shop does not ship internationally.";
+        $out[] = "- Delivery is {$flat} anywhere in ".config('store.contact.country').', and arrives within 1–3 working days. There is one delivery option; the shop does not ship internationally.';
         $out[] = '- Collection from the shop is possible — say so in the order notes.';
         $out[] = '- Returns: 7 days from delivery, unworn with tags, return postage covered. Refunds within 5 working days.';
         $out[] = '- Sizing runs true to size; size up for knitwear and outerwear.';

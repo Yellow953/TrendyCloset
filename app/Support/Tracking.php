@@ -96,7 +96,15 @@ class Tracking
      */
     public function checkoutStarted(Collection $lines, float $value): static
     {
-        return $this->push(new TrackedEvent(
+        return $this->push(self::checkoutEvent($lines, $value));
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $lines
+     */
+    private static function checkoutEvent(Collection $lines, float $value, ?string $id = null): TrackedEvent
+    {
+        return new TrackedEvent(
             name: 'checkout_started',
             items: $lines->map(fn (array $line) => self::item(
                 $line['variant']->product,
@@ -104,7 +112,8 @@ class Tracking
                 (float) $line['unit'],
             ))->values()->all(),
             value: self::amount($value),
-        ));
+            id: $id,
+        );
     }
 
     /**
@@ -234,6 +243,50 @@ class Tracking
     public static function contacted(): ?array
     {
         return self::payload(new TrackedEvent(name: 'contacted', extra: ['method' => 'whatsapp']), send: false);
+    }
+
+    /**
+     * "Order on WhatsApp" — the bag handed over as a chat, so it is reported as
+     * a checkout with its products and value, not just a Contact. Fired on the
+     * tap; {@see self::reportWhatsappOrder()} sends the server copy.
+     *
+     * @return array{meta: array<string, mixed>, ga4: array<string, mixed>}|null
+     */
+    public static function whatsappOrder(Cart $cart): ?array
+    {
+        return $cart->isEmpty()
+            ? null
+            : self::payload(self::checkoutEvent($cart->lines(), (float) $cart->summary()['total']), send: false);
+    }
+
+    public static function reportWhatsappOrder(Cart $cart, string $eventId): void
+    {
+        if (! $cart->isEmpty()) {
+            MetaConversions::send(self::toMeta(
+                self::checkoutEvent($cart->lines(), (float) $cart->summary()['total'], $eventId),
+            ));
+        }
+    }
+
+    /**
+     * Carries a JSON-style payload across a redirect — "Buy Now" posts a plain
+     * form, so its AddToCart is fired by the page it lands on.
+     *
+     * @param  array<string, mixed>|null  $payload
+     */
+    public static function flash(?array $payload): void
+    {
+        if ($payload !== null) {
+            session()->flash('tracking_carried', $payload);
+        }
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function carried(): ?array
+    {
+        return session('tracking_carried');
     }
 
     public static function reportContact(string $eventId): void

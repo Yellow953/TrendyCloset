@@ -695,6 +695,10 @@ class StoreController extends Controller
 
         if (preg_match('/^[A-Za-z0-9-]{8,64}$/', $eventId)) {
             Tracking::reportContact($eventId);
+
+            if ($request->boolean('order')) {
+                Tracking::reportWhatsappOrder(app(Cart::class), $eventId.'-order');
+            }
         }
 
         return response()->noContent();
