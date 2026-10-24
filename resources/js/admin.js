@@ -565,6 +565,163 @@ function initColorSync() {
     });
 }
 
+// Drag-to-reorder for a product's saved photos. Pointer events rather than
+// HTML5 drag so it works on a phone: a mouse can drag the whole tile, touch
+// only the ⠿ handle (so the row still scrolls). The order saves on drop.
+function initImageSort() {
+    document.querySelectorAll('[data-image-sort]').forEach((row) => {
+        const tiles = () => [...row.querySelectorAll('[data-image-id]')];
+        const order = () => tiles().map((t) => t.dataset.imageId);
+        const scroller = row.closest('.overflow-x-auto');
+        const status = document.querySelector('[data-image-sort-status]');
+        let saved = order();
+        let drag = null;
+        let suppressClick = false;
+
+        // The click a drag ends with must not pick a colour or press a button.
+        row.addEventListener('click', (e) => {
+            if (!suppressClick) return;
+            e.stopPropagation();
+            e.preventDefault();
+        }, true);
+
+        const flash = (text, error = false) => {
+            if (!status) return;
+            status.textContent = text;
+            status.classList.toggle('text-rose-600', error);
+            clearTimeout(flash.timer);
+            flash.timer = setTimeout(() => { status.textContent = ''; }, 2500);
+        };
+
+        const save = async () => {
+            const next = order();
+            if (next.join() === saved.join()) return;
+            flash('Saving…');
+            try {
+                const res = await fetch(row.dataset.imageSort, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    },
+                    body: JSON.stringify({ order: next }),
+                });
+                if (!res.ok) throw new Error(res.status);
+                saved = next;
+                flash('Order saved');
+            } catch {
+                saved.forEach((id) => row.append(row.querySelector(`[data-image-id="${id}"]`)));
+                flash('Could not save the order — try again', true);
+            }
+        };
+
+        const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const ease = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+        // FLIP: let a DOM move happen, then slide every other tile from where
+        // it was to where it now sits, so neighbours glide aside, never jump.
+        const reflow = (move) => {
+            const others = tiles().filter((t) => t !== drag?.tile);
+            const before = new Map(others.map((t) => [t, t.getBoundingClientRect().left]));
+            move();
+            if (calm) return;
+            others.forEach((t) => {
+                const dx = before.get(t) - t.getBoundingClientRect().left;
+                if (dx) t.animate([{ transform: `translateX(${dx}px)` }, { transform: 'none' }], { duration: 260, easing: ease });
+            });
+        };
+
+        // Where the lifted tile should sit: under the pointer, wherever its
+        // slot in the row has moved to since the drag began.
+        const follow = (x) => {
+            const slot = row.getBoundingClientRect().left + drag.tile.offsetLeft;
+            drag.offset = x - drag.grab - slot;
+            drag.tile.style.translate = `${drag.offset}px 0`;
+        };
+
+        // Swap once the lifted tile's centre crosses a neighbour's centre,
+        // judged on layout positions so tiles mid-slide don't cause jitter.
+        const moveTo = (x) => {
+            const centre = x - drag.grab + drag.tile.offsetWidth / 2 - row.getBoundingClientRect().left;
+            const list = tiles();
+            const from = list.indexOf(drag.tile);
+            let to = from;
+            list.forEach((t, i) => {
+                const mid = t.offsetLeft + t.offsetWidth / 2;
+                if (i < from && centre < mid) to = Math.min(to, i);
+                if (i > from && centre > mid) to = Math.max(to, i);
+            });
+            if (to === from) return;
+            reflow(() => row.insertBefore(drag.tile, to < from ? list[to] : list[to].nextSibling));
+        };
+
+        const lift = (tile, on) => {
+            tile.classList.toggle('z-10', on);
+            tile.classList.toggle('scale-[1.04]', on);
+            tile.firstElementChild.classList.toggle('shadow-2xl', on);
+            document.body.classList.toggle('select-none', on);
+            document.body.style.cursor = on ? 'grabbing' : '';
+        };
+
+        row.addEventListener('pointerdown', (e) => {
+            const tile = e.target.closest('[data-image-id]');
+            if (!tile || e.button !== 0) return;
+            const onHandle = e.target.closest('[data-image-handle]');
+            if (!onHandle && (e.pointerType !== 'mouse' || e.target.closest('button, a, form'))) return;
+            if (tile.querySelector('[data-pickable-image].cursor-crosshair')) return;
+            drag = { tile, x: e.clientX, grab: e.clientX - tile.getBoundingClientRect().left, offset: 0, moved: false, id: e.pointerId };
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (!drag || e.pointerId !== drag.id) return;
+            if (!drag.moved) {
+                if (Math.abs(e.clientX - drag.x) < 5) return;
+                drag.moved = true;
+                lift(drag.tile, true);
+                row.setPointerCapture?.(e.pointerId);
+            }
+            e.preventDefault();
+            moveTo(e.clientX);
+            follow(e.clientX);
+            if (scroller) {
+                const r = scroller.getBoundingClientRect();
+                if (e.clientX < r.left + 60) scroller.scrollLeft -= 10;
+                else if (e.clientX > r.right - 60) scroller.scrollLeft += 10;
+            }
+        });
+
+        const end = (e) => {
+            if (!drag || e.pointerId !== drag.id) return;
+            const { tile, moved, offset } = drag;
+            drag = null;
+            if (!moved) return;
+            tile.style.translate = '';
+            if (!calm) tile.animate([{ translate: `${offset}px 0` }, { translate: '0 0' }], { duration: 240, easing: ease });
+            lift(tile, false);
+            suppressClick = true;
+            setTimeout(() => { suppressClick = false; }, 0);
+            save();
+        };
+        document.addEventListener('pointerup', end);
+        document.addEventListener('pointercancel', end);
+
+        row.addEventListener('keydown', (e) => {
+            const handle = e.target.closest('[data-image-handle]');
+            if (!handle || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+            e.preventDefault();
+            const tile = handle.closest('[data-image-id]');
+            const sibling = e.key === 'ArrowLeft' ? tile.previousElementSibling : tile.nextElementSibling;
+            if (!sibling) return;
+            const start = tile.getBoundingClientRect().left;
+            reflow(() => row.insertBefore(tile, e.key === 'ArrowLeft' ? sibling : sibling.nextSibling));
+            if (!calm) tile.animate([{ translate: `${start - tile.getBoundingClientRect().left}px 0` }, { translate: '0 0' }], { duration: 260, easing: ease });
+            handle.focus();
+            save();
+        });
+    });
+}
+
 function init() {
     initAdminNav();
     initAdminMenu();
@@ -573,6 +730,7 @@ function init() {
     initColorPicker();
     initColorSync();
     initUploadPreviews();
+    initImageSort();
     initFieldToggles();
 }
 

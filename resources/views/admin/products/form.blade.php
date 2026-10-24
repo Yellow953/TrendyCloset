@@ -231,6 +231,7 @@
                 <p class="mt-0.5 text-[12px] font-normal text-slate-400">The primary image is what every product card and search result leads with.</p>
             </div>
             @if($editing)
+                <span data-image-sort-status class="ml-auto mr-3 text-[12px] font-normal text-slate-500" aria-live="polite"></span>
                 <span class="bo-badge bo-badge-neutral">{{ $product->images->count() }} {{ Str::plural('image', $product->images->count()) }}</span>
             @endif
         </div>
@@ -254,15 +255,14 @@
                 <input form="product-form" type="file" name="photos[]" accept="image/*" multiple class="hidden" data-upload="#photo-preview" data-upload-crop="photo_crops">
             </label>
 
-            @if($editing)
+            @if($editing && $product->images->isNotEmpty())
+                <div class="relative flex gap-4" data-image-sort="{{ route('admin.products.images.reorder', $product) }}">
                 @foreach($product->images as $image)
-                    <div class="w-[200px] shrink-0">
-                        <div class="relative {{ $ratioClass }} overflow-hidden rounded-lg border {{ $image->is_primary ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-100' }} bg-slate-100">
-                            <img src="{{ $image->url }}" alt="" data-pickable-image class="h-full w-full object-cover transition-shadow">
+                    <div class="group/tile relative w-[200px] shrink-0 cursor-grab transition-[scale] duration-200 active:cursor-grabbing" data-image-id="{{ $image->id }}">
+                        <div class="relative {{ $ratioClass }} overflow-hidden rounded-lg border border-slate-100 bg-slate-100 transition-shadow duration-200 group-first/tile:border-slate-900 group-first/tile:ring-2 group-first/tile:ring-slate-900/20">
+                            <img src="{{ $image->url }}" alt="" draggable="false" data-pickable-image class="h-full w-full object-cover transition-shadow">
 
-                            @if($image->is_primary)
-                                <span class="absolute top-2 left-2 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium text-white">Primary</span>
-                            @endif
+                            <span class="absolute top-2 left-2 hidden rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium text-white group-first/tile:inline">Primary</span>
 
                             @unless($image->disk_path)
                                 <span class="absolute top-2 right-2 rounded-full bg-slate-800/75 px-2 py-0.5 text-[10px] font-normal text-white" title="A remote URL — deleting the row leaves the file alone">Linked</span>
@@ -270,20 +270,21 @@
                         </div>
 
                         <div class="mt-2 flex items-center justify-between gap-1.5">
-                            @unless($image->is_primary)
-                                <form method="POST" action="{{ route('admin.products.images.primary', [$product, $image]) }}">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="text-[11.5px] font-medium text-slate-900 hover:underline">Make primary</button>
-                                </form>
-                            @else
-                                <span class="text-[11.5px] font-normal text-slate-400">Leads the gallery</span>
-                            @endunless
+                            <button type="button" data-image-handle aria-label="Move image (drag, or use the arrow keys)" title="Drag to reorder"
+                                    class="touch-none cursor-grab rounded px-1 text-[14px] leading-none text-slate-400 hover:text-slate-900">⠿</button>
+
+                            <form method="POST" action="{{ route('admin.products.images.primary', [$product, $image]) }}" class="group-first/tile:hidden">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-[11.5px] font-medium text-slate-900 hover:underline">Make primary</button>
+                            </form>
+                            <span class="hidden text-[11.5px] font-normal text-slate-400 group-first/tile:inline">Leads the gallery</span>
 
                             <button type="button" data-modal-open="delete-image-{{ $image->id }}"
-                                    class="text-[11.5px] font-medium text-rose-600 hover:underline">Remove</button>
+                                    class="ml-auto text-[11.5px] font-medium text-rose-600 hover:underline">Remove</button>
                         </div>
                     </div>
                 @endforeach
+                </div>
             @endif
         </div>
 
@@ -294,7 +295,7 @@
 
             <p class="bo-hint">
                 @if($editing)
-                    Newly chosen files are added to the row above when you save. The first image on a product with none becomes its primary one.
+                    Drag images to change their order — it saves straight away, and the first one is the primary. Newly chosen files are added to the end of the row when you save.
                 @else
                     Uploads are attached once the product is created.
                 @endif

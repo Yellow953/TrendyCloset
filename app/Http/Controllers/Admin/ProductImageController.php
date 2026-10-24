@@ -24,10 +24,10 @@ class ProductImageController extends Controller
     {
         abort_unless($image->product_id === $product->id, 404);
 
-        DB::transaction(function () use ($product, $image) {
-            $product->images()->update(['is_primary' => false]);
-            $image->update(['is_primary' => true]);
-        });
+        $order = $product->images()->orderBy('position')->pluck('id')
+            ->reject(fn ($id) => $id === $image->id)->prepend($image->id);
+
+        $this->applyOrder($product, $order->all());
 
         return back()->with('status', 'Primary image updated.');
     }
@@ -52,7 +52,8 @@ class ProductImageController extends Controller
     }
 
     /**
-     * Persist a new running order for the gallery.
+     * Persist a new running order for the gallery. The first image leads, so
+     * it is also the primary one — the row in the form is the row a shopper sees.
      */
     public function reorder(Request $request, Product $product)
     {
@@ -61,10 +62,29 @@ class ProductImageController extends Controller
             'order.*' => ['integer'],
         ])['order'];
 
-        foreach (array_values($order) as $position => $id) {
-            $product->images()->whereKey($id)->update(['position' => $position + 1]);
+        $this->applyOrder($product, array_values($order));
+
+        return $request->expectsJson()
+            ? response()->json(['status' => 'ok'])
+            : back()->with('status', 'Gallery reordered.');
+    }
+
+    private function applyOrder(Product $product, array $order): void
+    {
+        $ids = $product->images()->whereKey($order)->pluck('id')->all();
+        $order = array_values(array_filter($order, fn ($id) => in_array($id, $ids)));
+
+        if ($order === []) {
+            return;
         }
 
-        return back()->with('status', 'Gallery reordered.');
+        DB::transaction(function () use ($product, $order) {
+            foreach ($order as $position => $id) {
+                $product->images()->whereKey($id)->update([
+                    'position' => $position + 1,
+                    'is_primary' => $position === 0,
+                ]);
+            }
+        });
     }
 }

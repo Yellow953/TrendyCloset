@@ -72,7 +72,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load(['variants', 'images' => fn ($q) => $q->orderBy('position')]);
+        $product->load(['variants', 'images' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('position')]);
 
         return view('admin.products.form', [
             'active' => 'products',
